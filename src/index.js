@@ -1,6 +1,6 @@
 // ====================================================================
 // ARCHIVO: src/index.js
-// DESCRIPCIÓN: Punto de entrada de la aplicación (Entry Point).
+// DESCRIPCIÓN: Punto de entrada de la aplicación (Entry Point)
 //              Inicia el servidor Express y define las rutas principales.
 // ====================================================================
 
