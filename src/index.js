@@ -9,6 +9,11 @@ const cors = require('cors');
 const { getConnection } = require('./db'); // Importamos nuestra conexión
 const pacientesRoutes = require('./routes/pacientes.routes');
 const medicosRoutes = require('./routes/medicos.routes');
+const rolesRoutes = require('./routes/roles.routes');
+const usuariosRoutes = require('./routes/usuarios.routes');
+const administrativosRoutes = require('./routes/administrativos.routes');
+const turnosRoutes = require('./routes/turnos.routes');
+const historialRoutes = require('./routes/historial.routes');
 
 const app = express(); // Inicializamos Express
 
@@ -23,9 +28,15 @@ app.use(express.json()); // Permite recibir datos en formato JSON
 // NUEVO: Le decimos al servidor que use las rutas de pacientes
 app.use(pacientesRoutes);
 app.use(medicosRoutes);
+app.use(rolesRoutes);
+app.use(usuariosRoutes);
+app.use(administrativosRoutes);
+app.use(turnosRoutes);
+app.use(historialRoutes);
 
 // --- ARRANQUE DEL SERVIDOR ---
 const port = process.env.PORT || 3000;
+
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });
