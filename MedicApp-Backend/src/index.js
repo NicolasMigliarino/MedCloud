@@ -1,42 +1,38 @@
-// ====================================================================
-// ARCHIVO: src/index.js
-// DESCRIPCIÓN: Punto de entrada de la aplicación (Entry Point)
-//              Inicia el servidor Express y define las rutas principales.
-// ====================================================================
-
 const express = require('express');
+const morgan = require('morgan');
 const cors = require('cors');
-const { getConnection } = require('./db'); // Importamos nuestra conexión
+
+// IMPORTACIONES DE RUTAS
 const pacientesRoutes = require('./routes/pacientes.routes');
-const medicosRoutes = require('./routes/medicos.routes');
-const rolesRoutes = require('./routes/roles.routes');
-const usuariosRoutes = require('./routes/usuarios.routes');
-const administrativosRoutes = require('./routes/administrativos.routes');
+const profesionalesRoutes = require('./routes/profesionales.routes');
 const turnosRoutes = require('./routes/turnos.routes');
+const usuariosRoutes = require('./routes/usuarios.routes');
+const rolesRoutes = require('./routes/roles.routes');
+const administrativosRoutes = require('./routes/administrativos.routes');
 const historialRoutes = require('./routes/historial.routes');
 
-const app = express(); // Inicializamos Express
+const app = express();
 
-// --- MIDDLEWARES (Configuraciones previas) ---
-app.use(cors());         // Permite que el Frontend se conecte sin bloqueos
-app.use(express.json()); // Permite recibir datos en formato JSON
+app.use(morgan('dev'));
+app.use(cors());
+app.use(express.json());
 
-// --- RUTAS (Endpoints) ---
-
-// Ruta de prueba para verificar estado del servidor y BD
-
-// NUEVO: Le decimos al servidor que use las rutas de pacientes
+// USO DE RUTAS
 app.use(pacientesRoutes);
-app.use(medicosRoutes);
-app.use(rolesRoutes);
-app.use(usuariosRoutes);
-app.use(administrativosRoutes);
+app.use(profesionalesRoutes);
 app.use(turnosRoutes);
+app.use(usuariosRoutes);
+app.use(rolesRoutes);
+app.use(administrativosRoutes);
 app.use(historialRoutes);
 
-// --- ARRANQUE DEL SERVIDOR ---
-const port = process.env.PORT || 3000;
+// Manejo de errores (opcional pero recomendado)
+app.use((err, req, res, next) => {
+    return res.json({
+        message: err.message
+    });
+});
 
-app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}`);
+app.listen(3000, () => {
+    console.log('Server on port 3000');
 });
