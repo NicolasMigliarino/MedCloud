@@ -2,7 +2,7 @@ const { getConnection, sql } = require('../db');
 const getUsuarios = async (req, res) => {
     try {
         const pool = await getConnection();
-        const result = await pool.request().execute('getUsuarios');
+        const result = await pool.request().execute('sp_GetUsuarios');
         res.json(result.recordset);
     } catch (error) {
         res.status(500).send(error.message);
@@ -20,7 +20,7 @@ const createUsuario = async (req, res) => {
             .input('activo', sql.Bit, activo)
             .input('username', sql.VarChar, username)
             .input('debeCambiarPass', sql.Bit, debe_cambiar_pass)
-            .execute('createUsuario');
+            .execute('sp_CreateUsuario');
         
         res.json({ msg: 'Usuario creado' });
     } catch (error) {
@@ -42,7 +42,7 @@ const setUsuario = async (req, res) => {
             .input('activo', sql.Bit, activo)
             .input('username', sql.VarChar, username)
             .input('debeCambiarPass', sql.Bit, debe_cambiar_pass)
-            .execute('setUsuario');
+            .execute('sp_SetUsuario');
         
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Usuario no encontrado' });
 
@@ -57,7 +57,7 @@ const deleteUsuario = async (req, res) => {
         const pool = await getConnection();
         const result = await pool.request()
             .input('id', sql.Int, req.params.id)
-            .execute('deleteUsuario');
+            .execute('sp_DeleteUsuario');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Usuario no encontrado' });
 

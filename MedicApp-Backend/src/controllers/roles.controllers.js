@@ -2,7 +2,7 @@ const { getConnection, sql } = require('../db');
 const getRoles = async (req, res) => {
     try {
         const pool = await getConnection();
-        const result = await pool.request().execute('getRoles');
+        const result = await pool.request().execute('sp_GetRoles');
         res.json(result.recordset);
     } catch (error) {
         res.status(500).send(error.message);
@@ -16,7 +16,7 @@ const createRol = async (req, res) => {
         await pool.request()
             .input('nombre', sql.VarChar, nombre)
             .input('codigo', sql.VarChar, codigo)
-            .execute('createRol');
+            .execute('sp_CreateRol');
         
         res.json({ msg: 'Rol creado' });
     } catch (error) {
@@ -34,7 +34,7 @@ const setRol = async (req, res) => {
             .input('id', sql.Int, id)
             .input('nombre', sql.VarChar, nombre)
             .input('codigo', sql.VarChar, codigo)
-            .execute('setRol');
+            .execute('sp_SetRoles');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Rol no encontrado' });
 
@@ -49,7 +49,7 @@ const deleteRol = async (req, res) => {
         const pool = await getConnection();
         const result = await pool.request()
             .input('id', sql.Int, req.params.id)
-            .execute('deleteRol');
+            .execute('sp_DeleteRol');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Rol no encontrado' });
 

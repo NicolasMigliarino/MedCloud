@@ -1,0 +1,158 @@
+/* src/components/Login.css */
+
+/* --- 1. CONTENEDOR PRINCIPAL --- */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #e0e5ec; /* Gris suave de fondo */
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.card-login {
+  position: relative;
+  width: 800px; /* Ancho fijo generoso */
+  height: 500px;
+  background-color: #fff; /* Fondo blanco para los formularios */
+  border-radius: 20px;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 
+              0 10px 10px rgba(0,0,0,0.22);
+  overflow: hidden; /* IMPORTANTE: Lo que salga de la caja se corta */
+}
+
+/* --- 2. EL PANEL MÓVIL (AZUL) --- */
+.card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, #3c23c9, #5b42f3); /* Degradado moderno */
+  color: white;
+  z-index: 100; /* Siempre encima de los formularios */
+  transition: transform 0.6s ease-in-out;
+  /* POR DEFECTO: Está a la izquierda (Tapando Login) */
+  transform: translateX(0); 
+}
+
+/* ESTADO: LOGIN (Movemos el panel a la DERECHA) */
+.card-bg.login-mode {
+  transform: translateX(100%);
+}
+
+/* --- 3. FORMULARIOS (LOS CAMPOS DE TEXTO) --- */
+.form-section {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%; /* Ocupan exactamente la mitad */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 40px;
+  transition: all 0.6s ease-in-out;
+  background-color: #fff; /* Fondo blanco explícito */
+  z-index: 1; /* Debajo del panel azul */
+}
+
+/* POSICIONES FIJAS */
+.form-section.login {
+  left: 0; /* Login siempre a la izquierda */
+}
+
+.form-section.register {
+  left: 50%; /* Registro siempre a la derecha */
+}
+
+/* ESTILOS DE LOS INPUTS (Para que se vean bien) */
+.form-section h2 {
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-section input, .form-section select {
+  background-color: #f0f0f0; /* Gris clarito */
+  border: none;
+  padding: 12px 15px;
+  margin: 8px 0;
+  width: 100%;
+  border-radius: 8px;
+  outline: none;
+}
+
+.action-btn {
+  border-radius: 20px;
+  border: 1px solid #3c23c9;
+  background-color: #3c23c9;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 45px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: transform 80ms ease-in;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+/* --- 4. HERO TEXT (TEXTO DENTRO DEL PANEL AZUL) --- */
+/* Son los textos que viajan DENTRO del panel azul */
+.hero {
+  position: absolute;
+  top: 0;
+  width: 50%; /* Ojo: 50% del ancho TOTAL de la card, no del panel */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 200; /* Encima del panel azul */
+  transition: transform 0.6s ease-in-out;
+  pointer-events: none; /* Dejamos pasar clicks si fuera necesario */
+}
+
+.hero h2 { font-weight: bold; font-size: 24px; margin-bottom: 10px; }
+.hero p { font-size: 14px; margin-bottom: 20px; padding: 0 30px;}
+.hero button {
+  background-color: transparent;
+  border: 1px solid #fff;
+  border-radius: 20px;
+  color: #fff;
+  padding: 10px 40px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: all; /* IMPORTANTE: Para poder hacer click en el botón de cambiar */
+}
+
+/* LÓGICA DE MOVIMIENTO DE LOS TEXTOS HERO */
+/* El truco aquí es que los textos también se mueven para crear el efecto 
+   de que están "pegados" al panel azul.
+*/
+
+/* Texto "Eres Nuevo?" (Para ir a Registro) */
+/* Vive a la derecha, para mostrarse cuando el panel está a la derecha */
+.hero.register {
+  left: 50%; 
+  transform: translateX(0); /* Visible cuando el panel está a la derecha */
+}
+/* Cuando estamos en modo Registro (panel a la izquierda), este texto se esconde más a la derecha */
+.card-bg:not(.login-mode) ~ .hero.register {
+    transform: translateX(100%); /* Se va fuera de pantalla */
+}
+
+
+/* Texto "Ya tienes cuenta?" (Para ir a Login) */
+/* Vive a la izquierda, para mostrarse cuando el panel está a la izquierda */
+.hero.login {
+  left: 0;
+  transform: translateX(-100%); /* Por defecto escondido a la izquierda */
+}
+/* Cuando NO estamos en login-mode (o sea, estamos en modo Registro, panel a la izquierda), este se muestra */
+.card-bg:not(.login-mode) ~ .hero.login {
+    transform: translateX(0); /* Entra a escena */
+}

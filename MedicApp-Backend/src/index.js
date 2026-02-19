@@ -10,6 +10,7 @@ const usuariosRoutes = require('./routes/usuarios.routes');
 const rolesRoutes = require('./routes/roles.routes');
 const administrativosRoutes = require('./routes/administrativos.routes');
 const historialRoutes = require('./routes/historial.routes');
+const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(usuariosRoutes);
 app.use(rolesRoutes);
 app.use(administrativosRoutes);
 app.use(historialRoutes);
+app.use(authRoutes);
 
 // Manejo de errores (opcional pero recomendado)
 app.use((err, req, res, next) => {
