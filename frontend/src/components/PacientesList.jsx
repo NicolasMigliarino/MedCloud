@@ -40,7 +40,7 @@ const PacientesList = () => {
 
             {/* Botón para crear nuevo paciente (Opcional, ya está en el Navbar) */}
             <div className="d-flex justify-content-end mb-3">
-                <Link to="/nuevo" className="btn btn-success">
+                <Link to="/pacientes/nuevo" className="btn btn-success">
                     ➕ Nuevo Paciente
                 </Link>
             </div>
@@ -66,7 +66,7 @@ const PacientesList = () => {
                             <td>{paciente.email}</td>
                             <td>
                                 {/* Botón Editar (Amarillo) */}
-                                <Link to={`/editar/${paciente.id}`} className="btn btn-warning btn-sm me-2">
+                                <Link to={`/pacientes/editar/${paciente.id}`} className="btn btn-warning btn-sm me-2">
                                     Editar
                                 </Link>
 

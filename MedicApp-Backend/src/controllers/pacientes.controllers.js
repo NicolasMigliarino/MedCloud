@@ -2,7 +2,7 @@ const { getConnection, sql } = require('../db');
 const getPacientes = async (req, res) => {
     try {
         const pool = await getConnection();
-        const result = await pool.request().execute('getPacientes');
+        const result = await pool.request().execute('sp_GetPacientes');
         res.json(result.recordset);
     } catch (error) {
         res.status(500).send(error.message);
@@ -14,7 +14,7 @@ const getPaciente = async (req, res) => {
         const pool = await getConnection();
         const result = await pool.request()
             .input('id', sql.Int, req.params.id)
-            .execute('getPaciente'); // Singular
+            .execute('sp_GetPaciente'); // Singular
 
         if (result.recordset.length === 0) return res.status(404).json({ message: 'Paciente no encontrado' });
 
@@ -25,7 +25,7 @@ const getPaciente = async (req, res) => {
 };
 
 const createPaciente = async (req, res) => {
-    const { nombre, apellido, dni, telefono, email, fecha_nacimiento, obra_social, numero_afiliado } = req.body;
+    const { nombre, apellido, dni, telefono, email, fecha_nacimiento, obra_social, numero_afiliado,fecha_alta } = req.body;
     try {
         const pool = await getConnection();
         await pool.request()
@@ -34,13 +34,15 @@ const createPaciente = async (req, res) => {
             .input('dni', sql.VarChar, dni)
             .input('telefono', sql.VarChar, telefono)
             .input('email', sql.VarChar, email)
-            .input('fechaNacimiento', sql.Date, fecha_nacimiento)
-            .input('obraSocial', sql.VarChar, obra_social)
-            .input('numeroAfiliado', sql.VarChar, numero_afiliado)
-            .execute('createPaciente');
+            .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
+            .input('obra_social', sql.VarChar, obra_social)
+            .input('numero_afiliado', sql.VarChar, numero_afiliado)
+            .input('fecha_alta',sql.VarChar, fecha_alta)
+            .execute('sp_CreatePaciente');
 
         res.json({ msg: 'Paciente registrado correctamente' });
     } catch (error) {
+        console.error("🚨 ERROR SQL AL CREAR PACIENTE:", error.message);
         res.status(500).send(error.message);
     }
 };
@@ -57,7 +59,7 @@ const setPaciente = async (req, res) => {
             .input('apellido', sql.VarChar, apellido)
             .input('dni', sql.VarChar, dni)
             .input('email', sql.VarChar, email)
-            .execute('setPaciente');
+            .execute('sp_SetPaciente');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Paciente no encontrado' });
 
@@ -72,7 +74,7 @@ const deletePaciente = async (req, res) => {
         const pool = await getConnection();
         const result = await pool.request()
             .input('id', sql.Int, req.params.id)
-            .execute('deletePaciente');
+            .execute('sp_DeletePaciente');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Paciente no encontrado' });
         

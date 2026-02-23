@@ -1,0 +1,95 @@
+aside.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 260px;
+    padding: 0 16px;
+    background: #212529; /* Color oscuro de Bootstrap para combinar */
+    color: white;
+    z-index: 1000;
+}
+
+aside.sidebar header {
+    display: flex;
+    align-items: center;
+    height: 72px;
+    padding-top: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 20px;
+}
+
+aside.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+aside.sidebar button {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    height: 50px;
+    width: 100%;
+    border-radius: 6px;
+    padding: 0 16px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    transition: 0.3s;
+    font-size: 16px;
+}
+
+aside.sidebar button:hover, aside.sidebar button.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+aside.sidebar ion-icon {
+    font-size: 20px;
+    min-width: 20px;
+}
+
+aside.sidebar button ion-icon:last-child {
+    margin-left: auto;
+    transition: 0.3s;
+}
+
+aside.sidebar button.active ion-icon:last-child {
+    transform: rotate(-180deg);
+}
+
+.sub-menu {
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+.sub-menu ul {
+    padding-left: 0;
+}
+
+.sub-menu button {
+    padding-left: 48px;
+    height: 40px;
+    font-size: 14px;
+}
+
+.sub-menu button::before {
+    content: "";
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.sub-menu button:hover::before {
+    background: white;
+}

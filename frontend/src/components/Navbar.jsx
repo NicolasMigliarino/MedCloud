@@ -1,62 +1,25 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // 1. Borramos el token y el usuario del navegador
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    // 2. Redirigimos al login
+    navigate('/login');
+  };
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-      <div className="container">
-        <Link className="navbar-brand" to="/">🏥 MedicApp</Link>
+    <nav className="navbar navbar-light bg-white border-bottom shadow-sm mb-4 px-4 sticky-top">
+      <div className="container-fluid d-flex justify-content-between align-items-center">
+        <Link className="navbar-brand fw-bold text-primary" to="/">Dashboard</Link>
         
-        {/* Botón hamburguesa para móviles */}
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span className="navbar-toggler-icon"></span>
+        <button onClick={handleLogout} className="btn btn-outline-danger btn-sm d-flex align-items-center gap-2">
+           <ion-icon name="log-out-outline" style={{ fontSize: '18px' }}></ion-icon> Cerrar Sesión
         </button>
-
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            
-            {/* SECCIÓN PACIENTES */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/">Pacientes</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/nuevo">➕ Paciente</Link>
-            </li>
-
-            {/* SEPARADOR */}
-            <li className="nav-item mx-2 text-secondary d-flex align-items-center">|</li>
-
-            {/* SECCIÓN PROFESIONALES */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/profesionales">Profesionales</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/profesionales/nuevo">➕ Profesional</Link>
-            </li>
-
-            {/* SEPARADOR */}
-            <li className="nav-item mx-2 text-secondary d-flex align-items-center">|</li>
-                  
-            {/* SECCIÓN USUARIOS */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/usuarios">Usuarios</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/usuarios/nuevo">➕ Usuario</Link>
-            </li>
-
-            {/* SEPARADOR */}
-            <li className="nav-item mx-2 text-secondary d-flex align-items-center">|</li>
-
-            {/* SECCIÓN ROLES (NUEVA) */}
-            <li className="nav-item">
-              <Link className="nav-link text-warning" to="/roles">Roles</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link text-warning" to="/roles/nuevo">➕ Rol</Link>
-            </li>
-
-          </ul>
-        </div>
       </div>
     </nav>
   );

@@ -2,7 +2,7 @@ const { getConnection, sql } = require('../db');
 const getHistoriales = async (req, res) => {
     try {
         const pool = await getConnection();
-        const result = await pool.request().execute('getHistoriales');
+        const result = await pool.request().execute('sp_GetHistorialesClinicos');
         res.json(result.recordset);
     } catch (error) {
         res.status(500).send(error.message);
@@ -14,15 +14,15 @@ const createHistorial = async (req, res) => {
     try {
         const pool = await getConnection();
         await pool.request()
-            .input('pacienteId', sql.Int, paciente_id)
-            .input('medicoId', sql.Int, profesional_id)
+            .input('paciente_id', sql.Int, paciente_id)
+            .input('profesional_id', sql.Int, profesional_id)
             .input('turnoId', sql.Int, turno_id)
             .input('motivo', sql.NVarChar, motivo)
             .input('evolucion', sql.NVarChar, evolucion)
             .input('diagnostico', sql.NVarChar, diagnostico)
             .input('tratamiento', sql.NVarChar, tratamiento)
             .input('archivosAdjuntosUrl', sql.NVarChar, archivos_adjuntos_url)
-            .execute('createHistorial');
+            .execute('sp_CreateHistorialClinico');
         
         res.json({ msg: 'Historia clínica guardada' });
     } catch (error) {
@@ -43,7 +43,7 @@ const setHistorial = async (req, res) => {
             .input('diagnostico', sql.NVarChar, diagnostico)
             .input('tratamiento', sql.NVarChar, tratamiento)
             .input('archivosAdjuntosUrl', sql.NVarChar, archivos_adjuntos_url)
-            .execute('setHistorial');
+            .execute('sp_SetHistorialesClinicos');
         
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Historial no encontrado' });
 
@@ -58,7 +58,7 @@ const deleteHistorial = async (req, res) => {
         const pool = await getConnection();
         const result = await pool.request()
             .input('id', sql.Int, req.params.id)
-            .execute('deleteHistorial');
+            .execute('sp_DeleteHistorialClinico');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Historial no encontrado' });
 

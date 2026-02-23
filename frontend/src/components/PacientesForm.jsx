@@ -8,7 +8,15 @@ const PacientesForm = () => {
     
     // Estado inicial vacío
     const [formData, setFormData] = useState({
-        nombre: '', apellido: '', dni: '', email: ''
+        nombre: '', 
+        apellido: '', 
+        dni: '', 
+        email: '',
+        telefono: '',
+        fecha_nacimiento: '', // Necesitamos este para que SQL no se queje
+        obra_social: '',
+        numero_afiliado: '',
+        fecha_alta: ''
     });
     
     // Estado para saber si estamos editando (opcional, para cambiar el título)
@@ -86,6 +94,16 @@ const PacientesForm = () => {
                         <label className="form-label">Email</label>
                         <input type="email" name="email" className="form-control" 
                                value={formData.email} onChange={handleChange} required />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Fecha de Nacimiento</label>
+                        <input type="date" name="fecha_nacimiento" className="form-control" 
+                               value={formData.fecha_nacimiento} onChange={handleChange} required />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Fecha de Alta Paciente</label>
+                        <input type="date" name="fecha_nacimiento" className="form-control" 
+                               value={formData.fecha_nacimiento} onChange={handleChange} required />
                     </div>
 
                     <button type="submit" className={`btn w-100 ${isEditing ? 'btn-warning' : 'btn-success'}`}>
