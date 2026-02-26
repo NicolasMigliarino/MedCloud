@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+
 
 const ProfesionalesList = () => {
     const [profesionales, setProfesionales] = useState([]);
@@ -16,13 +18,41 @@ const ProfesionalesList = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("¿Seguro que quieres eliminar este profesional?")) {
+        // 🌟 NUEVO CARTEL DE CONFIRMACIÓN ANIMADO
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción eliminará al profesional de forma permanente.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545', // Rojo para el peligro
+            cancelButtonColor: '#6c757d',  // Gris para cancelar
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        // Si el usuario presionó "Sí, eliminar"
+        if (result.isConfirmed) {
             try {
                 await axios.delete(`http://localhost:3000/profesionales/${id}`);
-                loadProfesionales();
+                
+                // Alerta de éxito pequeña
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Eliminado',
+                    text: 'El profesional ha sido borrado del sistema.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                
+                fetchPacientes(); 
             } catch (error) {
-                console.error(error);
-            }
+                console.error("Error al eliminar:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar al profesional.'
+                });
+                   }
         }
     };
 
