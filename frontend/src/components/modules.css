@@ -1,0 +1,414 @@
+/* ============================================
+   MODULES - Premium Shared Design
+   Pacientes · Profesionales · Turnos · Usuarios · Roles
+   ============================================ */
+
+/* ── Resizable column handle ─────────────────────────────────────────────── */
+.col-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 1;
+    border-right: 2px solid transparent;
+    transition: border-color 0.15s;
+}
+
+.col-resize-handle:hover,
+.col-resize-handle.dragging {
+    border-right-color: #1a73e8;
+}
+
+
+/* ── Page Header ─────────────────────────────────────────────────────────── */
+.mod-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mod-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mod-title-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.mod-title-icon.blue {
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+}
+
+.mod-title-icon.teal {
+    background: linear-gradient(135deg, #00b09b, #0a8c75);
+}
+
+.mod-title-icon.orange {
+    background: linear-gradient(135deg, #f7941d, #d97706);
+}
+
+.mod-title-icon.rose {
+    background: linear-gradient(135deg, #e85d8a, #c0375f);
+}
+
+.mod-title-icon.purple {
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+}
+
+/* ── Add / Primary Action Button ─────────────────────────────────────────── */
+.mod-btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(26, 115, 232, 0.38);
+}
+
+.mod-btn-add:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 115, 232, 0.5);
+    color: #fff;
+}
+
+/* ── Stat / Count Chip ───────────────────────────────────────────────────── */
+.mod-count-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: #f0f4ff;
+    color: #1a73e8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid #c7d9ff;
+}
+
+/* ── Search Input ────────────────────────────────────────────────────────── */
+.mod-search-wrap {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.mod-search-wrap input {
+    width: 100%;
+    max-width: 360px;
+    padding: 9px 16px 9px 38px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.88rem;
+    color: #374151;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+.mod-search-wrap input:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+}
+
+.mod-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.95rem;
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+/* ── Table Card ──────────────────────────────────────────────────────────── */
+.mod-table-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    overflow-x: auto;
+    /* horizontal scroll when columns are wider than container */
+    overflow-y: hidden;
+    border-radius: 16px;
+}
+
+.mod-table-card table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* makes column widths controlled by th.style.width */
+    min-width: 500px;
+    /* prevents table collapsing when columns are narrowed */
+}
+
+.mod-table-card thead {
+    background: #f0f4ff;
+}
+
+.mod-table-card thead th {
+    padding: 14px 18px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #4a5568;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mod-table-card tbody tr {
+    border-top: 1px solid #f1f3f8;
+    transition: background 0.15s;
+}
+
+.mod-table-card tbody tr:hover {
+    background: #f7f9ff;
+}
+
+.mod-table-card tbody td {
+    padding: 13px 18px;
+    font-size: 0.88rem;
+    color: #374151;
+    vertical-align: middle;
+    border: none;
+}
+
+/* ── Empty State ──────────────────────────────────────────────────────────── */
+.mod-empty td {
+    padding: 50px 18px !important;
+    text-align: center;
+    color: #9ca3af;
+}
+
+.mod-empty-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 10px;
+    opacity: 0.4;
+}
+
+.mod-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* ── Name / Avatar Chip ───────────────────────────────────────────────────── */
+.mod-name-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mod-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.mod-avatar.blue {
+    background: linear-gradient(135deg, #60a5fa, #1d4ed8);
+}
+
+.mod-avatar.teal {
+    background: linear-gradient(135deg, #34d399, #059669);
+}
+
+.mod-avatar.orange {
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+}
+
+.mod-avatar.purple {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+}
+
+.mod-avatar.rose {
+    background: linear-gradient(135deg, #fb7185, #e11d48);
+}
+
+/* ── Status / Role Badges ─────────────────────────────────────────────────── */
+.mod-badge {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.mod-badge.activo {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.mod-badge.inactivo {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.mod-badge.confirmado {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.mod-badge.pendiente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.mod-badge.cancelado {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.mod-badge.completado {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.mod-badge.admin {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.mod-badge.medico {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.mod-badge.recepcion {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.mod-badge.default {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* ── ID Cell ──────────────────────────────────────────────────────────────── */
+.mod-id {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+/* ── Code / Monospace ─────────────────────────────────────────────────────── */
+.mod-code {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+/* ── Action Buttons ───────────────────────────────────────────────────────── */
+.mod-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mod-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 13px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.mod-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Variants */
+.mod-btn.edit {
+    background: #f0f4ff;
+    color: #1a73e8;
+    border-color: #c7d9ff;
+}
+
+.mod-btn.edit:hover {
+    background: #1a73e8;
+    color: #fff;
+    border-color: #1a73e8;
+}
+
+.mod-btn.delete {
+    background: #fff1f2;
+    color: #e11d48;
+    border-color: #fecdd3;
+}
+
+.mod-btn.delete:hover {
+    background: #e11d48;
+    color: #fff;
+    border-color: #e11d48;
+}
+
+.mod-btn.view {
+    background: #f0fdf4;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+
+.mod-btn.view:hover {
+    background: #059669;
+    color: #fff;
+    border-color: #059669;
+}
+
+/* ── Specialty / Info Chip ────────────────────────────────────────────────── */
+.mod-specialty {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+}

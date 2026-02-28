@@ -62,42 +62,42 @@ function App() {
           {/* RUTA PÚBLICA */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* ==========================================
-              NIVEL 1: SOLO USUARIOS LOGUEADOS
+{/* ==========================================
+              NIVEL 1: SOLO USUARIOS LOGUEADOS (Cualquiera)
               ========================================== */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Dashboard />} />
-            
             <Route path="/pacientes" element={<PacientesList />} />
             <Route path="/pacientes/nuevo" element={<PacientesForm />} />
             <Route path="/pacientes/editar/:id" element={<PacientesForm />} />
-            
             <Route path="/turnos" element={<TurnosList />} />
             <Route path="/turnos/nuevo" element={<TurnosForm />} />
             <Route path="/turnos/editar/:id" element={<TurnosForm />} />
-            <Route path="/pacientes/:paciente_id/historial" element={<HistorialClinico />} />
           </Route>
 
           {/* ==========================================
-              NIVEL 2: ADMIN y RECEPCION
+              NIVEL 2: ADMIN y RECEPCIÓN
               ========================================== */}
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPCION']} />}>
             <Route path="/profesionales" element={<ProfesionalList />} />
             <Route path="/profesionales/nuevo" element={<ProfesionalForm />} />
             <Route path="/profesionales/editar/:id" element={<ProfesionalForm />} />
-          </Route>
-
-          {/* ==========================================
-              NIVEL 3: SOLO ADMIN
-              ========================================== */}
-          <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+            
+            {/* 👇 Movimos Usuarios y Roles aquí según tu pedido 👇 */}
             <Route path="/usuarios" element={<UsuariosList />} />
             <Route path="/usuarios/nuevo" element={<UsuariosForm />} />
             <Route path="/usuarios/editar/:id" element={<UsuariosForm />} />
-
             <Route path="/roles" element={<RolList />} />
             <Route path="/roles/nuevo" element={<RolForm />} />
             <Route path="/roles/editar/:id" element={<RolForm />} />
+          </Route>
+
+          {/* ==========================================
+              NIVEL 3: SOLO PROFESIONALES (MÉDICOS)
+              ========================================== */}
+          <Route element={<ProtectedRoute allowedRoles={['MEDICO']} />}>
+             {/* 👇 Solo los doctores pueden entrar a esta URL 👇 */}
+            <Route path="/pacientes/:paciente_id/historial" element={<HistorialClinico />} />
           </Route>
 
         </Routes>

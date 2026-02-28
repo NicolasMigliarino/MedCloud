@@ -1,32 +1,26 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import './forms.css';
 
 const RolForm = () => {
     const [rol, setRol] = useState({
         nombre: '',
         codigo: ''
     });
-    
+
     const navigate = useNavigate();
     const { id } = useParams();
+    const isEditing = !!id;
 
-    // Cargar datos si estamos editando
     useEffect(() => {
         if (id) {
             const loadRol = async () => {
                 try {
-                    // Nota: Asumimos que tienes un endpoint para obtener un solo rol.
-                    // Si no lo tienes en el backend, el form aparecerá vacío al editar.
-                    // Podríamos filtrar la lista, pero lo ideal es tener router.get('/roles/:id')
-                    /* SI NO TIENES EL ENDPOINT GET /roles/:id, 
-                       ESTA PARTE DARÁ ERROR 404 O 500. 
-                       AVÍSAME SI NECESITAS EL CÓDIGO BACKEND PARA OBTENER 1 ROL.
-                    */
-                   // Por ahora intentamos cargarlo de la lista general si no existe el endpoint específico:
-                   const res = await axios.get('http://localhost:3000/roles');
-                   const rolEncontrado = res.data.find(r => r.id === parseInt(id));
-                   if(rolEncontrado) setRol(rolEncontrado);
+                    const res = await axios.get('http://localhost:3000/roles');
+                    const rolEncontrado = res.data.find(r => r.id === parseInt(id));
+                    if (rolEncontrado) setRol(rolEncontrado);
                 } catch (error) {
                     console.error(error);
                 }
@@ -44,58 +38,71 @@ const RolForm = () => {
         try {
             if (id) {
                 await axios.put(`http://localhost:3000/roles/${id}`, rol);
-                alert('Rol actualizado');
+                Swal.fire({ icon: 'success', title: '¡Actualizado!', text: 'Rol actualizado.', timer: 1500, showConfirmButton: false });
             } else {
                 await axios.post('http://localhost:3000/roles', rol);
-                alert('Rol creado');
+                Swal.fire({ icon: 'success', title: '¡Creado!', text: 'Rol creado correctamente.', timer: 1500, showConfirmButton: false });
             }
-            navigate('/roles');
+            setTimeout(() => navigate('/roles'), 1600);
         } catch (error) {
             console.error(error);
-            alert("Error al guardar rol");
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Error al guardar el rol.' });
         }
     };
 
     return (
-        <div className="card mx-auto mt-4" style={{ maxWidth: '500px' }}>
-            <div className="card-header bg-dark text-white">
-                <h4>{id ? 'Editar Rol' : 'Crear Nuevo Rol'}</h4>
-            </div>
-            <div className="card-body">
-                <form onSubmit={handleSubmit}>
-                    
-                    <div className="mb-3">
-                        <label className="form-label">Nombre del Rol</label>
-                        <input 
-                            type="text" 
-                            name="nombre" 
-                            className="form-control" 
-                            value={rol.nombre} 
-                            onChange={handleChange} 
-                            placeholder="Ej: Administrador"
-                            required 
-                        />
+        <div className="form-page">
+            <div className="form-card">
+                {/* Header */}
+                <div className="form-card-header purple">
+                    <div className="form-header-icon purple">🛡️</div>
+                    <div className="form-header-text">
+                        <h2>{isEditing ? 'Editar Rol' : 'Crear Nuevo Rol'}</h2>
+                        <p>{isEditing ? 'Modificá el nombre o código del rol' : 'Definí un nuevo rol de acceso para el sistema'}</p>
                     </div>
+                </div>
 
-                    <div className="mb-3">
-                        <label className="form-label">Código Interno</label>
-                        <input 
-                            type="text" 
-                            name="codigo" 
-                            className="form-control" 
-                            value={rol.codigo} 
-                            onChange={handleChange} 
-                            placeholder="Ej: ADMIN"
-                            required 
-                        />
-                        <div className="form-text">Usado por el sistema (Mayúsculas recomendado).</div>
-                    </div>
+                {/* Body */}
+                <div className="form-card-body">
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-section-label">Datos del Rol</div>
 
-                    <div className="d-grid gap-2">
-                        <button type="submit" className="btn btn-primary">Guardar</button>
-                        <Link to="/roles" className="btn btn-secondary">Cancelar</Link>
-                    </div>
-                </form>
+                        <div className="form-group">
+                            <label className="form-label-custom">Nombre del Rol <span className="required">*</span></label>
+                            <input
+                                className="form-input"
+                                type="text"
+                                name="nombre"
+                                value={rol.nombre}
+                                onChange={handleChange}
+                                placeholder="Ej: Administrador"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label-custom">Código Interno <span className="required">*</span></label>
+                            <input
+                                className="form-input"
+                                type="text"
+                                name="codigo"
+                                value={rol.codigo}
+                                onChange={handleChange}
+                                placeholder="Ej: ADMIN"
+                                required
+                            />
+                            <p className="form-hint">🔤 Usado por el sistema para verificar permisos. Se recomienda usar MAYÚSCULAS.</p>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="form-footer">
+                            <Link to="/roles" className="form-btn-cancel">← Cancelar</Link>
+                            <button type="submit" className="form-btn-submit">
+                                {isEditing ? '💾 Actualizar Rol' : '✅ Crear Rol'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

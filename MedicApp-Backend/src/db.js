@@ -6,7 +6,7 @@
 const sql = require('mssql');
 
 const dbSettings = {
-    server: 'localhost', 
+    server: 'localhost',
     database: 'MedicApp',
     user: 'medicapp_user',      // El usuario que acabamos de crear
     password: 'MedicApp123',    // La contraseña que pusimos en el script

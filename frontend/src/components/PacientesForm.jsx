@@ -1,42 +1,35 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom'; // Importamos useParams para leer el ID de la URL
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import './forms.css';
 
 const PacientesForm = () => {
     const navigate = useNavigate();
-    const { id } = useParams(); // Aquí capturamos el ID si viene en la ruta (ej: /editar/5)
-    
-    // Estado inicial vacío
+    const { id } = useParams();
+    const isEditing = !!id;
+
     const [formData, setFormData] = useState({
-        nombre: '', 
-        apellido: '', 
-        dni: '', 
+        nombre: '',
+        apellido: '',
+        dni: '',
         email: '',
         telefono: '',
-        fecha_nacimiento: '', // Necesitamos este para que SQL no se queje
+        fecha_nacimiento: '',
         obra_social: '',
         numero_afiliado: '',
         fecha_alta: ''
     });
-    
-    // Estado para saber si estamos editando (opcional, para cambiar el título)
-    const [isEditing, setIsEditing] = useState(false);
 
-    // --- EFECTO: CARGAR DATOS SI ESTAMOS EDITANDO ---
     useEffect(() => {
         const loadPaciente = async () => {
             if (id) {
-                // Si existe el ID, cambiamos a modo edición y buscamos los datos
-                setIsEditing(true);
                 try {
-                    // OJO: Aquí asumo que tienes un endpoint GET /pacientes/:id en tu backend
-                    // Si no lo tienes, avísame y lo hacemos rápido.
-                    // Por ahora intentará cargar los datos.
                     const response = await axios.get(`http://localhost:3000/pacientes/${id}`);
                     setFormData(response.data);
                 } catch (error) {
-                    console.error("Error al cargar paciente:", error);
-                    alert("No se pudo cargar el paciente para editar.");
+                    console.error('Error al cargar paciente:', error);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el paciente para editar.' });
                 }
             }
         };
@@ -51,65 +44,92 @@ const PacientesForm = () => {
         e.preventDefault();
         try {
             if (isEditing) {
-                // --- MODO EDICIÓN (PUT) ---
                 await axios.put(`http://localhost:3000/pacientes/${id}`, formData);
-                alert('¡Paciente actualizado con éxito!');
+                Swal.fire({ icon: 'success', title: '¡Actualizado!', text: 'Paciente actualizado con éxito.', timer: 1500, showConfirmButton: false });
             } else {
-                // --- MODO CREACIÓN (POST) ---
                 await axios.post('http://localhost:3000/pacientes', formData);
-                alert('¡Paciente registrado con éxito!');
+                Swal.fire({ icon: 'success', title: '¡Registrado!', text: 'Paciente registrado con éxito.', timer: 1500, showConfirmButton: false });
             }
-            navigate('/'); // Volver a la lista
+            setTimeout(() => navigate('/pacientes'), 1600);
         } catch (error) {
             console.error(error);
-            alert('Ocurrió un error al guardar.');
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al guardar.' });
         }
     };
 
     return (
-        <div className="card shadow-sm mt-5" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <div className={`card-header text-white ${isEditing ? 'bg-warning' : 'bg-success'}`}>
-                <h5 className="mb-0">
-                    {isEditing ? '✏️ Editar Paciente' : '📝 Registrar Nuevo Paciente'}
-                </h5>
-            </div>
-            <div className="card-body">
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                        <label className="form-label">Nombre</label>
-                        <input type="text" name="nombre" className="form-control" 
-                               value={formData.nombre} onChange={handleChange} required />
+        <div className="form-page">
+            <div className="form-card">
+                {/* Header */}
+                <div className="form-card-header blue">
+                    <div className="form-header-icon blue">👤</div>
+                    <div className="form-header-text">
+                        <h2>{isEditing ? 'Editar Paciente' : 'Registrar Nuevo Paciente'}</h2>
+                        <p>{isEditing ? 'Actualizá los datos del paciente' : 'Completá el formulario para agregar un paciente'}</p>
                     </div>
-                    <div className="mb-3">
-                        <label className="form-label">Apellido</label>
-                        <input type="text" name="apellido" className="form-control" 
-                               value={formData.apellido} onChange={handleChange} required />
-                    </div>
-                    <div className="mb-3">
-                        <label className="form-label">DNI</label>
-                        <input type="text" name="dni" className="form-control" 
-                               value={formData.dni} onChange={handleChange} required />
-                    </div>
-                    <div className="mb-3">
-                        <label className="form-label">Email</label>
-                        <input type="email" name="email" className="form-control" 
-                               value={formData.email} onChange={handleChange} required />
-                    </div>
-                    <div className="mb-3">
-                        <label className="form-label">Fecha de Nacimiento</label>
-                        <input type="date" name="fecha_nacimiento" className="form-control" 
-                               value={formData.fecha_nacimiento} onChange={handleChange} required />
-                    </div>
-                    <div className="mb-3">
-                        <label className="form-label">Fecha de Alta Paciente</label>
-                        <input type="date" name="fecha_nacimiento" className="form-control" 
-                               value={formData.fecha_nacimiento} onChange={handleChange} required />
-                    </div>
+                </div>
 
-                    <button type="submit" className={`btn w-100 ${isEditing ? 'btn-warning' : 'btn-success'}`}>
-                        {isEditing ? 'Actualizar Datos' : 'Guardar Paciente'}
-                    </button>
-                </form>
+                {/* Body */}
+                <div className="form-card-body">
+                    <form onSubmit={handleSubmit}>
+                        {/* Datos personales */}
+                        <div className="form-section-label">Datos Personales</div>
+                        <div className="form-row cols-2">
+                            <div className="form-group">
+                                <label className="form-label-custom">Nombre <span className="required">*</span></label>
+                                <input className="form-input" type="text" name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Ej: María" required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label-custom">Apellido <span className="required">*</span></label>
+                                <input className="form-input" type="text" name="apellido" value={formData.apellido} onChange={handleChange} placeholder="Ej: González" required />
+                            </div>
+                        </div>
+                        <div className="form-row cols-2">
+                            <div className="form-group">
+                                <label className="form-label-custom">DNI <span className="required">*</span></label>
+                                <input className="form-input" type="text" name="dni" value={formData.dni} onChange={handleChange} placeholder="Ej: 30123456" required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label-custom">Fecha de Nacimiento <span className="required">*</span></label>
+                                <input className="form-input" type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento} onChange={handleChange} required />
+                            </div>
+                        </div>
+
+                        {/* Contacto */}
+                        <div className="form-section-label">Contacto</div>
+                        <div className="form-row cols-2">
+                            <div className="form-group">
+                                <label className="form-label-custom">Email <span className="required">*</span></label>
+                                <input className="form-input" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="correo@email.com" required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label-custom">Teléfono</label>
+                                <input className="form-input" type="text" name="telefono" value={formData.telefono} onChange={handleChange} placeholder="Ej: +54 9 11 1234-5678" />
+                            </div>
+                        </div>
+
+                        {/* Obra Social */}
+                        <div className="form-section-label">Obra Social</div>
+                        <div className="form-row cols-2">
+                            <div className="form-group">
+                                <label className="form-label-custom">Obra Social</label>
+                                <input className="form-input" type="text" name="obra_social" value={formData.obra_social} onChange={handleChange} placeholder="Ej: OSDE" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label-custom">N° Afiliado</label>
+                                <input className="form-input" type="text" name="numero_afiliado" value={formData.numero_afiliado} onChange={handleChange} placeholder="Ej: 12345678" />
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="form-footer">
+                            <Link to="/pacientes" className="form-btn-cancel">← Cancelar</Link>
+                            <button type="submit" className="form-btn-submit">
+                                {isEditing ? '💾 Actualizar Paciente' : '✅ Guardar Paciente'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

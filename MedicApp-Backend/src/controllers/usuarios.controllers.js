@@ -10,6 +10,23 @@ const getUsuarios = async (req, res) => {
     }
 };
 
+const getUsuarioById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const pool = await getConnection();
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .execute('sp_GetUsuarioById');
+
+        if (result.recordset.length === 0) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+        res.json(result.recordset[0]);
+    } catch (error) {
+        console.error("🚨 ERROR SQL AL OBTENER USUARIO:", error.message);
+        res.status(500).send(error.message);
+    }
+};
+
 const createUsuario = async (req, res) => {
     const { email, password_hash, rol_id, activo, username, debe_cambiar_pass } = req.body;
     try {
@@ -23,10 +40,10 @@ const createUsuario = async (req, res) => {
             .input('username', sql.VarChar, username)
             .input('debe_cambiar_pass', sql.Bit, debe_cambiar_pass) // Corregido el nombre
             .execute('sp_CreateUsuario');
-        
+
         res.json({ msg: 'Usuario creado' });
     } catch (error) {
-        console.error("🚨 ERROR SQL AL CREAR USUARIO:", error.message); 
+        console.error("🚨 ERROR SQL AL CREAR USUARIO:", error.message);
         res.status(500).send(error.message);
     }
 };
@@ -45,7 +62,7 @@ const setUsuario = async (req, res) => {
             .input('username', sql.VarChar, username)
             .input('debe_cambiar_pass', sql.Bit, debe_cambiar_pass) // Corregido el nombre
             .execute('sp_SetUsuario');
-        
+
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Usuario no encontrado' });
 
         res.json({ msg: 'Usuario actualizado' });
@@ -70,4 +87,4 @@ const deleteUsuario = async (req, res) => {
     }
 };
 
-module.exports = { getUsuarios, createUsuario, setUsuario, deleteUsuario };
+module.exports = { getUsuarios, getUsuarioById, createUsuario, setUsuario, deleteUsuario };

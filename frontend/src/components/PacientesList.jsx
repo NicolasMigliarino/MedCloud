@@ -2,117 +2,134 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import './modules.css';
+import useResizableColumns from './useResizableColumns';
+
+const getInitials = (nombre = '', apellido = '') =>
+    `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
 
 const PacientesList = () => {
     const [pacientes, setPacientes] = useState([]);
+    const [search, setSearch] = useState('');
+    const tableRef = useResizableColumns();
 
-    // 1. Definimos la función NORMAL (sin useCallback para simplificar)
+    const usuarioLogueado = JSON.parse(localStorage.getItem('user'));
+    const esMedico = usuarioLogueado?.rol === 'MEDICO' || usuarioLogueado?.codigo === 'MEDICO';
+
     const fetchPacientes = async () => {
         try {
             const response = await axios.get('http://localhost:3000/pacientes');
             setPacientes(response.data);
         } catch (error) {
-            console.error("Error al buscar pacientes:", error);
+            console.error('Error al buscar pacientes:', error);
         }
     };
 
-    // 2. useEffect: Se ejecuta al inicio
-    useEffect(() => {
-        fetchPacientes();
-    }, []); // <--- DEJAMOS EL ARRAY VACÍO Y IGNORAMOS LA ADVERTENCIA
+    useEffect(() => { fetchPacientes(); }, []);
 
-const handleDelete = async (id) => {
-        // 🌟 NUEVO CARTEL DE CONFIRMACIÓN ANIMADO
+    const handleDelete = async (id) => {
         const result = await Swal.fire({
             title: '¿Estás seguro?',
-            text: "Esta acción eliminará al paciente de forma permanente.",
+            text: 'Esta acción eliminará al paciente de forma permanente.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc3545', // Rojo para el peligro
-            cancelButtonColor: '#6c757d',  // Gris para cancelar
+            confirmButtonColor: '#e11d48',
+            cancelButtonColor: '#6c757d',
             confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
+            cancelButtonText: 'Cancelar',
         });
-
-        // Si el usuario presionó "Sí, eliminar"
         if (result.isConfirmed) {
             try {
                 await axios.delete(`http://localhost:3000/pacientes/${id}`);
-                
-                // Alerta de éxito pequeña
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Eliminado',
-                    text: 'El paciente ha sido borrado del sistema.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-                fetchPacientes(); 
+                Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El paciente ha sido borrado del sistema.', timer: 1500, showConfirmButton: false });
+                fetchPacientes();
             } catch (error) {
-                console.error("Error al eliminar:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'No se pudo eliminar al paciente (Verifica que no tenga turnos ni historial).'
-                });
+                console.error('Error al eliminar:', error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo eliminar al paciente (Verifica que no tenga turnos ni historial).' });
             }
         }
     };
 
-    return (
-        <div className="container mt-4">
-            <h2 className="mb-4 text-center">Gestión de Pacientes</h2>
+    const filtered = pacientes.filter(p =>
+        `${p.nombre} ${p.apellido} ${p.dni} ${p.email}`.toLowerCase().includes(search.toLowerCase())
+    );
 
-            {/* Botón para crear nuevo paciente */}
-            <div className="d-flex justify-content-end mb-3">
-                <Link to="/pacientes/nuevo" className="btn btn-success">
-                    ➕ Nuevo Paciente
-                </Link>
+    return (
+        <div style={{ padding: '4px 0' }}>
+            {/* Header */}
+            <div className="mod-header">
+                <h1 className="mod-title">
+                    <span className="mod-title-icon blue">👤</span>
+                    Gestión de Pacientes
+                </h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="mod-count-chip">📋 {pacientes.length} pacientes</span>
+                    <Link to="/pacientes/nuevo" className="mod-btn-add">➕ Nuevo Paciente</Link>
+                </div>
             </div>
 
-            <table className="table table-striped table-hover table-bordered shadow-sm">
-                <thead className="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>DNI</th>
-                        <th>Email</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {pacientes.map((paciente) => (
-                        <tr key={paciente.id}>
-                            <td>{paciente.id}</td>
-                            <td>{paciente.nombre}</td>
-                            <td>{paciente.apellido}</td>
-                            <td>{paciente.dni}</td>
-                            <td>{paciente.email}</td>
-                            <td>
-                                {/* 👇 Botón Historial (Azul) 👇 */}
-                                <Link to={`/pacientes/${paciente.id}/historial`} className="btn btn-primary btn-sm me-2">
-                                    Historial
-                                </Link>
+            {/* Search */}
+            <div className="mod-search-wrap">
+                <span className="mod-search-icon">🔍</span>
+                <input
+                    type="text"
+                    placeholder="Buscar por nombre, DNI o email..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                />
+            </div>
 
-                                {/* Botón Editar (Amarillo) */}
-                                <Link to={`/pacientes/editar/${paciente.id}`} className="btn btn-warning btn-sm me-2">
-                                    Editar
-                                </Link>
-
-                                {/* Botón Eliminar (Rojo) */}
-                                <button 
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => handleDelete(paciente.id)}
-                                >
-                                    Eliminar
-                                </button>
-                            </td>
+            {/* Table */}
+            <div className="mod-table-card">
+                <table ref={tableRef}>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Paciente</th>
+                            <th>DNI</th>
+                            <th>Email</th>
+                            <th>Acciones</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {filtered.length > 0 ? filtered.map((paciente) => (
+                            <tr key={paciente.id}>
+                                <td><span className="mod-id">#{paciente.id}</span></td>
+                                <td>
+                                    <div className="mod-name-chip">
+                                        <div className="mod-avatar blue">{getInitials(paciente.nombre, paciente.apellido)}</div>
+                                        <span><strong>{paciente.nombre}</strong> {paciente.apellido}</span>
+                                    </div>
+                                </td>
+                                <td>{paciente.dni}</td>
+                                <td>{paciente.email}</td>
+                                <td>
+                                    <div className="mod-actions">
+                                        {esMedico && (
+                                            <Link to={`/pacientes/${paciente.id}/historial`} className="mod-btn view">
+                                                📋 Historial
+                                            </Link>
+                                        )}
+                                        <Link to={`/pacientes/editar/${paciente.id}`} className="mod-btn edit">
+                                            ✏️ Editar
+                                        </Link>
+                                        <button className="mod-btn delete" onClick={() => handleDelete(paciente.id)}>
+                                            🗑️ Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        )) : (
+                            <tr className="mod-empty">
+                                <td colSpan="5">
+                                    <span className="mod-empty-icon">👤</span>
+                                    <p>No se encontraron pacientes.</p>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

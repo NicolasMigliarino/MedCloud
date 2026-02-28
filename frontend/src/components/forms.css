@@ -1,0 +1,334 @@
+/* ============================================
+   FORMS - Premium Shared Design
+   PacientesForm · ProfesionalForm · TurnosForm · UsuariosForm · RolForm
+   ============================================ */
+
+/* ── Page wrapper ─────────────────────────────────────────────────────────── */
+.form-page {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0 40px;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.form-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.09);
+    width: 100%;
+    max-width: 640px;
+    overflow: hidden;
+}
+
+.form-card.wide {
+    max-width: 720px;
+}
+
+/* ── Card Header ──────────────────────────────────────────────────────────── */
+.form-card-header {
+    padding: 24px 28px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid #f1f3f8;
+}
+
+/* Gradient accent line on the left */
+.form-card-header::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 36px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.form-card-header.blue::before {
+    background: linear-gradient(180deg, #1a73e8, #0d47a1);
+}
+
+.form-card-header.teal::before {
+    background: linear-gradient(180deg, #00b09b, #0a8c75);
+}
+
+.form-card-header.orange::before {
+    background: linear-gradient(180deg, #f7941d, #d97706);
+}
+
+.form-card-header.rose::before {
+    background: linear-gradient(180deg, #e85d8a, #c0375f);
+}
+
+.form-card-header.purple::before {
+    background: linear-gradient(180deg, #7c3aed, #4c1d95);
+}
+
+.form-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.form-header-icon.blue {
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+}
+
+.form-header-icon.teal {
+    background: linear-gradient(135deg, #00b09b, #0a8c75);
+}
+
+.form-header-icon.orange {
+    background: linear-gradient(135deg, #f7941d, #d97706);
+}
+
+.form-header-icon.rose {
+    background: linear-gradient(135deg, #e85d8a, #c0375f);
+}
+
+.form-header-icon.purple {
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+}
+
+.form-header-text h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 2px;
+}
+
+.form-header-text p {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin: 0;
+}
+
+/* ── Card Body ────────────────────────────────────────────────────────────── */
+.form-card-body {
+    padding: 28px;
+}
+
+/* ── Section divider inside the form ─────────────────────────────────────── */
+.form-section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin: 24px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #f1f3f8;
+}
+
+/* ── Field Group ──────────────────────────────────────────────────────────── */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.form-row {
+    display: grid;
+    gap: 16px;
+}
+
+.form-row.cols-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 560px) {
+    .form-row.cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-card-body {
+        padding: 20px;
+    }
+}
+
+/* ── Label ────────────────────────────────────────────────────────────────── */
+.form-label-custom {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.form-label-custom .required {
+    color: #e11d48;
+    margin-left: 2px;
+}
+
+/* ── Input / Select / Textarea ───────────────────────────────────────────── */
+.form-input,
+.form-select-custom,
+.form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: #1a1a2e;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: inherit;
+}
+
+.form-input:focus,
+.form-select-custom:focus,
+.form-textarea:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: #c4cdd8;
+}
+
+.form-input.readonly {
+    background: #f8fafc;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* Select arrow */
+.form-select-wrap {
+    position: relative;
+}
+
+.form-select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.form-select-custom {
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ── Helper / Hint text ───────────────────────────────────────────────────── */
+.form-hint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 5px;
+}
+
+/* ── Toggle Switch (Checkbox) ─────────────────────────────────────────────── */
+.form-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+}
+
+.form-toggle-wrap:hover {
+    border-color: #1a73e8;
+    background: #f7f9ff;
+}
+
+.form-toggle-wrap input[type="checkbox"] {
+    accent-color: #1a73e8;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.form-toggle-label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* ── Form Footer (Buttons) ────────────────────────────────────────────────── */
+.form-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f3f8;
+}
+
+.form-btn-submit {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(26, 115, 232, 0.35);
+    text-decoration: none;
+}
+
+.form-btn-submit:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 115, 232, 0.45);
+    color: #fff;
+}
+
+.form-btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: #f1f3f8;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1.5px solid #e2e8f0;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.form-btn-cancel:hover {
+    background: #e2e8f0;
+    color: #1a1a2e;
+}

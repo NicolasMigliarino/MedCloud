@@ -30,18 +30,19 @@ const getProfesional = async (req, res) => {
 
 // 3. CREAR (createProfesional)
 const createProfesional = async (req, res) => {
-    const { nombre, apellido, matricula, especialidad, telefono, duracion_turno_promedio } = req.body;
+    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio } = req.body;
     try {
         const pool = await getConnection();
         await pool.request()
             .input('nombre', sql.VarChar, nombre)
             .input('apellido', sql.VarChar, apellido)
+            .input('DNI', sql.VarChar, dni)
             .input('matricula', sql.VarChar, matricula)
             .input('especialidad', sql.VarChar, especialidad)
             .input('telefono', sql.VarChar, telefono)
             .input('duracionTurnoPromedio', sql.Int, duracion_turno_promedio)
             .execute('sp_CreateProfesional');
-        
+
         res.json({ message: 'Profesional creado exitosamente' });
     } catch (error) {
         res.status(500).send(error.message);
@@ -51,13 +52,14 @@ const createProfesional = async (req, res) => {
 // 4. ACTUALIZAR (setProfesional - ANTES updateProfesional)
 const setProfesional = async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, matricula, especialidad, telefono, duracion_turno_promedio } = req.body;
+    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio } = req.body;
     try {
         const pool = await getConnection();
         const result = await pool.request()
             .input('id', sql.Int, id)
             .input('nombre', sql.VarChar, nombre)
             .input('apellido', sql.VarChar, apellido)
+            .input('dni', sql.VarChar, dni)
             .input('matricula', sql.VarChar, matricula)
             .input('especialidad', sql.VarChar, especialidad)
             .input('telefono', sql.VarChar, telefono)
@@ -89,10 +91,10 @@ const deleteProfesional = async (req, res) => {
 };
 
 // --- IMPORTANTE: EL EXPORT DEBE COINCIDIR EXACTAMENTE CON LOS NOMBRES DE ARRIBA ---
-module.exports = { 
-    getProfesionales, 
-    getProfesional, 
-    createProfesional, 
+module.exports = {
+    getProfesionales,
+    getProfesional,
+    createProfesional,
     setProfesional,    // <--- Verifica que esto no diga updateProfesional
-    deleteProfesional 
+    deleteProfesional
 };

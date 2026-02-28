@@ -1,91 +1,133 @@
-// src/components/UsuariosList.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import './modules.css';
+import useResizableColumns from './useResizableColumns';
+
+const getInitials = (username = '') =>
+    username.slice(0, 2).toUpperCase();
 
 const UsuariosList = () => {
-    // Aca guardamos la lista de usuarios que nos devuelve el servidor.
-    // Inicialmente es un array vacío [] hasta que carguen los datos.
     const [usuarios, setUsuarios] = useState([]);
+    const [search, setSearch] = useState('');
+    const tableRef = useResizableColumns();
 
-    //FUNCIÓN PARA CARGAR DATOS
-    // Es asíncrona (async) porque debe esperar a que el servidor responda.
     const loadUsuarios = async () => {
         try {
             const res = await axios.get('http://localhost:3000/usuarios');
-            setUsuarios(res.data); // Guardamos la respuesta en el estado
+            setUsuarios(res.data);
         } catch (error) {
-            console.error("Error cargando usuarios:", error);
+            console.error('Error cargando usuarios:', error);
         }
     };
 
-    //FUNCIÓN PARA ELIMINAR
     const handleDelete = async (id) => {
-        // Preguntamos antes de borrar para evitar accidentes
-        if (window.confirm("¿Estás seguro de eliminar este usuario?")) {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción eliminará al usuario de forma permanente.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+        });
+        if (result.isConfirmed) {
             try {
                 await axios.delete(`http://localhost:3000/usuarios/${id}`);
-                loadUsuarios(); // Recargamos la lista para que desaparezca el eliminado
+                Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El usuario ha sido eliminado.', timer: 1500, showConfirmButton: false });
+                loadUsuarios();
             } catch (error) {
                 console.error(error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo eliminar al usuario.' });
             }
         }
     };
 
-    // 4. USE EFFECT: Se ejecuta una sola vez cuando el componente se monta en pantalla.
-    // Es el equivalente a "Cuando inicie la página, haz esto..."
-    useEffect(() => {
-        loadUsuarios();
-    }, []);
+    useEffect(() => { loadUsuarios(); }, []);
+
+    const filtered = usuarios.filter(u =>
+        `${u.username} ${u.email}`.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
-        <div className="container mt-4">
-            <h2>Gestión de Usuarios</h2>
-            
-            {/* Botón para navegar al formulario de creación */}
-            <div className="d-flex justify-content-end mb-3">
-                <Link to="/usuarios/nuevo" className="btn btn-primary">➕ Nuevo Usuario</Link>
+        <div style={{ padding: '4px 0' }}>
+            {/* Header */}
+            <div className="mod-header">
+                <h1 className="mod-title">
+                    <span className="mod-title-icon rose">🔑</span>
+                    Gestión de Usuarios
+                </h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="mod-count-chip">👥 {usuarios.length} usuarios</span>
+                    <Link to="/usuarios/nuevo" className="mod-btn-add">➕ Nuevo Usuario</Link>
+                </div>
             </div>
 
-            <table className="table table-striped shadow-sm">
-                <thead className="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Rol ID</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {/*MAP: Recorremos el array de usuarios y creamos una fila (tr) por cada uno */}
-                    {usuarios.map((user) => (
-                        <tr key={user.id}>
-                            <td>{user.id}</td>
-                            <td>{user.username}</td>
-                            <td>{user.email}</td>
-                            <td>{user.rolId}</td>
-                            <td>
-                                {/* Renderizado condicional: Si es true muestra verde, si es false rojo */}
-                                {user.activo 
-                                    ? <span className="badge bg-success">Activo</span> 
-                                    : <span className="badge bg-danger">Inactivo</span>
-                                }
-                            </td>
-                            <td>
-                                {/* Navegamos a la ruta de edición pasando el ID en la URL */}
-                                <Link to={`/usuarios/editar/${user.id}`} className="btn btn-warning btn-sm me-2">
-                                    Editar
-                                </Link>
-                                <button onClick={() => handleDelete(user.id)} className="btn btn-danger btn-sm">
-                                    Eliminar
-                                </button>
-                            </td>
+            {/* Search */}
+            <div className="mod-search-wrap">
+                <span className="mod-search-icon">🔍</span>
+                <input
+                    type="text"
+                    placeholder="Buscar por username o email..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                />
+            </div>
+
+            {/* Table */}
+            <div className="mod-table-card">
+                <table ref={tableRef}>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol ID</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {filtered.length > 0 ? filtered.map((user) => (
+                            <tr key={user.id}>
+                                <td><span className="mod-id">#{user.id}</span></td>
+                                <td>
+                                    <div className="mod-name-chip">
+                                        <div className="mod-avatar purple">{getInitials(user.username)}</div>
+                                        <strong>{user.username}</strong>
+                                    </div>
+                                </td>
+                                <td>{user.email}</td>
+                                <td><span className="mod-code">{user.rol_id}</span></td>
+                                <td>
+                                    <span className={`mod-badge ${user.activo ? 'activo' : 'inactivo'}`}>
+                                        {user.activo ? 'Activo' : 'Inactivo'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div className="mod-actions">
+                                        <Link to={`/usuarios/editar/${user.id}`} className="mod-btn edit">
+                                            ✏️ Editar
+                                        </Link>
+                                        <button className="mod-btn delete" onClick={() => handleDelete(user.id)}>
+                                            🗑️ Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        )) : (
+                            <tr className="mod-empty">
+                                <td colSpan="6">
+                                    <span className="mod-empty-icon">👥</span>
+                                    <p>No se encontraron usuarios.</p>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

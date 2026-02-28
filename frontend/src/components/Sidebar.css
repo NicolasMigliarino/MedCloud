@@ -8,7 +8,7 @@ aside.sidebar {
     gap: 8px;
     width: 260px;
     padding: 0 16px;
-    background: #212529; /* Color oscuro de Bootstrap para combinar */
+    background: #212529;
     color: white;
     z-index: 1000;
 }
@@ -44,7 +44,8 @@ aside.sidebar button {
     font-size: 16px;
 }
 
-aside.sidebar button:hover, aside.sidebar button.active {
+aside.sidebar button:hover,
+aside.sidebar button.active {
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
@@ -59,17 +60,26 @@ aside.sidebar button ion-icon:last-child {
     transition: 0.3s;
 }
 
-aside.sidebar button.active ion-icon:last-child {
-    transform: rotate(-180deg);
-}
-
+/* ── Sub-menu: animated via max-height ─────────────────────────────────── */
 .sub-menu {
     overflow: hidden;
-    transition: height 0.3s ease;
+    max-height: 0;
+    transition: max-height 0.45s ease-in-out;
+}
+
+/* Opened by JS click toggle */
+.sub-menu.is-open {
+    max-height: 400px;
+}
+
+/* Opened by CSS hover on the parent .sidebar-item ─────────────────────── */
+.sidebar-item:hover .sub-menu {
+    max-height: 400px;
 }
 
 .sub-menu ul {
     padding-left: 0;
+    padding-bottom: 4px;
 }
 
 .sub-menu button {
@@ -88,8 +98,10 @@ aside.sidebar button.active ion-icon:last-child {
     height: 6px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.3);
+    transition: 0.2s;
 }
 
-.sub-menu button:hover::before {
+.sub-menu button:hover::before,
+.sub-menu button.active::before {
     background: white;
 }
