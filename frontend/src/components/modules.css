@@ -1,5 +1,4 @@
 /* ============================================
-   MODULES - Premium Shared Design
    Pacientes · Profesionales · Turnos · Usuarios · Roles
    ============================================ */
 
@@ -149,12 +148,14 @@
 /* ── Table Card ──────────────────────────────────────────────────────────── */
 .mod-table-card {
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.035);
+    /* Sombra estética muy difuminada */
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    /* Borde luminoso */
     overflow-x: auto;
     /* horizontal scroll when columns are wider than container */
     overflow-y: hidden;
-    border-radius: 16px;
 }
 
 .mod-table-card table {
@@ -411,4 +412,75 @@
     font-weight: 600;
     padding: 2px 10px;
     border-radius: 20px;
+}
+
+/* ── React Big Calendar Customization (Aesthetic) ───────────────────────── */
+.mod-calendar-wrapper .rbc-calendar {
+    font-family: inherit;
+}
+
+.mod-calendar-wrapper .rbc-toolbar {
+    margin-bottom: 20px;
+}
+
+.mod-calendar-wrapper .rbc-toolbar button {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #374151;
+    font-weight: 500;
+    font-size: 0.88rem;
+    background: #fff;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.mod-calendar-wrapper .rbc-toolbar button.rbc-active,
+.mod-calendar-wrapper .rbc-toolbar button:hover {
+    background: #f0f4ff;
+    color: #1a73e8;
+    border-color: #c7d9ff;
+    box-shadow: none;
+}
+
+.mod-calendar-wrapper .rbc-toolbar-label {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #1a1a2e;
+    text-transform: capitalize;
+}
+
+.mod-calendar-wrapper .rbc-header {
+    padding: 10px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #4a5568;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.mod-calendar-wrapper .rbc-month-view,
+.mod-calendar-wrapper .rbc-time-view {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.mod-calendar-wrapper .rbc-day-bg+.rbc-day-bg {
+    border-left: 1px solid #f1f3f8;
+}
+
+.mod-calendar-wrapper .rbc-month-row+.rbc-month-row {
+    border-top: 1px solid #f1f3f8;
+}
+
+.mod-calendar-wrapper .rbc-today {
+    background-color: #f7f9ff;
+}
+
+.mod-calendar-wrapper .rbc-event {
+    padding: 2px 4px;
+    border-radius: 6px;
+    border: none;
 }

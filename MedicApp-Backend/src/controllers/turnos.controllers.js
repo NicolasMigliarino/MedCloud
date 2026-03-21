@@ -71,4 +71,37 @@ const deleteTurno = async (req, res) => {
     }
 };
 
-module.exports = { getTurnos, createTurno, setTurno, deleteTurno };
+const getHorarios = async (req, res) => {
+    try {
+        const pool = await getConnection();
+        const result = await pool.request().execute('sp_GetHorarios');
+        res.json(result.recordset);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
+const registrarPagoTurno = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { monto, metodo_pago } = req.body;
+
+        if (!monto || !metodo_pago) {
+            return res.status(400).json({ message: 'El monto y el método de pago son obligatorios.' });
+        }
+
+        const pool = await getConnection();
+        await pool.request()
+            .input('turno_id', sql.Int, id)
+            .input('monto', sql.Decimal(10, 2), monto)
+            .input('metodo_pago', sql.VarChar(50), metodo_pago)
+            .execute('sp_RegistrarPagoTurno');
+
+        res.json({ message: 'Pago registrado exitosamente. El turno ha sido Confirmado de forma automática.' });
+    } catch (error) {
+        console.error("Error al registrar pago:", error.message);
+        res.status(500).send(error.message);
+    }
+};
+
+module.exports = { getTurnos, createTurno, setTurno, deleteTurno, getHorarios, registrarPagoTurno };

@@ -6,7 +6,7 @@ const login = async (req, res) => {
 
     try {
         const pool = await getConnection();
-        
+
         // CORRECCIÓN: Usamos el Stored Procedure en lugar de escribir la query aquí
         const result = await pool.request()
             .input('username', sql.VarChar, username)
@@ -26,8 +26,8 @@ const login = async (req, res) => {
 
         // 3. Crear Token
         const token = jwt.sign(
-            { id: usuario.id, username: usuario.username, rol: usuario.rol_codigo }, 
-            'PALABRA_SECRETA_SUPER_SEGURA', 
+            { id: usuario.id, username: usuario.username, rol: usuario.rol_codigo },
+            'PALABRA_SECRETA_SUPER_SEGURA',
             { expiresIn: '8h' }
         );
 
@@ -38,7 +38,8 @@ const login = async (req, res) => {
                 id: usuario.id,
                 username: usuario.username,
                 rol: usuario.rol_codigo,
-                rol_nombre: usuario.rol_nombre
+                rol_nombre: usuario.rol_nombre,
+                debe_cambiar_pass: usuario.debe_cambiar_pass
             }
         });
 

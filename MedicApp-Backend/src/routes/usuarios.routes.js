@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { getUsuarios, getUsuarioById, createUsuario, deleteUsuario, setUsuario } = require('../controllers/usuarios.controllers');
+const { getUsuarios, getUsuarioById, createUsuario, deleteUsuario, setUsuario, changePassword } = require('../controllers/usuarios.controllers');
 const router = Router();
 
 // Cuando alguien visite "/usuarios", se ejecuta la función getUsuario
@@ -16,5 +16,8 @@ router.put('/usuarios/:id', setUsuario);
 
 // DELETE: Para borrar. Se usa así: localhost:3000/medicos/1
 router.delete('/usuarios/:id', deleteUsuario);
+
+// PUT: Para cambiar la contraseña del usuario (ej: 1er login)
+router.put('/usuarios/:id/password', changePassword);
 
 module.exports = router;

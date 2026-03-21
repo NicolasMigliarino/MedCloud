@@ -8,7 +8,10 @@ aside.sidebar {
     gap: 8px;
     width: 260px;
     padding: 0 16px;
-    background: #212529;
+    /* Aesthetic Midnight/Navy Gradient */
+    background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
     color: white;
     z-index: 1000;
 }
@@ -18,7 +21,8 @@ aside.sidebar header {
     align-items: center;
     height: 72px;
     padding-top: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* Línea mucho más sutil */
     margin-bottom: 20px;
 }
 
@@ -35,19 +39,26 @@ aside.sidebar button {
     align-items: center;
     height: 50px;
     width: 100%;
-    border-radius: 6px;
+    border-radius: 12px;
+    /* Más redondeado y moderno */
     padding: 0 16px;
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.7);
-    transition: 0.3s;
-    font-size: 16px;
+    color: rgba(255, 255, 255, 0.65);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 15px;
+    /* Un poco más elegante */
+    font-weight: 500;
 }
 
 aside.sidebar button:hover,
 aside.sidebar button.active {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     color: white;
+    /* Efecto "Glow" sutil */
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateX(4px);
+    /* Animación lúdica aesthetric al posicionarse encima */
 }
 
 aside.sidebar ion-icon {

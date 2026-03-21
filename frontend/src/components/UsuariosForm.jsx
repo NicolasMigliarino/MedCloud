@@ -11,7 +11,7 @@ const UsuariosForm = () => {
         password_hash: '',
         rol_id: '',
         activo: true,
-        debe_cambiar_pass: false
+        debe_cambiar_pass: true // Set to true by default for new users
     });
 
     const [roles, setRoles] = useState([]);

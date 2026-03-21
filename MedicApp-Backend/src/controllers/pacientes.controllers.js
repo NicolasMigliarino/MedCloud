@@ -24,8 +24,36 @@ const getPaciente = async (req, res) => {
     }
 };
 
+const GetPacientesMenuPrincipal = async (req, res) => {
+    try {
+        const { term } = req.params;
+        const pool = await getConnection();
+        const result = await pool.request()
+            .input('termino', sql.NVarChar, term)
+            .execute('sp_GetPacientesMenuPrincipal');
+            
+        res.json(result.recordset);
+    } catch (error) {
+        console.error("Error en buscador global:", error.message);
+        res.status(500).send(error.message);
+    }
+};
+
+//  NUEVO: Obtener la lista de obras sociales
+const getObrasSociales = async (req, res) => {
+    try {
+        const pool = await getConnection();
+        const result = await pool.request().execute('sp_GetObrasSociales');
+        res.json(result.recordset);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
 const createPaciente = async (req, res) => {
-    const { nombre, apellido, dni, telefono, email, fecha_nacimiento, obra_social, numero_afiliado,fecha_alta } = req.body;
+    // 1. Extraemos obra_social_id (ya no existe 'obra_social')
+    const { nombre, apellido, dni, telefono, email, fecha_nacimiento, obra_social_id, numero_afiliado, fecha_alta } = req.body;
+    
     try {
         const pool = await getConnection();
         await pool.request()
@@ -35,9 +63,13 @@ const createPaciente = async (req, res) => {
             .input('telefono', sql.VarChar, telefono)
             .input('email', sql.VarChar, email)
             .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
-            .input('obra_social', sql.VarChar, obra_social)
+            
+            // 👇 2. AQUÍ ESTABA EL ERROR. Usamos obra_social_id y sql.Int
+            // (Si viene vacío, mandamos un null para que SQL no se queje)
+            .input('obra_social_id', sql.Int, obra_social_id === '' ? null : obra_social_id)
+            
             .input('numero_afiliado', sql.VarChar, numero_afiliado)
-            .input('fecha_alta',sql.VarChar, fecha_alta)
+            .input('fecha_alta', sql.VarChar, fecha_alta)
             .execute('sp_CreatePaciente');
 
         res.json({ msg: 'Paciente registrado correctamente' });
@@ -50,7 +82,8 @@ const createPaciente = async (req, res) => {
 // RENOMBRADO: setPaciente
 const setPaciente = async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, dni, email } = req.body;
+    // 👇 CAMBIO: Agregamos los campos que faltaban para editar completo
+    const { nombre, apellido, dni, email, telefono, fecha_nacimiento, obra_social_id, numero_afiliado } = req.body;
     try {
         const pool = await getConnection();
         const result = await pool.request()
@@ -59,6 +92,10 @@ const setPaciente = async (req, res) => {
             .input('apellido', sql.VarChar, apellido)
             .input('dni', sql.VarChar, dni)
             .input('email', sql.VarChar, email)
+            .input('telefono', sql.VarChar, telefono)
+            .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
+            .input('obra_social_id', sql.Int, obra_social_id) 
+            .input('numero_afiliado', sql.VarChar, numero_afiliado)
             .execute('sp_SetPaciente');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Paciente no encontrado' });
@@ -84,4 +121,4 @@ const deletePaciente = async (req, res) => {
     }
 };
 
-module.exports = { getPacientes, getPaciente, createPaciente, setPaciente, deletePaciente };
+module.exports = { getPacientes, getPaciente, createPaciente, setPaciente, deletePaciente,getObrasSociales,GetPacientesMenuPrincipal };

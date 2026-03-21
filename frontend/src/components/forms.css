@@ -14,7 +14,9 @@
 .form-card {
     background: #fff;
     border-radius: 20px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.09);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.035);
+    /* Match con mod-table-card */
+    border: 1px solid rgba(255, 255, 255, 0.8);
     width: 100%;
     max-width: 640px;
     overflow: hidden;
@@ -331,4 +333,43 @@
 .form-btn-cancel:hover {
     background: #e2e8f0;
     color: #1a1a2e;
+}
+
+/* ── React DatePicker Customization ───────────────────────────────────────── */
+.react-datepicker-wrapper {
+    display: block;
+    width: 100%;
+}
+
+.react-datepicker__input-container {
+    display: block;
+    width: 100%;
+}
+
+.react-datepicker {
+    font-family: inherit !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+}
+
+.react-datepicker__header {
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #f1f3f8 !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+    background-color: #1a73e8 !important;
+    color: white !important;
+}
+
+.react-datepicker__time-container {
+    border-left: 1px solid #f1f3f8 !important;
+}
+
+.react-datepicker__time-list-item--selected {
+    background-color: #1a73e8 !important;
+    color: white !important;
 }

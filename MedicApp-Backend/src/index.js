@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const path = require('path');
 
 // IMPORTACIONES DE RUTAS
 const pacientesRoutes = require('./routes/pacientes.routes');
@@ -11,6 +12,7 @@ const rolesRoutes = require('./routes/roles.routes');
 const administrativosRoutes = require('./routes/administrativos.routes');
 const historialRoutes = require('./routes/historial.routes');
 const authRoutes = require('./routes/auth.routes');
+const archivosRoutes = require('./routes/archivos.routes');
 
 const app = express();
 
@@ -27,7 +29,8 @@ app.use(rolesRoutes);
 app.use(administrativosRoutes);
 app.use(historialRoutes);
 app.use(authRoutes);
-
+app.use(archivosRoutes);
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Manejo de errores (opcional pero recomendado)
 app.use((err, req, res, next) => {
     return res.json({

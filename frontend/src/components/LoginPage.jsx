@@ -7,12 +7,18 @@ const LoginPage = () => {
     // true = Muestra Login (Panel Azul a la derecha)
     // false = Muestra Registro (Panel Azul a la izquierda)
     const [isLoginView, setIsLoginView] = useState(true);
-    
+
     // Estados para los formularios
     const [loginData, setLoginData] = useState({ username: '', password: '' });
     const [registerData, setRegisterData] = useState({ username: '', email: '', password: '', rol_id: 5 }); // 5 = MEDICO por defecto, o el que quieras
     const [roles, setRoles] = useState([]);
-    
+
+    // States for mandatory password change
+    const [showChangePassword, setShowChangePassword] = useState(false);
+    const [loggedInUser, setLoggedInUser] = useState(null);
+    const [newPassword, setNewPassword] = useState('');
+    const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
+
     const navigate = useNavigate();
 
     // Cargar roles para el registro (Opcional, si quieres un select)
@@ -29,21 +35,57 @@ const LoginPage = () => {
     }, []);
 
     // Manejar cambios en inputs
-    const handleLoginChange = (e) => setLoginData({...loginData, [e.target.name]: e.target.value});
-    const handleRegisterChange = (e) => setRegisterData({...registerData, [e.target.name]: e.target.value});
+    const handleLoginChange = (e) => setLoginData({ ...loginData, [e.target.name]: e.target.value });
+    const handleRegisterChange = (e) => setRegisterData({ ...registerData, [e.target.name]: e.target.value });
 
     // --- ACCIÓN DE LOGIN ---
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         try {
             const res = await axios.post('http://localhost:3000/login', loginData);
-            localStorage.setItem('token', res.data.token);
-            localStorage.setItem('user', JSON.stringify(res.data.user));
-            alert(`¡Hola de nuevo, ${res.data.user.username}!`);
+
+            if (res.data.user.debe_cambiar_pass) {
+                setLoggedInUser({ token: res.data.token, user: res.data.user });
+                setShowChangePassword(true);
+            } else {
+                localStorage.setItem('token', res.data.token);
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+                alert(`¡Hola de nuevo, ${res.data.user.username}!`);
+                navigate('/');
+                window.location.reload();
+            }
+        } catch (err) {
+            alert('❌ Error: Usuario o contraseña incorrectos');
+        }
+    };
+
+    // --- ACCIÓN DE CAMBIO DE CONTRASEÑA ---
+    const handlePasswordChangeSubmit = async (e) => {
+        e.preventDefault();
+        if (newPassword !== newPasswordConfirm) {
+            alert('❌ Las contraseñas no coinciden');
+            return;
+        }
+        try {
+            await axios.put(`http://localhost:3000/usuarios/${loggedInUser.user.id}/password`, {
+                newPassword: newPassword
+            });
+
+            // On success, save to localStorage and navigate
+            localStorage.setItem('token', loggedInUser.token);
+            const userNoFlag = { ...loggedInUser.user, debe_cambiar_pass: false };
+            localStorage.setItem('user', JSON.stringify(userNoFlag));
+
+            alert('✅ Contraseña actualizada correctamente. ¡Bienvenido!');
             navigate('/');
             window.location.reload();
         } catch (err) {
-            alert('❌ Error: Usuario o contraseña incorrectos');
+            console.error(err);
+            if (err.response && err.response.data && err.response.data.includes('La nueva contraseña no puede ser igual a la anterior')) {
+                alert('❌ Error: La nueva contraseña no puede ser igual a la temporal.');
+            } else {
+                alert('❌ Error al cambiar la contraseña.');
+            }
         }
     };
 
@@ -58,9 +100,9 @@ const LoginPage = () => {
                 password_hash: registerData.password, // Tu backend espera snake_case
                 rol_id: registerData.rol_id,
                 activo: true,
-                debe_cambiar_pass: false
+                debe_cambiar_pass: true // Set to true by default for new users
             };
-            
+
             await axios.post('http://localhost:3000/usuarios', payload);
             alert('✅ Usuario creado con éxito. Ahora inicia sesión.');
             setIsLoginView(true); // Movemos el panel al Login automáticamente
@@ -71,10 +113,42 @@ const LoginPage = () => {
 
     const toggleView = () => setIsLoginView(!isLoginView);
 
+    if (showChangePassword) {
+        return (
+            <div className="login-container">
+                <div className="card-login" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', padding: '2rem', borderRadius: '15px' }}>
+                    <h2 style={{ color: '#333', marginBottom: '1rem' }}>Cambio Obligatorio</h2>
+                    <p style={{ color: '#666', marginBottom: '2rem', textAlign: 'center' }}>
+                        Por tu seguridad, debes establecer una contraseña nueva y personal ahora mismo antes de continuar y acceder a la plataforma.
+                    </p>
+                    <form onSubmit={handlePasswordChangeSubmit} style={{ width: '100%', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <input
+                            type="password"
+                            placeholder="Nueva Contraseña"
+                            style={{ padding: '0.8rem', borderRadius: '5px', border: '1px solid #ddd' }}
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="password"
+                            placeholder="Confirmar Nueva Contraseña"
+                            style={{ padding: '0.8rem', borderRadius: '5px', border: '1px solid #ddd' }}
+                            value={newPasswordConfirm}
+                            onChange={(e) => setNewPasswordConfirm(e.target.value)}
+                            required
+                        />
+                        <button type="submit" className="action-btn" style={{ width: '100%', marginTop: '1rem' }}>Actualizar Contraseña</button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="login-container">
             <div className="card-login">
-                
+
                 {/* FONDO MÓVIL (EL PANEL AZUL) */}
                 {/* Si isLoginView es true, agregamos la clase .login-mode para que se mueva a la derecha */}
                 <div className={`card-bg ${isLoginView ? 'login-mode' : ''}`}></div>
@@ -91,13 +165,13 @@ const LoginPage = () => {
                 <div className={`form-section login ${isLoginView ? 'active' : ''}`}>
                     <h2>Bienvenido</h2>
                     <form onSubmit={handleLoginSubmit}>
-                        <input 
-                            type="text" name="username" placeholder="Usuario" 
-                            onChange={handleLoginChange} required 
+                        <input
+                            type="text" name="username" placeholder="Usuario"
+                            onChange={handleLoginChange} required
                         />
-                        <input 
-                            type="password" name="password" placeholder="Contraseña" 
-                            onChange={handleLoginChange} required 
+                        <input
+                            type="password" name="password" placeholder="Contraseña"
+                            onChange={handleLoginChange} required
                         />
                         <button type="submit" className="action-btn">INGRESAR</button>
                     </form>
@@ -117,24 +191,24 @@ const LoginPage = () => {
                 <div className={`form-section register ${!isLoginView ? 'active' : ''}`}>
                     <h2>Crear Cuenta</h2>
                     <form onSubmit={handleRegisterSubmit}>
-                        <input 
-                            type="text" name="username" placeholder="Nombre de Usuario" 
-                            onChange={handleRegisterChange} required 
+                        <input
+                            type="text" name="username" placeholder="Nombre de Usuario"
+                            onChange={handleRegisterChange} required
                         />
-                        <input 
-                            type="email" name="email" placeholder="Correo Electrónico" 
-                            onChange={handleRegisterChange} required 
+                        <input
+                            type="email" name="email" placeholder="Correo Electrónico"
+                            onChange={handleRegisterChange} required
                         />
-                        <input 
-                            type="password" name="password" placeholder="Contraseña" 
-                            onChange={handleRegisterChange} required 
+                        <input
+                            type="password" name="password" placeholder="Contraseña"
+                            onChange={handleRegisterChange} required
                         />
-                        
+
                         {/* Selector de Rol simple */}
                         <select name="rol_id" onChange={handleRegisterChange} value={registerData.rol_id} required>
-                             {roles.map(r => (
-                                 <option key={r.id} value={r.id}>{r.nombre}</option>
-                             ))}
+                            {roles.map(r => (
+                                <option key={r.id} value={r.id}>{r.nombre}</option>
+                            ))}
                         </select>
 
                         <button type="submit" className="action-btn">REGISTRARME</button>

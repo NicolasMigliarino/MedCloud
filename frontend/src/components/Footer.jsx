@@ -4,11 +4,15 @@ import { clinicConfig } from "./config";
 
 const Footer = () => {
     return (
-        // Usamos mt-auto para empujarlo siempre hacia abajo
-        <footer className="text-light mt-auto py-4" style={{ backgroundColor: '#212529' }}>
+        // Aplicamos exactamente el mismo gradiente aesthetic del Sidebar
+        <footer className="text-light mt-auto py-4" style={{
+            background: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+            boxShadow: '0 -4px 25px rgba(0, 0, 0, 0.1)'
+        }}>
             <div className="container-fluid px-4">
                 <div className="row align-items-center">
-                    
+
                     {/* COLUMNA 1: Logo y Copyright */}
                     <div className="col-md-4 mb-3 mb-md-0">
                         <h4 className="fw-bold d-flex align-items-center gap-2">

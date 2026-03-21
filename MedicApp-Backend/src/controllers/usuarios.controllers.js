@@ -87,4 +87,21 @@ const deleteUsuario = async (req, res) => {
     }
 };
 
-module.exports = { getUsuarios, getUsuarioById, createUsuario, setUsuario, deleteUsuario };
+const changePassword = async (req, res) => {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+    try {
+        const pool = await getConnection();
+        await pool.request()
+            .input('id', sql.Int, id)
+            .input('newPassword', sql.NVarChar, newPassword)
+            .execute('sp_ChangePassword');
+
+        res.json({ message: 'Contraseña actualizada correctamente' });
+    } catch (error) {
+        console.error("🚨 ERROR AL CAMBIAR PASSWORD:", error.message);
+        res.status(500).send(error.message);
+    }
+};
+
+module.exports = { getUsuarios, getUsuarioById, createUsuario, setUsuario, deleteUsuario, changePassword };
