@@ -26,7 +26,7 @@ export const SIDEBAR_ITEMS = [
         roles: [], // 🟢 Todos lo ven
         children: [
             { id: "turnos-list", label: "Agenda", path: "/turnos" },
-            { id: "turnos-new", label: "Nuevo Turno", path: "/turnos/nuevo" },
+            { id: "turnos-new", label: "Nuevo Turno", path: "/turnos/nuevo", roles: ['ADMIN', 'RECEPCION'] },
         ],
     },
     {

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './modules.css';
 import useResizableColumns from './useResizableColumns';
+import { hasRole } from '../utils/auth';
 
 const getInitials = (nombre = '', apellido = '') =>
     `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
@@ -13,8 +14,7 @@ const PacientesList = () => {
     const [search, setSearch] = useState('');
     const tableRef = useResizableColumns();
 
-    const usuarioLogueado = JSON.parse(localStorage.getItem('user'));
-    const esMedico = usuarioLogueado?.rol === 'MEDICO' || usuarioLogueado?.codigo === 'MEDICO';
+    const esMedico = hasRole('MEDICO');
 
     const fetchPacientes = async () => {
         try {

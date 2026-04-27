@@ -2,6 +2,7 @@ import { useRef, useState, useLayoutEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { SIDEBAR_ITEMS } from "./Sidebar-items";
 import "./Sidebar.css";
+import { getUserRole } from "../utils/auth";
 
 /* ─── Submenu ─────────────────────────────────────────────────────────────── */
 const Submenu = ({ isOpen, activePath, items, onNavigate }) => (
@@ -56,13 +57,21 @@ const Sidebar = () => {
     const [openSubmenuId, setOpenSubmenuId] = useState(null);
     const navigate = useNavigate();
 
-    const usuarioLogueado = JSON.parse(localStorage.getItem('user'));
-    const userRole = usuarioLogueado?.rol || usuarioLogueado?.codigo || 'USER';
+    const userRole = getUserRole();
 
     const menuFiltrado = useMemo(() => {
         return SIDEBAR_ITEMS.filter(item => {
             if (!item.roles || item.roles.length === 0) return true;
             return item.roles.includes(userRole);
+        }).map(item => {
+            if (!item.children) return item;
+            return {
+                ...item,
+                children: item.children.filter(child => {
+                    if (!child.roles || child.roles.length === 0) return true;
+                    return child.roles.includes(userRole);
+                })
+            };
         });
     }, [userRole]);
 

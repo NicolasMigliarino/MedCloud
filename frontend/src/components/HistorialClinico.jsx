@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { getLoggedInUser } from '../utils/auth';
 
 const HistorialClinico = () => {
     const { paciente_id } = useParams(); 
@@ -16,7 +17,7 @@ const HistorialClinico = () => {
     // 👇 NUEVO ESTADO: Para guardar los archivos del paciente
     const [archivos, setArchivos] = useState([]);
 
-    const usuarioLogueado = JSON.parse(localStorage.getItem('user'));
+    const usuarioLogueado = getLoggedInUser();
     const profesional_id = usuarioLogueado?.id; 
     
     const [nuevaEvolucion, setNuevaEvolucion] = useState({

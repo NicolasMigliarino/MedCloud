@@ -1,10 +1,21 @@
 const { getConnection, sql } = require('../db');
 const getTurnos = async (req, res) => {
     try {
+        // Extraemos los datos del usuario logueado desde el token (req.user)
+        const usuario_id = req.user.id; 
+        const rol_codigo = req.user.rol; 
+
         const pool = await getConnection();
-        const result = await pool.request().execute('sp_GetTurnos');
+        
+        // Le pasamos las credenciales al Stored Procedure
+        const result = await pool.request()
+            .input('UsuarioID', sql.Int, usuario_id)
+            .input('RolCodigo', sql.VarChar, rol_codigo)
+            .execute('sp_GetTurnos');
+            
         res.json(result.recordset);
     } catch (error) {
+        console.error("🚨 ERROR AL OBTENER TURNOS:", error.message);
         res.status(500).send(error.message);
     }
 };

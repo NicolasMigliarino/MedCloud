@@ -11,6 +11,7 @@ import esES from 'date-fns/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './modules.css';
 import useResizableColumns from './useResizableColumns';
+import { getUserRole } from '../utils/auth';
 
 const locales = {
     'es': esES,
@@ -52,6 +53,8 @@ const TurnosList = () => {
     const [viewMode, setViewMode] = useState('list'); // 'list' o 'calendar'
     const tableRef = useResizableColumns();
     const navigate = useNavigate();
+
+    const userRole = getUserRole();
 
     const loadTurnos = async () => {
         try {
@@ -115,7 +118,7 @@ const TurnosList = () => {
             preConfirm: () => {
                 const monto = document.getElementById('swal-input-monto').value;
                 const metodo = document.getElementById('swal-input-metodo').value;
-                
+
                 if (!monto || monto <= 0) {
                     Swal.showValidationMessage('Por favor, ingresá un monto válido.');
                     return false;
@@ -128,7 +131,7 @@ const TurnosList = () => {
         if (formValues) {
             try {
                 await axios.post(`http://localhost:3000/turnos/${turno_id}/pagar`, formValues);
-                
+
                 Swal.fire({
                     icon: 'success',
                     title: '¡Pago Registrado!',
@@ -136,10 +139,10 @@ const TurnosList = () => {
                     timer: 2000,
                     showConfirmButton: false
                 });
-                
+
                 // 3. Recargamos la lista
-                loadTurnos(); 
-                
+                loadTurnos();
+
             } catch (error) {
                 console.error(error);
                 Swal.fire('Error', 'No se pudo registrar el pago.', 'error');
@@ -199,7 +202,9 @@ const TurnosList = () => {
     };
 
     const handleSelectSlot = ({ start }) => {
-        navigate('/turnos/nuevo', { state: { selectedDate: start } });
+        if (userRole?.toUpperCase() !== 'MEDICO') {
+            navigate('/turnos/nuevo', { state: { selectedDate: start } });
+        }
     };
 
     return (
@@ -212,7 +217,9 @@ const TurnosList = () => {
                 </h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span className="mod-count-chip">📅 {turnos.length} turnos</span>
-                    <Link to="/turnos/nuevo" className="mod-btn-add">➕ Agendar Turno</Link>
+                    {userRole?.toUpperCase() !== 'MEDICO' && (
+                        <Link to="/turnos/nuevo" className="mod-btn-add">➕ Agendar Turno</Link>
+                    )}
                 </div>
             </div>
 
@@ -285,10 +292,10 @@ const TurnosList = () => {
                                         <td>
                                             {/* 👇 SECCIÓN DE ACCIONES ACTUALIZADA 👇 */}
                                             <div className="mod-actions" style={{ display: 'flex', gap: '5px' }}>
-                                                {/* Botón de Cobrar: Solo aparece si está pendiente */}
-                                                {turno.estado?.toLowerCase() === 'pendiente' && (
-                                                    <button 
-                                                        onClick={() => handleCobrarTurno(turno.id)} 
+                                                {/* Botón de Cobrar: Solo aparece si está pendiente y el rol no es PROFESIONAL */}
+                                                {turno.estado?.toLowerCase() === 'pendiente' && userRole?.toUpperCase() !== 'MEDICO' && (
+                                                    <button
+                                                        onClick={() => handleCobrarTurno(turno.id)}
                                                         className="mod-btn"
                                                         style={{ backgroundColor: '#10b981', color: 'white', borderColor: '#10b981' }}
                                                         title="Registrar Pago y Confirmar"
