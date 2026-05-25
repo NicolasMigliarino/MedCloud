@@ -206,7 +206,6 @@ const TurnosList = () => {
             navigate('/turnos/nuevo', { state: { selectedDate: start } });
         }
     };
-
     return (
         <div style={{ padding: '4px 0' }}>
             {/* Header */}
@@ -257,7 +256,6 @@ const TurnosList = () => {
                         <table ref={tableRef}>
                             <thead>
                                 <tr>
-                                    <th>#</th>
                                     <th>Paciente</th>
                                     <th>Profesional</th>
                                     <th>Fecha y Horario</th>
@@ -268,7 +266,6 @@ const TurnosList = () => {
                             <tbody>
                                 {filtered.length > 0 ? filtered.map((turno) => (
                                     <tr key={turno.id}>
-                                        <td><span className="mod-id">#{turno.id}</span></td>
                                         <td>
                                             <div className="mod-name-chip">
                                                 <div className="mod-avatar blue">{getInitials(turno.paciente_nombre, turno.paciente_apellido)}</div>
@@ -314,7 +311,7 @@ const TurnosList = () => {
                                     </tr>
                                 )) : (
                                     <tr className="mod-empty">
-                                        <td colSpan="6">
+                                        <td colSpan="5">
                                             <span className="mod-empty-icon">📅</span>
                                             <p>No se encontraron turnos.</p>
                                         </td>

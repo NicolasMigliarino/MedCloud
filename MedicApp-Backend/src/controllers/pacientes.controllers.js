@@ -2,7 +2,14 @@ const { getConnection, sql } = require('../db');
 const getPacientes = async (req, res) => {
     try {
         const pool = await getConnection();
-        const result = await pool.request().execute('sp_GetPacientes');
+        const request = pool.request();
+        
+        // Si el token inyectó el req.user, le pasamos su id al Stored Procedure
+        if (req.user && req.user.id) {
+            request.input('usuario_id', sql.Int, req.user.id);
+        }
+
+        const result = await request.execute('sp_GetPacientes');
         res.json(result.recordset);
     } catch (error) {
         res.status(500).send(error.message);
@@ -51,8 +58,13 @@ const getObrasSociales = async (req, res) => {
 };
 
 const createPaciente = async (req, res) => {
-    // 1. Extraemos obra_social_id (ya no existe 'obra_social')
-    const { nombre, apellido, dni, telefono, email, fecha_nacimiento, obra_social_id, numero_afiliado, fecha_alta } = req.body;
+    // Bloquear si el rol es MEDICO
+    if (req.user && req.user.rol === 'MEDICO') {
+        return res.status(403).json({ message: 'Acceso denegado. Los médicos no pueden registrar pacientes.' });
+    }
+
+    // 1. Extraemos obra_social_id y los campos clínicos
+    const { nombre, apellido, dni, telefono, email, fecha_nacimiento, obra_social_id, numero_afiliado, fecha_alta, sexo, grupo_sanguineo, direccion, contacto_emergencia, alergias } = req.body;
     
     try {
         const pool = await getConnection();
@@ -70,6 +82,11 @@ const createPaciente = async (req, res) => {
             
             .input('numero_afiliado', sql.VarChar, numero_afiliado)
             .input('fecha_alta', sql.VarChar, fecha_alta)
+            .input('sexo', sql.NVarChar, sexo || null)
+            .input('grupo_sanguineo', sql.NVarChar, grupo_sanguineo || null)
+            .input('direccion', sql.NVarChar, direccion || null)
+            .input('contacto_emergencia', sql.NVarChar, contacto_emergencia || null)
+            .input('alergias', sql.NVarChar, alergias || null)
             .execute('sp_CreatePaciente');
 
         res.json({ msg: 'Paciente registrado correctamente' });
@@ -81,9 +98,14 @@ const createPaciente = async (req, res) => {
 
 // RENOMBRADO: setPaciente
 const setPaciente = async (req, res) => {
+    // Bloquear si el rol es MEDICO
+    if (req.user && req.user.rol === 'MEDICO') {
+        return res.status(403).json({ message: 'Acceso denegado. Los médicos no pueden editar pacientes.' });
+    }
+
     const { id } = req.params;
-    // 👇 CAMBIO: Agregamos los campos que faltaban para editar completo
-    const { nombre, apellido, dni, email, telefono, fecha_nacimiento, obra_social_id, numero_afiliado } = req.body;
+    // 👇 CAMBIO: Agregamos los campos que faltaban para editar completo y los nuevos clínicos
+    const { nombre, apellido, dni, email, telefono, fecha_nacimiento, obra_social_id, numero_afiliado, sexo, grupo_sanguineo, direccion, contacto_emergencia, alergias } = req.body;
     try {
         const pool = await getConnection();
         const result = await pool.request()
@@ -94,8 +116,13 @@ const setPaciente = async (req, res) => {
             .input('email', sql.VarChar, email)
             .input('telefono', sql.VarChar, telefono)
             .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
-            .input('obra_social_id', sql.Int, obra_social_id) 
+            .input('obra_social_id', sql.Int, obra_social_id === '' ? null : obra_social_id) 
             .input('numero_afiliado', sql.VarChar, numero_afiliado)
+            .input('sexo', sql.NVarChar, sexo || null)
+            .input('grupo_sanguineo', sql.NVarChar, grupo_sanguineo || null)
+            .input('direccion', sql.NVarChar, direccion || null)
+            .input('contacto_emergencia', sql.NVarChar, contacto_emergencia || null)
+            .input('alergias', sql.NVarChar, alergias || null)
             .execute('sp_SetPaciente');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Paciente no encontrado' });
@@ -107,6 +134,11 @@ const setPaciente = async (req, res) => {
 };
 
 const deletePaciente = async (req, res) => {
+    // Bloquear si el rol es MEDICO
+    if (req.user && req.user.rol === 'MEDICO') {
+        return res.status(403).json({ message: 'Acceso denegado. Los médicos no pueden eliminar pacientes.' });
+    }
+
     try {
         const pool = await getConnection();
         const result = await pool.request()

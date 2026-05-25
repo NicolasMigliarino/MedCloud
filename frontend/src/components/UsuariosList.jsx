@@ -81,7 +81,6 @@ const UsuariosList = () => {
                 <table ref={tableRef}>
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>Usuario</th>
                             <th>Email</th>
                             <th>Rol ID</th>
@@ -92,7 +91,6 @@ const UsuariosList = () => {
                     <tbody>
                         {filtered.length > 0 ? filtered.map((user) => (
                             <tr key={user.id}>
-                                <td><span className="mod-id">#{user.id}</span></td>
                                 <td>
                                     <div className="mod-name-chip">
                                         <div className="mod-avatar purple">{getInitials(user.username)}</div>
@@ -119,7 +117,7 @@ const UsuariosList = () => {
                             </tr>
                         )) : (
                             <tr className="mod-empty">
-                                <td colSpan="6">
+                                <td colSpan="5">
                                     <span className="mod-empty-icon">👥</span>
                                     <p>No se encontraron usuarios.</p>
                                 </td>

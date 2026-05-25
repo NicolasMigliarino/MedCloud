@@ -22,14 +22,17 @@ const getBadgeClass = (estado = '') => {
 };
 
 // ── Stat Card ─────────────────────────────────────────────────────────────────
-const StatCard = ({ label, value, icon, variant, to }) => (
-    <Link to={to} className={`dash-stat-card ${variant}`} style={{ textDecoration: 'none' }}>
-        <div className="dash-stat-icon">{icon}</div>
-        <div className="dash-stat-label">{label}</div>
-        <div className="dash-stat-value">{value}</div>
-        <div className="dash-stat-arrow">→</div>
-    </Link>
-);
+const StatCard = ({ label, value, icon, variant, to }) => {
+    const isText = typeof value === 'string' && !/\d/.test(value);
+    return (
+        <Link to={to} className={`dash-stat-card ${variant}`} style={{ textDecoration: 'none' }}>
+            <div className="dash-stat-icon">{icon}</div>
+            <div className="dash-stat-label">{label}</div>
+            <div className={`dash-stat-value ${isText ? 'text-val' : ''}`}>{value}</div>
+            <div className="dash-stat-arrow">→</div>
+        </Link>
+    );
+};
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 const Dashboard = () => {
@@ -41,14 +44,24 @@ const Dashboard = () => {
         proximasCitas: []
     });
 
+    const [cajaInfo, setCajaInfo] = useState({
+        estado: 'Cargando...',
+        monto: 0
+    });
+
+    const formatCurrency = (val) => {
+        return '$' + parseFloat(val).toLocaleString('es-AR', { minimumFractionDigits: 2 });
+    };
+
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const [resPacientes, resProfesionales, resUsuarios, resTurnos] = await Promise.all([
+                const [resPacientes, resProfesionales, resUsuarios, resTurnos, resCaja] = await Promise.all([
                     axios.get('http://localhost:3000/pacientes'),
                     axios.get('http://localhost:3000/profesionales'),
                     axios.get('http://localhost:3000/usuarios'),
                     axios.get('http://localhost:3000/turnos'),
+                    axios.get('http://localhost:3000/caja/activa')
                 ]);
 
                 const turnos = resTurnos.data;
@@ -66,6 +79,19 @@ const Dashboard = () => {
                     .sort((a, b) => new Date(a.fecha_hora_inicio) - new Date(b.fecha_hora_inicio))
                     .slice(0, 5);
 
+                // Calcular monto actual de la caja
+                let estadoCaja = 'Cerrada';
+                let montoCaja = 0;
+
+                if (resCaja.data && resCaja.data.caja) {
+                    estadoCaja = 'Abierta';
+                    const caja = resCaja.data.caja;
+                    const resumen = resCaja.data.resumen || [];
+                    const efectivoRow = resumen.find(r => r.metodo_pago === 'Efectivo');
+                    const totalEfectivoCobrado = efectivoRow ? parseFloat(efectivoRow.total) : 0;
+                    montoCaja = parseFloat(caja.monto_apertura) + totalEfectivoCobrado;
+                }
+
                 setStats({
                     totalPacientes: resPacientes.data.length,
                     totalProfesionales: resProfesionales.data.length,
@@ -73,8 +99,17 @@ const Dashboard = () => {
                     citasHoy: turnosHoy.length,
                     proximasCitas: proximas,
                 });
+
+                setCajaInfo({
+                    estado: estadoCaja,
+                    monto: montoCaja
+                });
             } catch (err) {
                 console.error('Error cargando el Dashboard:', err);
+                setCajaInfo({
+                    estado: 'Error',
+                    monto: 0
+                });
             }
         };
 
@@ -99,6 +134,20 @@ const Dashboard = () => {
                 <StatCard label="Total Profesionales" value={stats.totalProfesionales} icon="🩺" variant="teal" to="/profesionales" />
                 <StatCard label="Total Usuarios" value={stats.totalUsuarios} icon="🔑" variant="orange" to="/usuarios" />
                 <StatCard label="Citas del Día" value={stats.citasHoy} icon="📅" variant="rose" to="/turnos" />
+                <StatCard 
+                    label={`Caja Diaria (${cajaInfo.estado})`} 
+                    value={cajaInfo.estado === 'Abierta' ? formatCurrency(cajaInfo.monto) : 'Cerrada'} 
+                    icon="💵" 
+                    variant="purple" 
+                    to="/caja" 
+                />
+                <StatCard 
+                    label="Liquidación Médica" 
+                    value="Calcular" 
+                    icon="🧮" 
+                    variant="emerald" 
+                    to="/liquidaciones" 
+                />
             </div>
 
             {/* ── Upcoming Appointments ─────────────────────────────── */}
@@ -118,7 +167,6 @@ const Dashboard = () => {
                             <th>Fecha</th>
                             <th>Hora</th>
                             <th>Estado</th>
-                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -148,19 +196,11 @@ const Dashboard = () => {
                                             {turno.estado}
                                         </span>
                                     </td>
-                                    <td>
-                                        <Link
-                                            to={`/turnos/editar/${turno.id}`}
-                                            className="dash-action-btn"
-                                        >
-                                            Ver detalle
-                                        </Link>
-                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr className="dash-empty-row">
-                                <td colSpan="6">
+                                <td colSpan="5">
                                     <span className="dash-empty-icon">📋</span>
                                     No hay citas próximas registradas.
                                 </td>

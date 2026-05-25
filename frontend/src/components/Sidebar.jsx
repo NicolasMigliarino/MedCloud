@@ -37,7 +37,7 @@ const SidebarItem = ({ item, openSubmenuId, onMenuToggle, onNavigate }) => {
                 <span>{item.label}</span>
                 <ion-icon
                     name="chevron-down-outline"
-                    className={isOpen ? "rotated" : ""}
+                    className={`sidebar-chevron ${isOpen ? "rotated" : ""}`}
                     style={{ transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)', transition: '0.3s' }}
                 />
             </button>
@@ -53,7 +53,7 @@ const SidebarItem = ({ item, openSubmenuId, onMenuToggle, onNavigate }) => {
 };
 
 /* ─── Sidebar ─────────────────────────────────────────────────────────────── */
-const Sidebar = () => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     const [openSubmenuId, setOpenSubmenuId] = useState(null);
     const navigate = useNavigate();
 
@@ -82,7 +82,7 @@ const Sidebar = () => {
     const handleNavigate = (path) => navigate(path);
 
     return (
-        <aside className="sidebar shadow">
+        <aside className={`sidebar shadow${sidebarOpen ? ' mobile-open' : ''}`}>
             <header className="d-flex align-items-center">
                 <button
                     onClick={() => handleNavigate("/")}

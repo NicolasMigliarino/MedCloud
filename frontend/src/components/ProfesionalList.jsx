@@ -81,7 +81,6 @@ const ProfesionalesList = () => {
                 <table ref={tableRef}>
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>Profesional</th>
                             <th>Matrícula</th>
                             <th>Especialidad</th>
@@ -91,7 +90,6 @@ const ProfesionalesList = () => {
                     <tbody>
                         {filtered.length > 0 ? filtered.map((prof) => (
                             <tr key={prof.id}>
-                                <td><span className="mod-id">#{prof.id}</span></td>
                                 <td>
                                     <div className="mod-name-chip">
                                         <div className="mod-avatar teal">{getInitials(prof.nombre, prof.apellido)}</div>
@@ -113,7 +111,7 @@ const ProfesionalesList = () => {
                             </tr>
                         )) : (
                             <tr className="mod-empty">
-                                <td colSpan="5">
+                                <td colSpan="4">
                                     <span className="mod-empty-icon">🩺</span>
                                     <p>No se encontraron profesionales.</p>
                                 </td>

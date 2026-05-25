@@ -245,167 +245,222 @@ const TurnosForm = () => {
 
     return (
         <div className="form-page">
-            <div className="form-card wide">
-                <div className="form-card-header orange">
-                    <div className="form-header-icon orange">📅</div>
-                    <div className="form-header-text">
-                        <h2>{isEditing ? 'Editar Turno' : 'Agendar Nuevo Turno'}</h2>
-                        <p>{isEditing ? 'Modificá los datos del turno' : 'Completá los datos para agendar una nueva cita'}</p>
+            <div className="form-container-layout">
+                <div className="form-card-wrapper">
+                    <div className="form-card wide">
+                        <div className="form-card-header orange">
+                            <div className="form-header-icon orange">📅</div>
+                            <div className="form-header-text">
+                                <h2>{isEditing ? 'Editar Turno' : 'Agendar Nuevo Turno'}</h2>
+                                <p>{isEditing ? 'Modificá los datos del turno' : 'Completá los datos para agendar una nueva cita'}</p>
+                            </div>
+                        </div>
+
+                        <div className="form-card-body">
+                            <form onSubmit={handleSubmit}>
+                                {/* Participantes */}
+                                <div className="form-section-label">Participantes</div>
+                                <div className="form-row cols-2">
+                                    <div className="form-group">
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                            <label className="form-label-custom" style={{ margin: 0 }}>Paciente <span className="required">*</span></label>
+                                            <Link to="/pacientes/nuevo" target="_blank" rel="noopener noreferrer" style={quickAddStyle}>➕ Nuevo paciente</Link>
+                                        </div>
+                                        <div className="form-select-wrap">
+                                            <select className="form-select-custom" name="paciente_id" value={turno.paciente_id} onChange={handleChange} required>
+                                                <option value="">Seleccione un paciente...</option>
+                                                {pacientes.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.nombre} {p.apellido} — DNI: {p.dni}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                            <label className="form-label-custom" style={{ margin: 0 }}>Profesional <span className="required">*</span></label>
+                                            <Link to="/profesionales/nuevo" target="_blank" rel="noopener noreferrer" style={quickAddStyle}>➕ Nuevo profesional</Link>
+                                        </div>
+                                        <div className="form-select-wrap">
+                                            <select className="form-select-custom" name="profesional_id" value={turno.profesional_id} onChange={handleChange} required>
+                                                <option value="">Seleccione un profesional...</option>
+                                                {profesionales.map(p => (
+                                                    <option key={p.id} value={p.id}>Dr. {p.nombre} {p.apellido} — {p.especialidad}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        
+                                        {/* Info de horarios del profesional seleccionado */}
+                                        {turno.profesional_id && (
+                                            <div style={{ 
+                                                marginTop: '10px', 
+                                                padding: '12px 14px', 
+                                                background: 'rgba(26, 115, 232, 0.04)', 
+                                                border: '1px solid rgba(26, 115, 232, 0.15)',
+                                                borderRadius: '8px',
+                                                fontSize: '0.85rem',
+                                                color: '#495057'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#1a73e8', fontWeight: '600' }}>
+                                                    <span>🕒</span> Días y Horarios de Atención:
+                                                </div>
+                                                {horarios.filter(h => h.profesional_id === parseInt(turno.profesional_id)).length > 0 ? (
+                                                    <ul style={{ margin: 0, paddingLeft: '24px', listStyleType: 'disc' }}>
+                                                        {horarios
+                                                            .filter(h => h.profesional_id === parseInt(turno.profesional_id))
+                                                            .sort((a, b) => a.dia_semana - b.dia_semana)
+                                                            .map(h => {
+                                                                const nombresDias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                                                                const horaInicio = h.hora_inicio ? h.hora_inicio.substring(0, 5) : '';
+                                                                const horaFin = h.hora_fin ? h.hora_fin.substring(0, 5) : '';
+                                                                return (
+                                                                    <li key={h.id} style={{ marginBottom: '4px' }}>
+                                                                        <strong>{nombresDias[h.dia_semana]}:</strong> {horaInicio} a {horaFin} hs
+                                                                    </li>
+                                                                );
+                                                            })}
+                                                    </ul>
+                                                ) : (
+                                                    <p style={{ margin: 0, fontStyle: 'italic', color: '#6c757d', paddingLeft: '4px' }}>No hay horarios registrados para este profesional.</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Horario */}
+                                <div className="form-section-label">Horario</div>
+                                <div className="form-row cols-2">
+                                    <div className="form-group">
+                                        <label className="form-label-custom">Fecha y Hora de Inicio <span className="required">*</span></label>
+                                        <div className="datepicker-wrapper" style={{ width: '100%' }}>
+                                            <DatePicker
+                                                selected={turno.fecha_hora_inicio ? new Date(turno.fecha_hora_inicio) : null}
+                                                onChange={handleDateChange}
+                                                showTimeSelect
+                                                timeFormat="HH:mm"
+                                                timeIntervals={15}
+                                                timeCaption="Hora"
+                                                dateFormat="dd/MM/yyyy HH:mm"
+                                                className="form-input"
+                                                placeholderText="Selecciona la fecha y hora..."
+                                                locale="es"
+                                                ref={datePickerRef}
+                                                required
+                                                customInput={
+                                                    <input
+                                                        className="form-input"
+                                                        onBlur={handleBlurFechaInicio}
+                                                    />
+                                                }
+                                                shouldCloseOnSelect={false}
+                                            >
+                                                <div className="datepicker-footer">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleDateClose();
+                                                        }}
+                                                        className="form-btn-submit"
+                                                        style={{ width: '100%', padding: '8px', margin: 0 }}
+                                                    >
+                                                        OK
+                                                    </button>
+                                                </div>
+                                            </DatePicker>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label-custom">Fecha y Hora de Fin</label>
+                                        <input className="form-input readonly" type="datetime-local" name="fecha_hora_fin" value={turno.fecha_hora_fin} readOnly />
+                                        <p className="form-hint">⚡ Se calcula automáticamente (+{duracionProfesional} min)</p>
+                                    </div>
+                                </div>
+
+                                {/* Estado y detalles */}
+                                <div className="form-section-label">Estado y Detalles</div>
+                                <div className="form-group">
+                                    <label className="form-label-custom">Estado del Turno</label>
+                                    <div className="form-select-wrap">
+                                        <select className="form-select-custom" name="estado" value={turno.estado} onChange={handleChange}>
+                                            <option value="Pendiente">Pendiente</option>
+                                            {/* Lo deshabilitamos para que no lo puedan forzar a mano */}
+                                            <option value="Confirmado" disabled>Confirmado (Requiere Pago)</option>
+                                            <option value="Completado">Completado</option>
+                                            <option value="Cancelado">Cancelado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label-custom">Motivo de Consulta</label>
+                                    <input className="form-input" type="text" name="motivo_consulta" value={turno.motivo_consulta} onChange={handleChange} placeholder="Ej: Control periódico, dolor de cabeza..." />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label-custom">Observaciones Internas (Admin)</label>
+                                    <textarea className="form-textarea" name="observaciones_admin" rows="3" value={turno.observaciones_admin} onChange={handleChange} placeholder="Notas internas no visibles al paciente..." />
+                                </div>
+
+                                {/* Footer */}
+                                <div className="form-footer">
+                                    <Link to="/turnos" className="form-btn-cancel">← Cancelar</Link>
+                                    <button type="submit" className="form-btn-submit">
+                                        {isEditing ? '💾 Actualizar Turno' : '✅ Agendar Turno'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                <div className="form-card-body">
-                    <form onSubmit={handleSubmit}>
-                        {/* Participantes */}
-                        <div className="form-section-label">Participantes</div>
-                        <div className="form-row cols-2">
-                            <div className="form-group">
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                    <label className="form-label-custom" style={{ margin: 0 }}>Paciente <span className="required">*</span></label>
-                                    <Link to="/pacientes/nuevo" target="_blank" rel="noopener noreferrer" style={quickAddStyle}>➕ Nuevo paciente</Link>
-                                </div>
-                                <div className="form-select-wrap">
-                                    <select className="form-select-custom" name="paciente_id" value={turno.paciente_id} onChange={handleChange} required>
-                                        <option value="">Seleccione un paciente...</option>
-                                        {pacientes.map(p => (
-                                            <option key={p.id} value={p.id}>{p.nombre} {p.apellido} — DNI: {p.dni}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                {/* Guía del Asistente */}
+                <div className="form-guide-side-card">
+                    <h3 style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '1.15rem', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        📅 Guía de Reserva
+                    </h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: '1.5', marginBottom: '20px' }}>
+                        Agendamiento inteligente y control de disponibilidad en la clínica:
+                    </p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div className="d-flex align-items-start">
+                            <span className="guide-step-number" style={{ background: '#3b82f6' }}>1</span>
+                            <div>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Médico y Duración</strong>
+                                <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.82rem', lineHeight: '1.4' }}>
+                                    Al seleccionar un médico, el sistema recupera su duración de consulta promedio y sus horarios activos para validar la agenda.
+                                </p>
                             </div>
-                            <div className="form-group">
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                    <label className="form-label-custom" style={{ margin: 0 }}>Profesional <span className="required">*</span></label>
-                                    <Link to="/profesionales/nuevo" target="_blank" rel="noopener noreferrer" style={quickAddStyle}>➕ Nuevo profesional</Link>
-                                </div>
-                                <div className="form-select-wrap">
-                                    <select className="form-select-custom" name="profesional_id" value={turno.profesional_id} onChange={handleChange} required>
-                                        <option value="">Seleccione un profesional...</option>
-                                        {profesionales.map(p => (
-                                            <option key={p.id} value={p.id}>Dr. {p.nombre} {p.apellido} — {p.especialidad}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                
-                                {/* Info de horarios del profesional seleccionado */}
-                                {turno.profesional_id && (
-                                    <div style={{ 
-                                        marginTop: '10px', 
-                                        padding: '12px 14px', 
-                                        background: 'rgba(26, 115, 232, 0.04)', 
-                                        border: '1px solid rgba(26, 115, 232, 0.15)',
-                                        borderRadius: '8px',
-                                        fontSize: '0.85rem',
-                                        color: '#495057'
-                                    }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#1a73e8', fontWeight: '600' }}>
-                                            <span>🕒</span> Días y Horarios de Atención:
-                                        </div>
-                                        {horarios.filter(h => h.profesional_id === parseInt(turno.profesional_id)).length > 0 ? (
-                                            <ul style={{ margin: 0, paddingLeft: '24px', listStyleType: 'disc' }}>
-                                                {horarios
-                                                    .filter(h => h.profesional_id === parseInt(turno.profesional_id))
-                                                    .sort((a, b) => a.dia_semana - b.dia_semana)
-                                                    .map(h => {
-                                                        const nombresDias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-                                                        const horaInicio = h.hora_inicio ? h.hora_inicio.substring(0, 5) : '';
-                                                        const horaFin = h.hora_fin ? h.hora_fin.substring(0, 5) : '';
-                                                        return (
-                                                            <li key={h.id} style={{ marginBottom: '4px' }}>
-                                                                <strong>{nombresDias[h.dia_semana]}:</strong> {horaInicio} a {horaFin} hs
-                                                            </li>
-                                                        );
-                                                    })}
-                                            </ul>
-                                        ) : (
-                                            <p style={{ margin: 0, fontStyle: 'italic', color: '#6c757d', paddingLeft: '4px' }}>No hay horarios registrados para este profesional.</p>
-                                        )}
-                                    </div>
-                                )}
+                        </div>
+                        
+                        <div className="d-flex align-items-start">
+                            <span className="guide-step-number" style={{ background: '#3b82f6' }}>2</span>
+                            <div>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Asociar Paciente</strong>
+                                <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.82rem', lineHeight: '1.4' }}>
+                                    Busque al paciente por nombre o DNI. Si no existe, use el botón de "Nuevo paciente" para darlo de alta en una pestaña secundaria de forma rápida.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="d-flex align-items-start">
+                            <span className="guide-step-number" style={{ background: '#3b82f6' }}>3</span>
+                            <div>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Conflictos y Horarios</strong>
+                                <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.82rem', lineHeight: '1.4' }}>
+                                    El sistema no admite turnos en el pasado ni en días/horas fuera del rango del profesional. Confirme el horario en el selector.
+                                </p>
                             </div>
                         </div>
 
-                        {/* Horario */}
-                        <div className="form-section-label">Horario</div>
-                        <div className="form-row cols-2">
-                            <div className="form-group">
-                                <label className="form-label-custom">Fecha y Hora de Inicio <span className="required">*</span></label>
-                                <div className="datepicker-wrapper" style={{ width: '100%' }}>
-                                    <DatePicker
-                                        selected={turno.fecha_hora_inicio ? new Date(turno.fecha_hora_inicio) : null}
-                                        onChange={handleDateChange}
-                                        showTimeSelect
-                                        timeFormat="HH:mm"
-                                        timeIntervals={15}
-                                        timeCaption="Hora"
-                                        dateFormat="dd/MM/yyyy HH:mm"
-                                        className="form-input"
-                                        placeholderText="Selecciona la fecha y hora..."
-                                        locale="es"
-                                        ref={datePickerRef}
-                                        required
-                                        customInput={
-                                            <input
-                                                className="form-input"
-                                                onBlur={handleBlurFechaInicio}
-                                            />
-                                        }
-                                        shouldCloseOnSelect={false}
-                                    >
-                                        <div style={{ padding: '10px 14px', textAlign: 'center', borderTop: '1px solid #f1f3f8', background: '#fff' }}>
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    handleDateClose();
-                                                }}
-                                                className="form-btn-submit"
-                                                style={{ width: '100%', padding: '8px', margin: 0 }}
-                                            >
-                                                OK
-                                            </button>
-                                        </div>
-                                    </DatePicker>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label-custom">Fecha y Hora de Fin</label>
-                                <input className="form-input readonly" type="datetime-local" name="fecha_hora_fin" value={turno.fecha_hora_fin} readOnly />
-                                <p className="form-hint">⚡ Se calcula automáticamente (+{duracionProfesional} min)</p>
-                            </div>
+                        <div className="p-3 rounded mt-2" style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)' }}>
+                            <strong style={{ color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                                ⚡ Cálculo Automático
+                            </strong>
+                            <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.8rem', lineHeight: '1.4' }}>
+                                La hora de finalización se calcula de forma automática sumando los minutos correspondientes al médico elegido al horario de inicio seleccionado.
+                            </p>
                         </div>
-
-                        {/* Estado y detalles */}
-                        <div className="form-section-label">Estado y Detalles</div>
-                        <div className="form-group">
-                            <label className="form-label-custom">Estado del Turno</label>
-                            <div className="form-select-wrap">
-                                <select className="form-select-custom" name="estado" value={turno.estado} onChange={handleChange}>
-                                    <option value="Pendiente">Pendiente</option>
-                                    {/* Lo deshabilitamos para que no lo puedan forzar a mano */}
-                                    <option value="Confirmado" disabled>Confirmado (Requiere Pago)</option>
-                                    <option value="Completado">Completado</option>
-                                    <option value="Cancelado">Cancelado</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label-custom">Motivo de Consulta</label>
-                            <input className="form-input" type="text" name="motivo_consulta" value={turno.motivo_consulta} onChange={handleChange} placeholder="Ej: Control periódico, dolor de cabeza..." />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label-custom">Observaciones Internas (Admin)</label>
-                            <textarea className="form-textarea" name="observaciones_admin" rows="3" value={turno.observaciones_admin} onChange={handleChange} placeholder="Notas internas no visibles al paciente..." />
-                        </div>
-
-                        {/* Footer */}
-                        <div className="form-footer">
-                            <Link to="/turnos" className="form-btn-cancel">← Cancelar</Link>
-                            <button type="submit" className="form-btn-submit">
-                                {isEditing ? '💾 Actualizar Turno' : '✅ Agendar Turno'}
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

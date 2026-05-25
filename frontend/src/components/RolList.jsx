@@ -87,7 +87,6 @@ const RolList = () => {
                 <table ref={tableRef}>
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>Nombre del Rol</th>
                             <th>Código Interno</th>
                             <th>Acciones</th>
@@ -96,7 +95,6 @@ const RolList = () => {
                     <tbody>
                         {filtered.length > 0 ? filtered.map((rol) => (
                             <tr key={rol.id}>
-                                <td><span className="mod-id">#{rol.id}</span></td>
                                 <td><strong>{rol.nombre}</strong></td>
                                 <td>
                                     <span className={`mod-badge ${getRolBadge(rol.codigo)}`}>
@@ -116,7 +114,7 @@ const RolList = () => {
                             </tr>
                         )) : (
                             <tr className="mod-empty">
-                                <td colSpan="4">
+                                <td colSpan="3">
                                     <span className="mod-empty-icon">🛡️</span>
                                     <p>No se encontraron roles.</p>
                                 </td>

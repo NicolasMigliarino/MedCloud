@@ -13,6 +13,7 @@ const administrativosRoutes = require('./routes/administrativos.routes');
 const historialRoutes = require('./routes/historial.routes');
 const authRoutes = require('./routes/auth.routes');
 const archivosRoutes = require('./routes/archivos.routes');
+const cajaRoutes = require('./routes/caja.routes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(administrativosRoutes);
 app.use(historialRoutes);
 app.use(authRoutes);
 app.use(archivosRoutes);
+app.use(cajaRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Manejo de errores (opcional pero recomendado)
 app.use((err, req, res, next) => {

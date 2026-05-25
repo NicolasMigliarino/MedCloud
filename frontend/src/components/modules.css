@@ -2,6 +2,100 @@
    Pacientes · Profesionales · Turnos · Usuarios · Roles
    ============================================ */
 
+:root {
+    --bg-app: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    --bg-card: #ffffff;
+    --border-card: rgba(255, 255, 255, 0.8);
+    --border-separator: #f1f3f8;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a5568;
+    --text-muted: #9ca3af;
+    --bg-thead: rgba(240, 244, 255, 0.8);
+    --border-thead: rgba(226, 232, 240, 0.6);
+    --border-row: rgba(241, 243, 248, 0.6);
+    --row-hover: #f8fafc;
+    --input-bg: rgba(255, 255, 255, 0.8);
+    --input-focus-bg: #ffffff;
+    --input-border: rgba(226, 232, 240, 0.8);
+    --input-color: #374151;
+    --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.035);
+    
+    /* Navbar custom variables */
+    --nav-bg: rgba(255, 255, 255, 0.75);
+    --nav-border: rgba(255, 255, 255, 0.3);
+    --panel-bg-hover: rgba(0, 0, 0, 0.04);
+    --text-main: #1a1a2e;
+    
+    /* Calendar & widgets variables */
+    --cal-bg: #ffffff;
+    --cal-header-bg: #f8fafc;
+    --cal-border: #e2e8f0;
+    --cal-grid-border: #f1f3f8;
+    --cal-today-bg: #f7f9ff;
+    --cal-text: #374151;
+    
+    /* Badges / Chips backgrounds and text colors */
+    --badge-activo-bg: #d1fae5;
+    --badge-activo-text: #065f46;
+    --badge-inactivo-bg: #fee2e2;
+    --badge-inactivo-text: #b91c1c;
+    --badge-pendiente-bg: #fef3c7;
+    --badge-pendiente-text: #92400e;
+    --badge-confirmado-bg: #dbeafe;
+    --badge-confirmado-text: #1d4ed8;
+    --badge-admin-bg: #ede9fe;
+    --badge-admin-text: #6d28d9;
+    --badge-default-bg: #e5e7eb;
+    --badge-default-text: #374151;
+}
+
+.dark-mode {
+    --bg-app: linear-gradient(180deg, #090d16 0%, #0f111a 100%);
+    --bg-card: #151926;
+    --border-card: rgba(255, 255, 255, 0.06);
+    --border-separator: rgba(255, 255, 255, 0.08);
+    --text-primary: #f3f4f6;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --bg-thead: rgba(26, 31, 46, 0.8);
+    --border-thead: rgba(255, 255, 255, 0.08);
+    --border-row: rgba(255, 255, 255, 0.04);
+    --row-hover: #1b2132;
+    --input-bg: rgba(21, 25, 38, 0.6);
+    --input-focus-bg: #151926;
+    --input-border: rgba(255, 255, 255, 0.12);
+    --input-color: #f3f4f6;
+    --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.25);
+    
+    /* Navbar custom variables in dark mode */
+    --nav-bg: rgba(21, 25, 38, 0.75);
+    --nav-border: rgba(255, 255, 255, 0.08);
+    --panel-bg-hover: rgba(255, 255, 255, 0.06);
+    --text-main: #f3f4f6;
+    
+    /* Calendar & widgets variables in dark mode */
+    --cal-bg: #151926;
+    --cal-header-bg: #1b2132;
+    --cal-border: rgba(255, 255, 255, 0.1);
+    --cal-grid-border: rgba(255, 255, 255, 0.05);
+    --cal-today-bg: #1b2132;
+    --cal-text: #f3f4f6;
+    
+    /* Dark mode badges / chips */
+    --badge-activo-bg: rgba(16, 185, 129, 0.15);
+    --badge-activo-text: #34d399;
+    --badge-inactivo-bg: rgba(239, 68, 68, 0.15);
+    --badge-inactivo-text: #f87171;
+    --badge-pendiente-bg: rgba(245, 158, 11, 0.15);
+    --badge-pendiente-text: #fbbf24;
+    --badge-confirmado-bg: rgba(59, 130, 246, 0.15);
+    --badge-confirmado-text: #60a5fa;
+    --badge-admin-bg: rgba(139, 92, 246, 0.15);
+    --badge-admin-text: #a78bfa;
+    --badge-default-bg: rgba(107, 114, 128, 0.15);
+    --badge-default-text: #9ca3af;
+}
+
 /* ── Resizable column handle ─────────────────────────────────────────────── */
 .col-resize-handle {
     position: absolute;
@@ -34,11 +128,18 @@
 .mod-title {
     font-size: 1.6rem;
     font-weight: 800;
-    color: #1a1a2e;
+    color: var(--text-primary);
     margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.mod-subtitle {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    margin-bottom: 0;
 }
 
 .mod-title-icon {
@@ -104,11 +205,11 @@
     gap: 6px;
     padding: 5px 14px;
     border-radius: 20px;
-    background: #f0f4ff;
-    color: #1a73e8;
+    background: var(--badge-confirmado-bg);
+    color: var(--badge-confirmado-text);
     font-size: 0.82rem;
     font-weight: 600;
-    border: 1px solid #c7d9ff;
+    border: 1px solid var(--border-card);
 }
 
 /* ── Search Input ────────────────────────────────────────────────────────── */
@@ -122,17 +223,19 @@
     max-width: 360px;
     padding: 9px 16px 9px 38px;
     border-radius: 10px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--input-border);
     font-size: 0.88rem;
-    color: #374151;
-    background: #fff;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    color: var(--input-color);
+    background: var(--input-bg);
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
     outline: none;
 }
 
 .mod-search-wrap input:focus {
     border-color: #1a73e8;
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+    background: var(--input-focus-bg);
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
 }
 
 .mod-search-icon {
@@ -145,30 +248,35 @@
     pointer-events: none;
 }
 
-/* ── Table Card ──────────────────────────────────────────────────────────── */
+/* ── Table Card ─────────────────────────────────────────────────────────── */
 .mod-table-card {
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.035);
-    /* Sombra estética muy difuminada */
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    /* Borde luminoso */
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border-card);
     overflow-x: auto;
-    /* horizontal scroll when columns are wider than container */
     overflow-y: hidden;
+}
+
+.mod-table-card table,
+.mod-table-card tbody,
+.mod-table-card tbody tr,
+.mod-table-card tbody td {
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
 .mod-table-card table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    /* makes column widths controlled by th.style.width */
     min-width: 500px;
-    /* prevents table collapsing when columns are narrowed */
 }
 
 .mod-table-card thead {
-    background: #f0f4ff;
+    background: var(--bg-thead) !important;
+    background-color: var(--bg-thead) !important;
+    border-bottom: 1.5px solid var(--border-thead);
 }
 
 .mod-table-card thead th {
@@ -177,26 +285,29 @@
     font-weight: 700;
     letter-spacing: 0.6px;
     text-transform: uppercase;
-    color: #4a5568;
+    color: var(--text-secondary);
     border: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    background: var(--bg-thead) !important;
+    background-color: var(--bg-thead) !important;
 }
 
 .mod-table-card tbody tr {
-    border-top: 1px solid #f1f3f8;
-    transition: background 0.15s;
+    border-top: 1px solid var(--border-row);
+    transition: background 0.2s ease;
 }
 
-.mod-table-card tbody tr:hover {
-    background: #f7f9ff;
+.mod-table-card tbody tr:hover td {
+    background: var(--row-hover) !important;
+    background-color: var(--row-hover) !important;
 }
 
 .mod-table-card tbody td {
     padding: 13px 18px;
     font-size: 0.88rem;
-    color: #374151;
+    color: var(--text-secondary);
     vertical-align: middle;
     border: none;
 }
@@ -205,7 +316,7 @@
 .mod-empty td {
     padding: 50px 18px !important;
     text-align: center;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .mod-empty-icon {
@@ -272,66 +383,66 @@
 }
 
 .mod-badge.activo {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--badge-activo-bg);
+    color: var(--badge-activo-text);
 }
 
 .mod-badge.inactivo {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--badge-inactivo-bg);
+    color: var(--badge-inactivo-text);
 }
 
 .mod-badge.confirmado {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--badge-confirmado-bg);
+    color: var(--badge-confirmado-text);
 }
 
 .mod-badge.pendiente {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--badge-pendiente-bg);
+    color: var(--badge-pendiente-text);
 }
 
 .mod-badge.cancelado {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--badge-inactivo-bg);
+    color: var(--badge-inactivo-text);
 }
 
 .mod-badge.completado {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--badge-activo-bg);
+    color: var(--badge-activo-text);
 }
 
 .mod-badge.admin {
-    background: #ede9fe;
-    color: #6d28d9;
+    background: var(--badge-admin-bg);
+    color: var(--badge-admin-text);
 }
 
 .mod-badge.medico {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--badge-activo-bg);
+    color: var(--badge-activo-text);
 }
 
 .mod-badge.recepcion {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--badge-confirmado-bg);
+    color: var(--badge-confirmado-text);
 }
 
 .mod-badge.default {
-    background: #e5e7eb;
-    color: #374151;
+    background: var(--badge-default-bg);
+    color: var(--badge-default-text);
 }
 
 /* ── ID Cell ──────────────────────────────────────────────────────────────── */
 .mod-id {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
 /* ── Code / Monospace ─────────────────────────────────────────────────────── */
 .mod-code {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--cal-header-bg);
+    color: var(--text-primary);
     padding: 2px 8px;
     border-radius: 6px;
     font-size: 0.78rem;
@@ -368,9 +479,9 @@
 
 /* Variants */
 .mod-btn.edit {
-    background: #f0f4ff;
-    color: #1a73e8;
-    border-color: #c7d9ff;
+    background: var(--badge-confirmado-bg);
+    color: var(--badge-confirmado-text);
+    border-color: var(--border-card);
 }
 
 .mod-btn.edit:hover {
@@ -380,9 +491,9 @@
 }
 
 .mod-btn.delete {
-    background: #fff1f2;
-    color: #e11d48;
-    border-color: #fecdd3;
+    background: var(--badge-inactivo-bg);
+    color: var(--badge-inactivo-text);
+    border-color: var(--border-card);
 }
 
 .mod-btn.delete:hover {
@@ -392,9 +503,9 @@
 }
 
 .mod-btn.view {
-    background: #f0fdf4;
-    color: #059669;
-    border-color: #a7f3d0;
+    background: var(--badge-activo-bg);
+    color: var(--badge-activo-text);
+    border-color: var(--border-card);
 }
 
 .mod-btn.view:hover {
@@ -406,8 +517,8 @@
 /* ── Specialty / Info Chip ────────────────────────────────────────────────── */
 .mod-specialty {
     display: inline-block;
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--badge-pendiente-bg);
+    color: var(--badge-pendiente-text);
     font-size: 0.75rem;
     font-weight: 600;
     padding: 2px 10px;
@@ -417,6 +528,7 @@
 /* ── React Big Calendar Customization (Aesthetic) ───────────────────────── */
 .mod-calendar-wrapper .rbc-calendar {
     font-family: inherit;
+    color: var(--text-primary);
 }
 
 .mod-calendar-wrapper .rbc-toolbar {
@@ -424,28 +536,28 @@
 }
 
 .mod-calendar-wrapper .rbc-toolbar button {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--cal-border);
     border-radius: 8px;
-    color: #374151;
+    color: var(--cal-text);
     font-weight: 500;
     font-size: 0.88rem;
-    background: #fff;
+    background: var(--cal-bg);
     transition: all 0.2s;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .mod-calendar-wrapper .rbc-toolbar button.rbc-active,
 .mod-calendar-wrapper .rbc-toolbar button:hover {
-    background: #f0f4ff;
+    background: var(--cal-header-bg);
     color: #1a73e8;
-    border-color: #c7d9ff;
+    border-color: var(--cal-border);
     box-shadow: none;
 }
 
 .mod-calendar-wrapper .rbc-toolbar-label {
     font-weight: 700;
     font-size: 1.15rem;
-    color: #1a1a2e;
+    color: var(--text-primary);
     text-transform: capitalize;
 }
 
@@ -454,29 +566,29 @@
     font-weight: 700;
     font-size: 0.8rem;
     text-transform: uppercase;
-    color: #4a5568;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    color: var(--text-secondary);
+    background: var(--cal-header-bg);
+    border-bottom: 1px solid var(--cal-border);
 }
 
 .mod-calendar-wrapper .rbc-month-view,
 .mod-calendar-wrapper .rbc-time-view {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--cal-border);
     border-radius: 12px;
     overflow: hidden;
-    background: #fff;
+    background: var(--cal-bg);
 }
 
 .mod-calendar-wrapper .rbc-day-bg+.rbc-day-bg {
-    border-left: 1px solid #f1f3f8;
+    border-left: 1px solid var(--cal-grid-border);
 }
 
 .mod-calendar-wrapper .rbc-month-row+.rbc-month-row {
-    border-top: 1px solid #f1f3f8;
+    border-top: 1px solid var(--cal-grid-border);
 }
 
 .mod-calendar-wrapper .rbc-today {
-    background-color: #f7f9ff;
+    background-color: var(--cal-today-bg);
 }
 
 .mod-calendar-wrapper .rbc-event {
@@ -484,3 +596,234 @@
     border-radius: 6px;
     border: none;
 }
+
+/* ── SweetAlert 2 Dark Mode ───────────────────────────────────────────────── */
+.dark-mode .swal2-popup {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-card) !important;
+}
+
+.dark-mode .swal2-title,
+.dark-mode .swal2-html-container {
+    color: var(--text-primary) !important;
+}
+
+.dark-mode .swal2-confirm {
+    box-shadow: none !important;
+}
+
+.dark-mode .swal2-cancel {
+    background: var(--border-separator) !important;
+    color: var(--text-primary) !important;
+}
+
+/* ── Mobile Layout Media Queries ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* El contenido principal ya no tiene margen izquierdo en móvil */
+    .main-content-wrapper {
+        margin-left: 0 !important;
+    }
+    
+    /* Encabezados de los módulos apilados en móvil */
+    .mod-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    
+    .mod-header .mod-btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .mod-search-wrap {
+        width: 100%;
+    }
+    
+    .mod-search-wrap input {
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    /* El contenedor de las tablas permite scrolling horizontal limpio */
+    .mod-table-card {
+        border-radius: 12px;
+    }
+}
+
+/* =========================================================================
+   🌓 CUSTOM DARK MODE OVERRIDES FOR BOOTSTRAP COMPONENTS & FORM FIELDS
+   ========================================================================= */
+.dark-mode .table {
+    --bs-table-bg: transparent !important;
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+.dark-mode .table th {
+    background-color: transparent !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border-separator) !important;
+}
+
+.dark-mode .table td {
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-separator) !important;
+}
+
+.dark-mode .table-hover tbody tr:hover td {
+    background-color: var(--row-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+.dark-mode .form-control,
+.dark-mode .form-select {
+    background-color: var(--input-bg) !important;
+    color: var(--input-color) !important;
+    border-color: var(--input-border) !important;
+}
+
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus {
+    background-color: var(--input-focus-bg) !important;
+    color: var(--input-color) !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark-mode option {
+    background-color: #151926 !important;
+    color: #f3f4f6 !important;
+}
+
+.dark-mode .form-text, 
+.dark-mode .text-muted {
+    color: var(--text-muted) !important;
+}
+
+.dark-mode label, 
+.dark-mode .form-label {
+    color: var(--text-primary) !important;
+}
+
+.dark-mode .modal-content {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-card) !important;
+}
+
+/* ── Assistant Interactive Guide Styles ───────────────────────────────────── */
+.assistant-guide-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-card);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.assistant-guide-card.light-blue-theme {
+    background: rgba(59, 130, 246, 0.03);
+    border-color: rgba(59, 130, 246, 0.15);
+}
+
+.dark-mode .assistant-guide-card.light-blue-theme {
+    background: rgba(59, 130, 246, 0.04);
+    border-color: rgba(59, 130, 246, 0.22);
+}
+
+.guide-step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.guide-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1.5px solid var(--border-card);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-card);
+}
+
+.guide-toggle-btn:hover {
+    background: var(--row-hover);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.assistant-guide-card.emerald-theme {
+    background: rgba(16, 185, 129, 0.03);
+    border-color: rgba(16, 185, 129, 0.15);
+}
+
+.dark-mode .assistant-guide-card.emerald-theme {
+    background: rgba(16, 185, 129, 0.04);
+    border-color: rgba(16, 185, 129, 0.22);
+}
+
+.guide-step-number.emerald {
+    background: #10b981;
+}
+
+/* ── Dark Mode Overrides for Schedule Grid & Phone Prefix ─────────────────── */
+.dark-mode .phone-prefix-addon {
+    background: #1b2132 !important;
+    border-right-color: rgba(255, 255, 255, 0.12) !important;
+    color: var(--text-secondary) !important;
+}
+
+.dark-mode .schedule-day-row {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-mode .schedule-day-row.active {
+    background: #1e293b !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark-mode .schedule-day-name {
+    color: var(--text-secondary) !important;
+}
+
+.dark-mode .schedule-day-row.active .schedule-day-name {
+    color: #3b82f6 !important;
+}
+
+.dark-mode .schedule-time-separator {
+    color: var(--text-muted) !important;
+}
+
+/* ── Form Section Label High Contrast in Dark Mode ────────────────────────── */
+.dark-mode .form-section-label {
+    color: #38bdf8 !important; /* sky blue accent */
+    font-weight: 700 !important;
+}
+
+.dark-mode .form-section-label::after {
+    background: rgba(56, 189, 248, 0.25) !important;
+}
+
+

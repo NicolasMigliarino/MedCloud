@@ -1,0 +1,73 @@
+/* ── SweetAlert2 Premium Adaptive Theme ───────────────────────────────────── */
+.swal2-popup {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-card) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-card) !important;
+    font-family: inherit !important;
+}
+
+.swal2-title {
+    color: var(--text-primary) !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+}
+
+.swal2-html-container {
+    color: var(--text-secondary) !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+}
+
+.swal2-confirm {
+    background-color: #1a73e8 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    box-shadow: none !important;
+    transition: background-color 0.2s !important;
+}
+
+.swal2-confirm:hover {
+    background-color: #155cb4 !important;
+}
+
+.swal2-cancel {
+    background-color: transparent !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    box-shadow: none !important;
+    transition: background 0.2s, color 0.2s !important;
+}
+
+.swal2-cancel:hover {
+    background-color: var(--row-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+.swal2-icon {
+    border-width: 3px !important;
+}
+
+/* Fix input field styling inside Swal if used */
+.swal2-input {
+    background-color: var(--input-bg) !important;
+    color: var(--input-color) !important;
+    border: 1.5px solid var(--input-border) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s !important;
+}
+
+.swal2-input:focus {
+    border-color: #1a73e8 !important;
+    background-color: var(--input-focus-bg) !important;
+}

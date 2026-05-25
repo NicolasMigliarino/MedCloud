@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './Login.css'; // Importamos los estilos oscuros
 
 const LoginPage = () => {
@@ -28,12 +29,25 @@ const LoginPage = () => {
             } else {
                 localStorage.setItem('token', res.data.token);
                 localStorage.setItem('user', JSON.stringify(res.data.user));
-                alert(`¡Hola de nuevo, ${res.data.user.username}!`);
+                
+                await Swal.fire({
+                    icon: 'success',
+                    title: '¡Hola de nuevo!',
+                    text: `¡Qué bueno verte de nuevo, ${res.data.user.username}!`,
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+                
                 navigate('/');
                 window.location.reload();
             }
         } catch (err) {
-            alert('❌ Error: Usuario o contraseña incorrectos');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de ingreso',
+                text: 'Usuario o contraseña incorrectos. Por favor, verificá tus credenciales.',
+                confirmButtonColor: '#3b82f6'
+            });
         }
     };
 
@@ -41,7 +55,12 @@ const LoginPage = () => {
     const handlePasswordChangeSubmit = async (e) => {
         e.preventDefault();
         if (newPassword !== newPasswordConfirm) {
-            alert('❌ Las contraseñas no coinciden');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Contraseñas no coinciden',
+                text: 'Las contraseñas ingresadas no son iguales. Por favor, verificalas.',
+                confirmButtonColor: '#3b82f6'
+            });
             return;
         }
         try {
@@ -54,15 +73,32 @@ const LoginPage = () => {
             const userNoFlag = { ...loggedInUser.user, debe_cambiar_pass: false };
             localStorage.setItem('user', JSON.stringify(userNoFlag));
 
-            alert('✅ Contraseña actualizada correctamente. ¡Bienvenido!');
+            await Swal.fire({
+                icon: 'success',
+                title: '¡Contraseña Actualizada!',
+                text: 'Tu contraseña ha sido actualizada correctamente. ¡Bienvenido!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
             navigate('/');
             window.location.reload();
         } catch (err) {
             console.error(err);
             if (err.response && err.response.data && err.response.data.includes('La nueva contraseña no puede ser igual a la anterior')) {
-                alert('❌ Error: La nueva contraseña no puede ser igual a la temporal.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Contraseña inválida',
+                    text: 'La nueva contraseña no puede ser igual a la temporal anterior.',
+                    confirmButtonColor: '#3b82f6'
+                });
             } else {
-                alert('❌ Error al cambiar la contraseña.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al intentar cambiar la contraseña.',
+                    confirmButtonColor: '#3b82f6'
+                });
             }
         }
     };

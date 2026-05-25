@@ -75,74 +75,129 @@ const UsuariosForm = () => {
 
     return (
         <div className="form-page">
-            <div className="form-card">
-                {/* Header */}
-                <div className="form-card-header rose">
-                    <div className="form-header-icon rose">🔑</div>
-                    <div className="form-header-text">
-                        <h2>{isEditing ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h2>
-                        <p>{isEditing ? 'Modificá los datos del usuario' : 'Completá el formulario para crear un usuario'}</p>
+            <div className="form-container-layout">
+                <div className="form-card-wrapper">
+                    <div className="form-card">
+                        {/* Header */}
+                        <div className="form-card-header rose">
+                            <div className="form-header-icon rose">🔑</div>
+                            <div className="form-header-text">
+                                <h2>{isEditing ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h2>
+                                <p>{isEditing ? 'Modificá los datos del usuario' : 'Completá el formulario para crear un usuario'}</p>
+                            </div>
+                        </div>
+
+                        {/* Body */}
+                        <div className="form-card-body">
+                            <form onSubmit={handleSubmit}>
+                                {/* Credenciales */}
+                                <div className="form-section-label">Credenciales</div>
+                                <div className="form-group">
+                                    <label className="form-label-custom">Nombre de Usuario <span className="required">*</span></label>
+                                    <input className="form-input" type="text" name="username" value={usuario.username} onChange={handleChange} placeholder="Ej: jperez" required autoComplete="off" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label-custom">Email <span className="required">*</span></label>
+                                    <input className="form-input" type="email" name="email" value={usuario.email} onChange={handleChange} placeholder="correo@email.com" required autoComplete="off" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label-custom">
+                                        Contraseña {!isEditing && <span className="required">*</span>}
+                                    </label>
+                                    <input
+                                        className="form-input"
+                                        type="password"
+                                        name="password_hash"
+                                        value={usuario.password_hash}
+                                        onChange={handleChange}
+                                        required={!isEditing}
+                                        placeholder={isEditing ? 'Dejar en blanco para mantener la actual' : 'Ingresá una contraseña segura'}
+                                        autoComplete="new-password"
+                                    />
+                                    {isEditing && <p className="form-hint">🔐 Solo completá este campo si querés cambiar la contraseña.</p>}
+                                </div>
+
+                                {/* Acceso y permisos */}
+                                <div className="form-section-label">Acceso y Permisos</div>
+                                <div className="form-group">
+                                    <label className="form-label-custom">Rol <span className="required">*</span></label>
+                                    <div className="form-select-wrap">
+                                        <select className="form-select-custom" name="rol_id" value={usuario.rol_id} onChange={handleChange} required>
+                                            <option value="">Seleccione un rol...</option>
+                                            {roles.map((rol) => (
+                                                <option key={rol.id} value={rol.id}>{rol.nombre} ({rol.codigo})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-toggle-wrap" htmlFor="activoCheck">
+                                        <input type="checkbox" id="activoCheck" name="activo" checked={usuario.activo} onChange={handleChange} />
+                                        <span className="form-toggle-label">✅ Usuario Activo — puede ingresar al sistema</span>
+                                    </label>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="form-footer">
+                                    <Link to="/usuarios" className="form-btn-cancel">← Cancelar</Link>
+                                    <button type="submit" className="form-btn-submit">
+                                        {isEditing ? '💾 Actualizar Usuario' : '✅ Crear Usuario'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                {/* Body */}
-                <div className="form-card-body">
-                    <form onSubmit={handleSubmit}>
-                        {/* Credenciales */}
-                        <div className="form-section-label">Credenciales</div>
-                        <div className="form-group">
-                            <label className="form-label-custom">Nombre de Usuario <span className="required">*</span></label>
-                            <input className="form-input" type="text" name="username" value={usuario.username} onChange={handleChange} placeholder="Ej: jperez" required autoComplete="off" />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label-custom">Email <span className="required">*</span></label>
-                            <input className="form-input" type="email" name="email" value={usuario.email} onChange={handleChange} placeholder="correo@email.com" required autoComplete="off" />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label-custom">
-                                Contraseña {!isEditing && <span className="required">*</span>}
-                            </label>
-                            <input
-                                className="form-input"
-                                type="password"
-                                name="password_hash"
-                                value={usuario.password_hash}
-                                onChange={handleChange}
-                                required={!isEditing}
-                                placeholder={isEditing ? 'Dejar en blanco para mantener la actual' : 'Ingresá una contraseña segura'}
-                                autoComplete="new-password"
-                            />
-                            {isEditing && <p className="form-hint">🔐 Solo completá este campo si querés cambiar la contraseña.</p>}
-                        </div>
-
-                        {/* Acceso y permisos */}
-                        <div className="form-section-label">Acceso y Permisos</div>
-                        <div className="form-group">
-                            <label className="form-label-custom">Rol <span className="required">*</span></label>
-                            <div className="form-select-wrap">
-                                <select className="form-select-custom" name="rol_id" value={usuario.rol_id} onChange={handleChange} required>
-                                    <option value="">Seleccione un rol...</option>
-                                    {roles.map((rol) => (
-                                        <option key={rol.id} value={rol.id}>{rol.nombre} ({rol.codigo})</option>
-                                    ))}
-                                </select>
+                {/* Guía del Asistente */}
+                <div className="form-guide-side-card">
+                    <h3 style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '1.15rem', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        🔑 Guía de Usuarios
+                    </h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: '1.5', marginBottom: '20px' }}>
+                        Gestión de accesos y credenciales de seguridad en el sistema:
+                    </p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div className="d-flex align-items-start">
+                            <span className="guide-step-number" style={{ background: '#ec4899' }}>1</span>
+                            <div>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Identidad de Acceso</strong>
+                                <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.82rem', lineHeight: '1.4' }}>
+                                    El nombre de usuario debe ser en minúsculas y sin espacios (ej: `jgonzalez`). Es la credencial principal para iniciar sesión.
+                                </p>
                             </div>
                         </div>
-                        <div className="form-group">
-                            <label className="form-toggle-wrap" htmlFor="activoCheck">
-                                <input type="checkbox" id="activoCheck" name="activo" checked={usuario.activo} onChange={handleChange} />
-                                <span className="form-toggle-label">✅ Usuario Activo — puede ingresar al sistema</span>
-                            </label>
+                        
+                        <div className="d-flex align-items-start">
+                            <span className="guide-step-number" style={{ background: '#ec4899' }}>2</span>
+                            <div>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Permisos por Roles</strong>
+                                <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.82rem', lineHeight: '1.4' }}>
+                                    Asigne un rol acorde a las responsabilidades del usuario (ADMIN, RECEPCION, MEDICO) para delimitar su acceso a las secciones del sistema.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="d-flex align-items-start">
+                            <span className="guide-step-number" style={{ background: '#ec4899' }}>3</span>
+                            <div>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Claves de Seguridad</strong>
+                                <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.82rem', lineHeight: '1.4' }}>
+                                    La contraseña debe contar con una longitud y complejidad robusta. Al editar, deje el campo vacío si no requiere cambiar la contraseña actual.
+                                </p>
+                            </div>
                         </div>
 
-                        {/* Footer */}
-                        <div className="form-footer">
-                            <Link to="/usuarios" className="form-btn-cancel">← Cancelar</Link>
-                            <button type="submit" className="form-btn-submit">
-                                {isEditing ? '💾 Actualizar Usuario' : '✅ Crear Usuario'}
-                            </button>
+                        <div className="p-3 rounded mt-2" style={{ background: 'rgba(236, 72, 153, 0.05)', border: '1px solid rgba(236, 72, 153, 0.15)' }}>
+                            <strong style={{ color: '#f472b6', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                                🔒 Control de Estado
+                            </strong>
+                            <p className="m-0 mt-1 text-muted" style={{ fontSize: '0.8rem', lineHeight: '1.4' }}>
+                                Al desmarcar la opción **"Usuario Activo"**, se revocarán todos los permisos del usuario de manera inmediata impidiendo cualquier acceso al portal.
+                            </p>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

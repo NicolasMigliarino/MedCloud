@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { getLoggedInUser } from '../utils/auth';
 
 const ProtectedRoute = ({ allowedRoles }) => {
@@ -14,7 +15,12 @@ const ProtectedRoute = ({ allowedRoles }) => {
     // 3. Si la ruta exige ciertos roles, verificamos si el usuario tiene permiso
     // (Si allowedRoles no se envía, significa que cualquier usuario logueado puede entrar)
     if (allowedRoles && !allowedRoles.includes(user.rol)) {
-        alert("⛔ No tienes permisos para acceder a esta sección.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Acceso Restringido',
+            text: 'No tienes permisos suficientes para acceder a esta sección.',
+            confirmButtonColor: '#3b82f6'
+        });
         return <Navigate to="/" replace />;
     }
 

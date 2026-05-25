@@ -30,7 +30,7 @@ const getProfesional = async (req, res) => {
 
 // 3. CREAR (createProfesional)
 const createProfesional = async (req, res) => {
-    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios } = req.body;
+    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios, porcentaje_retencion, tipo_matricula, cuit_cuil } = req.body;
     try {
         const pool = await getConnection();
         await pool.request()
@@ -42,9 +42,12 @@ const createProfesional = async (req, res) => {
             .input('telefono', sql.VarChar, telefono)
             .input('duracionTurnoPromedio', sql.Int, duracion_turno_promedio)
             .input('HorariosJSON', sql.VarChar(sql.MAX), horarios || null) 
+            .input('PorcentajeRetencion', sql.Decimal(5, 2), porcentaje_retencion !== undefined ? porcentaje_retencion : 20.00)
+            .input('TipoMatricula', sql.NVarChar, tipo_matricula || null)
+            .input('CuitCuil', sql.NVarChar, cuit_cuil || null)
             .execute('sp_CreateProfesional');
 
-       res.json({ msg: 'Paciente registrado correctamente' });
+        res.json({ msg: 'Paciente registrado correctamente' });
     } catch (error) {
         console.error("🚨 ERROR SQL AL CREAR PACIENTE:", error.message);
         res.status(500).send(error.message);
@@ -54,7 +57,7 @@ const createProfesional = async (req, res) => {
 // 4. ACTUALIZAR (setProfesional - ANTES updateProfesional)
 const setProfesional = async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios } = req.body;
+    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios, porcentaje_retencion, tipo_matricula, cuit_cuil } = req.body;
     try {
         const pool = await getConnection();
         const result = await pool.request()
@@ -66,7 +69,9 @@ const setProfesional = async (req, res) => {
             .input('especialidad', sql.VarChar, especialidad)
             .input('telefono', sql.VarChar, telefono)
             .input('duracionTurnoPromedio', sql.Int, duracion_turno_promedio)
-            .input('HorariosJSON', sql.VarChar(sql.MAX), horarios || null) 
+            .input('porcentajeRetencion', sql.Decimal(5, 2), porcentaje_retencion !== undefined ? porcentaje_retencion : 20.00)
+            .input('tipoMatricula', sql.NVarChar, tipo_matricula || null)
+            .input('cuitCuil', sql.NVarChar, cuit_cuil || null)
             .execute('sp_SetProfesional');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Profesional no encontrado' });

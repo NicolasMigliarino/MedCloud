@@ -45,7 +45,10 @@ aside.sidebar button {
     background: transparent;
     border: none;
     color: rgba(255, 255, 255, 0.65);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                color 0.2s ease,
+                transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                box-shadow 0.25s ease;
     font-size: 15px;
     /* Un poco más elegante */
     font-weight: 500;
@@ -58,7 +61,7 @@ aside.sidebar button.active {
     /* Efecto "Glow" sutil */
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateX(4px);
-    /* Animación lúdica aesthetric al posicionarse encima */
+    /* Animación lúdica aesthetic al posicionarse encima */
 }
 
 aside.sidebar ion-icon {
@@ -68,24 +71,25 @@ aside.sidebar ion-icon {
 
 aside.sidebar button ion-icon:last-child {
     margin-left: auto;
-    transition: 0.3s;
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* ── Sub-menu: animated via max-height ─────────────────────────────────── */
+/* ── Sub-menu: animated via max-height, opacity, and transform ────────── */
 .sub-menu {
     overflow: hidden;
     max-height: 0;
-    transition: max-height 0.45s ease-in-out;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: max-height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                opacity 0.25s ease-out,
+                transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* Opened by JS click toggle */
 .sub-menu.is-open {
-    max-height: 400px;
-}
-
-/* Opened by CSS hover on the parent .sidebar-item ─────────────────────── */
-.sidebar-item:hover .sub-menu {
-    max-height: 400px;
+    max-height: 120px; /* Suficiente para albergar holgadamente 2 items sin delay */
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .sub-menu ul {
@@ -93,26 +97,51 @@ aside.sidebar button ion-icon:last-child {
     padding-bottom: 4px;
 }
 
-.sub-menu button {
-    padding-left: 48px;
+/* Sub-menu button styling override for higher specificity */
+aside.sidebar .sub-menu button {
+    padding-left: 44px;
     height: 40px;
     font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    transform: none;
+    transition: background-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                color 0.2s ease,
+                transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.sub-menu button::before {
-    content: "";
-    position: absolute;
-    left: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transition: 0.2s;
+aside.sidebar .sub-menu button:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #38bdf8 !important; /* Celeste brillante súper premium */
+    transform: translateX(4px);
+    box-shadow: none;
 }
 
-.sub-menu button:hover::before,
-.sub-menu button.active::before {
-    background: white;
+aside.sidebar .sub-menu button.active {
+    background: rgba(56, 189, 248, 0.08); /* Fondo celeste traslúcido muy sutil */
+    color: #38bdf8 !important; /* Celeste brillante súper premium */
+    font-weight: 600;
+    transform: translateX(4px);
+    box-shadow: none;
+}
+
+/* Chevron arrow style and transition */
+.sidebar-chevron {
+    margin-left: auto !important;
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* 📱 Responsive Mobile Sidebar Drawer ─────────────────────────────────────── */
+@media (max-width: 768px) {
+    aside.sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
+    }
+    aside.sidebar.mobile-open {
+        transform: translateX(0);
+        box-shadow: 8px 0 30px rgba(0, 0, 0, 0.4);
+    }
 }

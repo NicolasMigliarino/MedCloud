@@ -106,6 +106,7 @@ const registrarPagoTurno = async (req, res) => {
             .input('turno_id', sql.Int, id)
             .input('monto', sql.Decimal(10, 2), monto)
             .input('metodo_pago', sql.VarChar(50), metodo_pago)
+            .input('usuario_registro_id', sql.Int, req.user ? req.user.id : 1)
             .execute('sp_RegistrarPagoTurno');
 
         res.json({ message: 'Pago registrado exitosamente. El turno ha sido Confirmado de forma automática.' });

@@ -90,19 +90,35 @@ const HistorialClinico = () => {
     // 3. Compartir
     const handleCompartir = async (historial_id) => {
         if (!profesionalSeleccionado) {
-            return alert("Por favor, selecciona un colega de la lista.");
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Seleccioná un colega',
+                text: 'Por favor, selecciona un colega de la lista antes de compartir.',
+                confirmButtonColor: '#3b82f6'
+            });
         }
         try {
             await axios.post('http://localhost:3000/historial/compartir', {
                 historial_id: historial_id,
                 profesional_invitado_id: parseInt(profesionalSeleccionado)
             });
-            alert("¡Lectura compartida con éxito!");
+            Swal.fire({
+                icon: 'success',
+                title: '¡Compartido!',
+                text: '¡Lectura de historia clínica compartida con éxito!',
+                timer: 1800,
+                showConfirmButton: false
+            });
             setMenuCompartirAbierto(null); 
             setProfesionalSeleccionado(''); 
         } catch (error) {
             console.error("Error al compartir:", error);
-            alert("Error: " + (error.response?.data?.message || "No se pudo compartir"));
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al compartir',
+                text: error.response?.data?.message || 'No se pudo compartir la lectura de la historia clínica.',
+                confirmButtonColor: '#3b82f6'
+            });
         }
     };
 

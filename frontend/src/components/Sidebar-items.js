@@ -48,5 +48,24 @@ export const SIDEBAR_ITEMS = [
             { id: "roles-list", label: "Listado", path: "/roles" },
             { id: "roles-new", label: "Nuevo Rol", path: "/roles/nuevo" },
         ],
+    },
+    {
+        id: "caja",
+        label: "Caja Diaria",
+        icon: "cash-outline",
+        roles: ['ADMIN', 'RECEPCION'],
+        children: [
+            { id: "caja-control", label: "Control de Caja", path: "/caja" },
+            { id: "caja-historial", label: "Historial de Cierres", path: "/caja/historial" },
+        ],
+    },
+    {
+        id: "liquidaciones",
+        label: "Liquidaciones",
+        icon: "calculator-outline",
+        roles: ['ADMIN', 'RECEPCION'],
+        children: [
+            { id: "liquidaciones-calc", label: "Liquidar Médicos", path: "/liquidaciones" },
+        ],
     }
 ];

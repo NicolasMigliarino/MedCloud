@@ -64,7 +64,9 @@ const PacientesList = () => {
                 </h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span className="mod-count-chip">📋 {pacientes.length} pacientes</span>
-                    <Link to="/pacientes/nuevo" className="mod-btn-add">➕ Nuevo Paciente</Link>
+                    {!esMedico && (
+                        <Link to="/pacientes/nuevo" className="mod-btn-add">➕ Nuevo Paciente</Link>
+                    )}
                 </div>
             </div>
 
@@ -84,7 +86,6 @@ const PacientesList = () => {
                 <table ref={tableRef}>
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>Paciente</th>
                             <th>DNI</th>
                             <th>Email</th>
@@ -94,7 +95,6 @@ const PacientesList = () => {
                     <tbody>
                         {filtered.length > 0 ? filtered.map((paciente) => (
                             <tr key={paciente.id}>
-                                <td><span className="mod-id">#{paciente.id}</span></td>
                                 <td>
                                     <div className="mod-name-chip">
                                         <div className="mod-avatar blue">{getInitials(paciente.nombre, paciente.apellido)}</div>
@@ -105,23 +105,26 @@ const PacientesList = () => {
                                 <td>{paciente.email}</td>
                                 <td>
                                     <div className="mod-actions">
-                                        {esMedico && (
+                                        {esMedico ? (
                                             <Link to={`/pacientes/${paciente.id}/historial`} className="mod-btn view">
                                                 📋 Historial
                                             </Link>
+                                        ) : (
+                                            <>
+                                                <Link to={`/pacientes/editar/${paciente.id}`} className="mod-btn edit">
+                                                    ✏️ Editar
+                                                </Link>
+                                                <button className="mod-btn delete" onClick={() => handleDelete(paciente.id)}>
+                                                    🗑️ Eliminar
+                                                </button>
+                                            </>
                                         )}
-                                        <Link to={`/pacientes/editar/${paciente.id}`} className="mod-btn edit">
-                                            ✏️ Editar
-                                        </Link>
-                                        <button className="mod-btn delete" onClick={() => handleDelete(paciente.id)}>
-                                            🗑️ Eliminar
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         )) : (
                             <tr className="mod-empty">
-                                <td colSpan="5">
+                                <td colSpan="4">
                                     <span className="mod-empty-icon">👤</span>
                                     <p>No se encontraron pacientes.</p>
                                 </td>
