@@ -31,21 +31,6 @@ const getPaciente = async (req, res) => {
     }
 };
 
-const GetPacientesMenuPrincipal = async (req, res) => {
-    try {
-        const { term } = req.params;
-        const pool = await getConnection();
-        const result = await pool.request()
-            .input('termino', sql.NVarChar, term)
-            .execute('sp_GetPacientesMenuPrincipal');
-            
-        res.json(result.recordset);
-    } catch (error) {
-        console.error("Error en buscador global:", error.message);
-        res.status(500).send(error.message);
-    }
-};
-
 //  NUEVO: Obtener la lista de obras sociales
 const getObrasSociales = async (req, res) => {
     try {
@@ -153,4 +138,4 @@ const deletePaciente = async (req, res) => {
     }
 };
 
-module.exports = { getPacientes, getPaciente, createPaciente, setPaciente, deletePaciente,getObrasSociales,GetPacientesMenuPrincipal };
+module.exports = { getPacientes, getPaciente, createPaciente, setPaciente, deletePaciente, getObrasSociales };

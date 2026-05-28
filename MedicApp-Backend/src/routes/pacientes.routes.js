@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { getPacientes,getPaciente,createPaciente,deletePaciente, setPaciente,getObrasSociales,GetPacientesMenuPrincipal } = require('../controllers/pacientes.controllers');
+const { getPacientes,getPaciente,createPaciente,deletePaciente, setPaciente,getObrasSociales } = require('../controllers/pacientes.controllers');
 const { verificarToken } = require('../middlewares/auth.middleware');
 const router = Router();
 
@@ -20,7 +20,5 @@ router.delete('/pacientes/:id', verificarToken, deletePaciente);
 
 // NUEVA RUTA: Para obtener la lista de obras sociales
 router.get('/obras-sociales', getObrasSociales);
-
-router.get('/pacientes/buscar/:term', verificarToken, GetPacientesMenuPrincipal);
 
 module.exports = router;
