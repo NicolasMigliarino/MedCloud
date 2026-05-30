@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './Login.css'; // Importamos los estilos oscuros
 
@@ -164,6 +164,9 @@ const LoginPage = () => {
                         />
                         <button type="submit" className="action-btn">INGRESAR</button>
                     </form>
+                    <Link to="/forgot-password" className="recovery-link">
+                        ¿Olvidaste tu contraseña?
+                    </Link>
                 </div>
 
             </div>

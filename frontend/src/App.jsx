@@ -18,6 +18,8 @@ import RolForm from './components/RolForm'; // ✅ Nombres correctos
 import TurnosList from './components/TurnosList';
 import HistorialClinico from './components/HistorialClinico';
 import TurnosForm from './components/TurnosForm';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,7 +30,9 @@ import Liquidaciones from './components/Liquidaciones';
 // 🏗️ EL LAYOUT MAESTRO: Controla cuándo mostrar el Sidebar
 const MainLayout = ({ children }) => {
   const location = useLocation();
-  const isLogin = location.pathname === '/login';
+  const isLogin = location.pathname === '/login' 
+    || location.pathname === '/forgot-password' 
+    || location.pathname.startsWith('/reset-password');
 
   // 🌓 Sistema Temático (Light / Dark Mode)
   const [theme, setTheme] = useState(() => {
@@ -143,8 +147,10 @@ function App() {
       {/* 👇 AQUÍ ESTÁ LA MAGIA: Envolvemos las rutas con MainLayout 👇 */}
       <MainLayout>
         <Routes>
-          {/* RUTA PÚBLICA */}
+          {/* RUTAS PÚBLICAS */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* ==========================================
               NIVEL 1: SOLO USUARIOS LOGUEADOS (Cualquiera)

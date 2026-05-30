@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -14,6 +15,7 @@ const historialRoutes = require('./routes/historial.routes');
 const authRoutes = require('./routes/auth.routes');
 const archivosRoutes = require('./routes/archivos.routes');
 const cajaRoutes = require('./routes/caja.routes');
+const passwordResetRoutes = require('./routes/passwordReset.routes');
 
 const app = express();
 
@@ -32,6 +34,7 @@ app.use(historialRoutes);
 app.use(authRoutes);
 app.use(archivosRoutes);
 app.use(cajaRoutes);
+app.use(passwordResetRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Manejo de errores (opcional pero recomendado)
 app.use((err, req, res, next) => {

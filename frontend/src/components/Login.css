@@ -156,3 +156,131 @@
 .card-bg:not(.login-mode) ~ .hero.login {
     transform: translateX(0); /* Entra a escena */
 }
+
+/* ============================================================================
+   5. ESTILOS DE RECUPERACIÓN DE CONTRASEÑA
+   ============================================================================ */
+
+/* Link "¿Olvidaste tu contraseña?" en la pantalla de login */
+.recovery-link {
+  display: inline-block;
+  margin-top: 16px;
+  color: #3c23c9;
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease, transform 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.recovery-link:hover {
+  color: #5b42f3;
+  text-decoration: underline;
+  transform: translateY(-1px);
+}
+
+/* Link "← Volver al inicio de sesión" */
+.recovery-back-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #64748b;
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.recovery-back-link:hover {
+  color: #3c23c9;
+}
+
+/* Icono decorativo grande en las pantallas de recuperación */
+.recovery-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  animation: iconBounce 0.6s ease-out;
+}
+
+.recovery-icon.sent {
+  animation: iconBounce 0.6s ease-out, iconPulse 2s ease-in-out infinite;
+}
+
+.recovery-icon.expired {
+  filter: grayscale(0.3);
+}
+
+.recovery-icon.loading-spin {
+  animation: spin 1.2s linear infinite;
+}
+
+/* Subtítulo descriptivo en las pantallas de recuperación */
+.recovery-subtitle {
+  color: #64748b;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  text-align: center;
+  padding: 0 10px;
+  max-width: 320px;
+}
+
+.recovery-subtitle strong {
+  color: #334155;
+}
+
+/* Hint pequeño (ej: "revisá la carpeta de spam") */
+.recovery-hint {
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+/* ── Animaciones ───────────────────────────────────────────────────────── */
+@keyframes iconBounce {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Responsive: Mobile ────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .card-login {
+    width: 95%;
+    height: auto;
+    min-height: 420px;
+    margin: 0 10px;
+  }
+
+  /* En mobile ocultamos el panel azul para que el form ocupe todo */
+  .card-bg {
+    display: none;
+  }
+
+  .hero {
+    display: none;
+  }
+
+  .form-section {
+    position: relative;
+    width: 100%;
+    left: 0 !important;
+    padding: 40px 30px;
+  }
+
+  .recovery-subtitle {
+    max-width: 100%;
+  }
+}
