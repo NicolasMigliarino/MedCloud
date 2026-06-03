@@ -226,8 +226,8 @@
     background: var(--bg-card);
     transition: border-color 0.2s, box-shadow 0.2s;
     outline: none;
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     font-family: inherit;
 }
 
@@ -292,6 +292,7 @@
     border-radius: 10px;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
+    -webkit-user-select: none;
     user-select: none;
     background: var(--bg-card);
 }
@@ -617,4 +618,9 @@
     color: var(--text-primary);
     line-height: 1.4;
     font-weight: 500;
+}
+
+/* Evita el solapamiento del calendario con elementos con posicionamiento absoluto */
+.react-datepicker-popper {
+    z-index: 1050 !important;
 }

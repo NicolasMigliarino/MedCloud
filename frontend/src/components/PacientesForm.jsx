@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -87,10 +87,12 @@ const PacientesForm = () => {
         loadPaciente();
     }, [id]);
 
+    // Manejador de cambios genérico para inputs de texto, números y selects estándar
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Formatea la fecha seleccionada del DatePicker al formato YYYY-MM-DD compatible con la BD
     const handleDateChange = (date) => {
         if (!date) {
             setFormData({ ...formData, fecha_nacimiento: '' });
@@ -101,6 +103,7 @@ const PacientesForm = () => {
         setFormData({ ...formData, fecha_nacimiento: value });
     };
 
+    // Parsea un string de fecha YYYY-MM-DD para inicializar correctamente el DatePicker en el UI
     const getParsedDate = (dateStr) => {
         if (!dateStr) return null;
         const [year, month, day] = dateStr.split('-');
@@ -110,7 +113,7 @@ const PacientesForm = () => {
         return null;
     };
 
-    // 👇 NUEVA FUNCIÓN: SUBIR EL ARCHIVO A NODE.JS
+    // Sube archivos de estudios médicos asociados al paciente mediante Axios
     const handleUploadArchivo = async () => {
         if (!archivoSeleccionado) {
             return Swal.fire({ icon: 'warning', title: 'Atención', text: 'Seleccioná un archivo primero.' });
@@ -156,9 +159,12 @@ const PacientesForm = () => {
         }
     };
 
-    const filteredObras = obrasSociales.filter(obra =>
-        obra.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // useMemo optimiza el filtrado del dropdown de obras sociales para evitar recálculos en renders innecesarios
+    const filteredObras = useMemo(() => {
+        return obrasSociales.filter(obra =>
+            obra.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [obrasSociales, searchTerm]);
 
     return (
         <div className="form-page">
@@ -230,23 +236,7 @@ const PacientesForm = () => {
                                     <div className="form-group">
                                         <label className="form-label-custom">Teléfono Celular</label>
                                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                            <div style={{
-                                                position: 'absolute',
-                                                left: '1px',
-                                                background: '#f8fafc',
-                                                borderRight: '1.5px solid #e2e8f0',
-                                                borderTopLeftRadius: '9px',
-                                                borderBottomLeftRadius: '9px',
-                                                padding: '0 12px',
-                                                height: 'calc(100% - 2px)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                color: '#475569',
-                                                fontWeight: '600',
-                                                fontSize: '0.85rem',
-                                                pointerEvents: 'none',
-                                                zIndex: 1
-                                            }}>
+                                            <div className="phone-prefix-addon">
                                                 🇦🇷 +54 9
                                             </div>
                                             <input 

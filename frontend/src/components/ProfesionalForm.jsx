@@ -2,8 +2,13 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { es } from 'date-fns/locale/es';
 import './forms.css';
 import './forms-schedule.css'; // Añadimos el nuevo CSS para la grilla
+
+registerLocale('es', es);
 
 const ProfesionalesForm = () => {
     const [profesional, setProfesional] = useState({
@@ -16,12 +21,15 @@ const ProfesionalesForm = () => {
         duracion_turno_promedio: 30,
         porcentaje_honorario: 80,
         tipo_matricula: '',
-        cuit_cuil: ''
+        cuit_cuil: '',
+        fecha_nacimiento: '',
+        sexo: ''
     });
     const navigate = useNavigate();
     const { id } = useParams();
     const isEditing = !!id;
-    // 👇 NUEVO ESTADO: Grilla semanal de horarios
+    // 👇 Estado para la grilla interactiva semanal de horarios del profesional.
+    // Inicializa todos los días de la semana desactivados por defecto.
     const [horariosSemana, setHorariosSemana] = useState([
         { dia_semana: 1, activo: false, hora_inicio: '09:00', hora_fin: '18:00', nombre: 'Lunes' },
         { dia_semana: 2, activo: false, hora_inicio: '09:00', hora_fin: '18:00', nombre: 'Martes' },
@@ -48,10 +56,32 @@ const ProfesionalesForm = () => {
         setProfesional({ ...profesional, [e.target.name]: e.target.value });
     };
 
+    // Formatea la fecha seleccionada del DatePicker al formato YYYY-MM-DD para la base de datos
+    const handleDateChange = (date) => {
+        if (!date) {
+            setProfesional({ ...profesional, fecha_nacimiento: '' });
+            return;
+        }
+        const pad = (n) => String(n).padStart(2, '0');
+        const value = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        setProfesional({ ...profesional, fecha_nacimiento: value });
+    };
+
+    // Parsea el formato YYYY-MM-DD a un objeto Date de JS para el componente DatePicker
+    const getParsedDate = (dateStr) => {
+        if (!dateStr) return null;
+        const [year, month, day] = dateStr.split('-');
+        if (year && month && day) {
+            return new Date(year, month - 1, day);
+        }
+        return null;
+    };
+
+    // Guarda el registro en la base de datos mandando la información estructurada
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Filtramos solo los días que el usuario activó (activo: true)
+        // Filtramos solo los días de la grilla interactiva que el usuario marcó como activos
         const horariosAEnviar = horariosSemana
             .filter(h => h.activo)
             .map(h => ({
@@ -60,6 +90,7 @@ const ProfesionalesForm = () => {
                 hora_fin: h.hora_fin
             }));
 
+        // El backend espera 'porcentaje_retencion'. Calculamos: 100 - % de honorario del profesional
         const honorario = parseFloat(profesional.porcentaje_honorario !== undefined ? profesional.porcentaje_honorario : 80);
         const retencion = 100 - honorario;
 
@@ -74,7 +105,10 @@ const ProfesionalesForm = () => {
             porcentaje_retencion: retencion,
             tipo_matricula: profesional.tipo_matricula || null,
             cuit_cuil: profesional.cuit_cuil || null,
-            horarios: horariosAEnviar.length > 0 ? JSON.stringify(horariosAEnviar) : null
+            // Enviamos el horario semanal como string JSON para procesar con OPENJSON en SQL
+            horarios: horariosAEnviar.length > 0 ? JSON.stringify(horariosAEnviar) : null,
+            fecha_nacimiento: profesional.fecha_nacimiento || null,
+            sexo: profesional.sexo || null
         };
 
         try {
@@ -92,6 +126,7 @@ const ProfesionalesForm = () => {
         }
     };
 
+    // Efecto para cargar los datos del profesional si estamos en modo edición (ID presente)
     useEffect(() => {
         if (id) {
             const loadProfesional = async () => {
@@ -99,8 +134,13 @@ const ProfesionalesForm = () => {
                     const res = await axios.get(`http://localhost:3000/profesionales/${id}`);
                     const data = res.data;
                     
+                    // Calculamos el honorario de cara al usuario a partir del valor de retención de la BD
                     const retencion = data.porcentaje_retencion !== undefined ? parseFloat(data.porcentaje_retencion) : 20;
                     
+                    if (data.fecha_nacimiento) {
+                        data.fecha_nacimiento = data.fecha_nacimiento.split('T')[0];
+                    }
+
                     setProfesional({
                         nombre: data.nombre || '',
                         apellido: data.apellido || '',
@@ -111,7 +151,9 @@ const ProfesionalesForm = () => {
                         duracion_turno_promedio: data.duracion_turno_promedio !== undefined ? data.duracion_turno_promedio : 30,
                         porcentaje_honorario: 100 - retencion,
                         tipo_matricula: data.tipo_matricula || '',
-                        cuit_cuil: data.cuit_cuil || ''
+                        cuit_cuil: data.cuit_cuil || '',
+                        fecha_nacimiento: data.fecha_nacimiento || '',
+                        sexo: data.sexo || ''
                     });
                 } catch (error) {
                     console.error(error);
@@ -174,6 +216,39 @@ const ProfesionalesForm = () => {
                                                 placeholder="11 5678-9012" 
                                                 style={{ paddingLeft: '100px' }} 
                                             />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 👇 Fila 3 (NUEVA): Fecha de Nacimiento y Sexo/Género 👇 */}
+                                <div className="form-row cols-2">
+                                    <div className="form-group">
+                                        <label className="form-label-custom">Fecha de Nacimiento</label>
+                                        <div className="datepicker-wrapper" style={{ width: '100%' }}>
+                                            <DatePicker
+                                                selected={getParsedDate(profesional.fecha_nacimiento)}
+                                                onChange={handleDateChange}
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-input"
+                                                placeholderText="Selecciona la fecha..."
+                                                locale="es"
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                dropdownMode="select"
+                                                maxDate={new Date()}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label-custom">Sexo / Género</label>
+                                        <div className="form-select-wrap">
+                                            <select className="form-select-custom" name="sexo" value={profesional.sexo} onChange={handleChange}>
+                                                <option value="">Seleccione...</option>
+                                                <option value="Femenino">👩 Femenino</option>
+                                                <option value="Masculino">👨 Masculino</option>
+                                                <option value="Otro">🌈 Otro</option>
+                                                <option value="No especifica">⚪ No especifica</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

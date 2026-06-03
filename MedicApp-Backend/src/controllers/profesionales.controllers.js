@@ -1,10 +1,12 @@
-const { getConnection, sql } = require('../db'); // Asegúrate que la ruta a db sea correcta
+const { getConnection, sql } = require('../db'); // Conexión a la base de datos SQL Server
+const { formatTelefonoAR } = require('../utils/phoneFormatter');
 
-// 1. OBTENER LISTA (getProfesionales)
+/**
+ * Obtener listado completo de profesionales de la salud.
+ */
 const getProfesionales = async (req, res) => {
     try {
         const pool = await getConnection();
-        // Asegúrate que tu SP en SQL se llame así
         const result = await pool.request().execute('sp_GetProfesionales');
         res.json(result.recordset);
     } catch (error) {
@@ -12,7 +14,9 @@ const getProfesionales = async (req, res) => {
     }
 };
 
-// 2. OBTENER UNO (getProfesional)
+/**
+ * Obtener un profesional de la salud por su ID único.
+ */
 const getProfesional = async (req, res) => {
     try {
         const pool = await getConnection();
@@ -28,9 +32,16 @@ const getProfesional = async (req, res) => {
     }
 };
 
-// 3. CREAR (createProfesional)
+/**
+ * Registrar un nuevo profesional.
+ * Normaliza el teléfono celular y guarda la grilla de horarios en formato JSON para simplificar consultas.
+ */
 const createProfesional = async (req, res) => {
-    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios, porcentaje_retencion, tipo_matricula, cuit_cuil } = req.body;
+    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios, porcentaje_retencion, tipo_matricula, cuit_cuil, fecha_nacimiento, sexo } = req.body;
+    
+    // Normalizamos el número de teléfono con prefijo "+54 9" para que n8n pueda procesar las notificaciones de WhatsApp
+    const telefonoFormateado = formatTelefonoAR(telefono);
+
     try {
         const pool = await getConnection();
         await pool.request()
@@ -39,25 +50,35 @@ const createProfesional = async (req, res) => {
             .input('DNI', sql.VarChar, dni)
             .input('matricula', sql.VarChar, matricula)
             .input('especialidad', sql.VarChar, especialidad)
-            .input('telefono', sql.VarChar, telefono)
+            .input('telefono', sql.VarChar, telefonoFormateado)
             .input('duracionTurnoPromedio', sql.Int, duracion_turno_promedio)
+            // Se envía la grilla horaria en formato de texto JSON para ser parseado en la base de datos
             .input('HorariosJSON', sql.VarChar(sql.MAX), horarios || null) 
             .input('PorcentajeRetencion', sql.Decimal(5, 2), porcentaje_retencion !== undefined ? porcentaje_retencion : 20.00)
             .input('TipoMatricula', sql.NVarChar, tipo_matricula || null)
             .input('CuitCuil', sql.NVarChar, cuit_cuil || null)
+            .input('fecha_nacimiento', sql.Date, fecha_nacimiento || null)
+            .input('sexo', sql.NVarChar, sexo || null)
             .execute('sp_CreateProfesional');
 
-        res.json({ msg: 'Paciente registrado correctamente' });
+        res.json({ msg: 'Profesional registrado correctamente' });
     } catch (error) {
-        console.error("🚨 ERROR SQL AL CREAR PACIENTE:", error.message);
+        console.error("🚨 ERROR SQL AL CREAR PROFESIONAL:", error.message);
         res.status(500).send(error.message);
     }
 };
 
-// 4. ACTUALIZAR (setProfesional - ANTES updateProfesional)
+/**
+ * Actualizar los datos de un profesional de la salud.
+ * El porcentaje de retención se calcula restando el porcentaje de honorarios del médico del 100%.
+ */
 const setProfesional = async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios, porcentaje_retencion, tipo_matricula, cuit_cuil } = req.body;
+    const { nombre, apellido, dni, matricula, especialidad, telefono, duracion_turno_promedio, horarios, porcentaje_retencion, tipo_matricula, cuit_cuil, fecha_nacimiento, sexo } = req.body;
+    
+    // Normalizamos el número de teléfono con prefijo "+54 9"
+    const telefonoFormateado = formatTelefonoAR(telefono);
+
     try {
         const pool = await getConnection();
         const result = await pool.request()
@@ -67,11 +88,13 @@ const setProfesional = async (req, res) => {
             .input('dni', sql.VarChar, dni)
             .input('matricula', sql.VarChar, matricula)
             .input('especialidad', sql.VarChar, especialidad)
-            .input('telefono', sql.VarChar, telefono)
+            .input('telefono', sql.VarChar, telefonoFormateado)
             .input('duracionTurnoPromedio', sql.Int, duracion_turno_promedio)
             .input('porcentajeRetencion', sql.Decimal(5, 2), porcentaje_retencion !== undefined ? porcentaje_retencion : 20.00)
             .input('tipoMatricula', sql.NVarChar, tipo_matricula || null)
-            .input('cuitCuil', sql.NVarChar, cuit_cuil || null)
+            .input('cuit_cuil', sql.NVarChar, cuit_cuil || null)
+            .input('fecha_nacimiento', sql.Date, fecha_nacimiento || null)
+            .input('sexo', sql.NVarChar, sexo || null)
             .execute('sp_SetProfesional');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Profesional no encontrado' });
@@ -82,7 +105,9 @@ const setProfesional = async (req, res) => {
     }
 };
 
-// 5. ELIMINAR (deleteProfesional)
+/**
+ * Eliminar un profesional mediante el Stored Procedure.
+ */
 const deleteProfesional = async (req, res) => {
     try {
         const pool = await getConnection();
@@ -98,11 +123,10 @@ const deleteProfesional = async (req, res) => {
     }
 };
 
-// --- IMPORTANTE: EL EXPORT DEBE COINCIDIR EXACTAMENTE CON LOS NOMBRES DE ARRIBA ---
 module.exports = {
     getProfesionales,
     getProfesional,
     createProfesional,
-    setProfesional,    // <--- Verifica que esto no diga updateProfesional
+    setProfesional,    
     deleteProfesional
 };

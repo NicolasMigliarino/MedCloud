@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * Middleware para verificar la validez del token JWT enviado por el frontend.
+ * También realiza la validación centralizada del estado de prueba (Trial) para evitar mutaciones de datos.
+ */
 const verificarToken = (req, res, next) => {
-    // Buscamos el token que manda React
+    // Buscamos el token que manda React en el header de Authorization
     const tokenHeader = req.headers['authorization'];
     
     if (!tokenHeader) {
@@ -17,10 +21,23 @@ const verificarToken = (req, res, next) => {
             return res.status(401).json({ message: 'Token inválido o expirado' });
         }
         
-        // ¡LA MAGIA! Guardamos los datos del usuario para usarlos después
+        // Guardamos los datos decodificados del usuario en la request (req.user) para uso de roles y auditoría
         req.user = decoded; 
         
-        next(); // Lo dejamos pasar
+        // ── VALIDACIÓN DEL TRIAL EXPIRADO CENTRALIZADA ─────────────────────────
+        // Bloquea cualquier operación de escritura (POST, PUT, DELETE) si el trial venció (< 0).
+        // De esta manera protegemos toda la base de datos de modificaciones sin interrumpir las consultas (GET).
+        if (req.method !== 'GET') {
+            const { trial_dias_restantes } = decoded;
+            if (trial_dias_restantes !== undefined && trial_dias_restantes < 0) {
+                return res.status(403).json({ 
+                    message: 'El periodo de prueba ha expirado. Por favor, contacte a soporte para activar su licencia.',
+                    code: 'TRIAL_EXPIRED'
+                });
+            }
+        }
+        
+        next(); // Token válido y trial activo, procedemos al controlador correspondiente
     });
 };
 

@@ -1,10 +1,16 @@
 const { getConnection, sql } = require('../db');
+const { formatTelefonoAR } = require('../utils/phoneFormatter');
+
+/**
+ * Obtener lista de pacientes.
+ * Si el usuario es un médico, se filtra para que solo acceda a los pacientes relacionados a sus turnos.
+ */
 const getPacientes = async (req, res) => {
     try {
         const pool = await getConnection();
         const request = pool.request();
         
-        // Si el token inyectó el req.user, le pasamos su id al Stored Procedure
+        // Si el token inyectó el req.user, le pasamos su id al Stored Procedure para filtrado
         if (req.user && req.user.id) {
             request.input('usuario_id', sql.Int, req.user.id);
         }
@@ -16,12 +22,15 @@ const getPacientes = async (req, res) => {
     }
 };
 
+/**
+ * Obtener los datos de un paciente específico por su ID único.
+ */
 const getPaciente = async (req, res) => {
     try {
         const pool = await getConnection();
         const result = await pool.request()
             .input('id', sql.Int, req.params.id)
-            .execute('sp_GetPaciente'); // Singular
+            .execute('sp_GetPaciente'); 
 
         if (result.recordset.length === 0) return res.status(404).json({ message: 'Paciente no encontrado' });
 
@@ -31,7 +40,9 @@ const getPaciente = async (req, res) => {
     }
 };
 
-//  NUEVO: Obtener la lista de obras sociales
+/**
+ * Obtener el listado de obras sociales disponibles en la clínica.
+ */
 const getObrasSociales = async (req, res) => {
     try {
         const pool = await getConnection();
@@ -42,27 +53,32 @@ const getObrasSociales = async (req, res) => {
     }
 };
 
+/**
+ * Registrar un nuevo paciente.
+ * Valida que el rol no sea MEDICO y formatea el número de teléfono para la integración con WhatsApp/n8n.
+ */
 const createPaciente = async (req, res) => {
-    // Bloquear si el rol es MEDICO
+    // Restricción de negocio: Los médicos no cargan ni editan pacientes (solo la administración)
     if (req.user && req.user.rol === 'MEDICO') {
         return res.status(403).json({ message: 'Acceso denegado. Los médicos no pueden registrar pacientes.' });
     }
 
-    // 1. Extraemos obra_social_id y los campos clínicos
     const { nombre, apellido, dni, telefono, email, fecha_nacimiento, obra_social_id, numero_afiliado, fecha_alta, sexo, grupo_sanguineo, direccion, contacto_emergencia, alergias } = req.body;
     
+    // Normalizamos el teléfono para n8n en formato internacional de Argentina (+54 9...)
+    const telefonoFormateado = formatTelefonoAR(telefono);
+
     try {
         const pool = await getConnection();
         await pool.request()
             .input('nombre', sql.VarChar, nombre)
             .input('apellido', sql.VarChar, apellido)
             .input('dni', sql.VarChar, dni)
-            .input('telefono', sql.VarChar, telefono)
+            .input('telefono', sql.VarChar, telefonoFormateado)
             .input('email', sql.VarChar, email)
             .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
             
-            // 👇 2. AQUÍ ESTABA EL ERROR. Usamos obra_social_id y sql.Int
-            // (Si viene vacío, mandamos un null para que SQL no se queje)
+            // Si la obra social viene vacía, enviamos un null a la BD
             .input('obra_social_id', sql.Int, obra_social_id === '' ? null : obra_social_id)
             
             .input('numero_afiliado', sql.VarChar, numero_afiliado)
@@ -81,16 +97,22 @@ const createPaciente = async (req, res) => {
     }
 };
 
-// RENOMBRADO: setPaciente
+/**
+ * Actualizar los datos de un paciente existente.
+ * Valida restricciones de rol médico y normaliza el teléfono.
+ */
 const setPaciente = async (req, res) => {
-    // Bloquear si el rol es MEDICO
+    // Restricción de negocio: Los médicos no pueden modificar datos del paciente
     if (req.user && req.user.rol === 'MEDICO') {
         return res.status(403).json({ message: 'Acceso denegado. Los médicos no pueden editar pacientes.' });
     }
 
     const { id } = req.params;
-    // 👇 CAMBIO: Agregamos los campos que faltaban para editar completo y los nuevos clínicos
     const { nombre, apellido, dni, email, telefono, fecha_nacimiento, obra_social_id, numero_afiliado, sexo, grupo_sanguineo, direccion, contacto_emergencia, alergias } = req.body;
+    
+    // Normalizamos el teléfono para n8n en formato internacional de Argentina (+54 9...)
+    const telefonoFormateado = formatTelefonoAR(telefono);
+
     try {
         const pool = await getConnection();
         const result = await pool.request()
@@ -99,7 +121,7 @@ const setPaciente = async (req, res) => {
             .input('apellido', sql.VarChar, apellido)
             .input('dni', sql.VarChar, dni)
             .input('email', sql.VarChar, email)
-            .input('telefono', sql.VarChar, telefono)
+            .input('telefono', sql.VarChar, telefonoFormateado)
             .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
             .input('obra_social_id', sql.Int, obra_social_id === '' ? null : obra_social_id) 
             .input('numero_afiliado', sql.VarChar, numero_afiliado)
@@ -118,8 +140,11 @@ const setPaciente = async (req, res) => {
     }
 };
 
+/**
+ * Eliminar lógicamente o físicamente un paciente mediante el Stored Procedure.
+ */
 const deletePaciente = async (req, res) => {
-    // Bloquear si el rol es MEDICO
+    // Restricción de negocio: Los médicos no pueden dar de baja pacientes
     if (req.user && req.user.rol === 'MEDICO') {
         return res.status(403).json({ message: 'Acceso denegado. Los médicos no pueden eliminar pacientes.' });
     }

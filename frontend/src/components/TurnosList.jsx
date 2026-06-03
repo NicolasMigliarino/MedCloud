@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -152,18 +152,22 @@ const TurnosList = () => {
 
     useEffect(() => { loadTurnos(); }, []);
 
-    const filtered = turnos.filter(t =>
-        `${t.paciente_nombre} ${t.paciente_apellido} ${t.profesional_nombre} ${t.profesional_apellido} ${t.estado}`.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = useMemo(() => {
+        return turnos.filter(t =>
+            `${t.paciente_nombre} ${t.paciente_apellido} ${t.profesional_nombre} ${t.profesional_apellido} ${t.estado}`.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [turnos, search]);
 
     // Mapeo de turnos para react-big-calendar
-    const eventosCalendario = turnos.map(t => ({
-        id: t.id,
-        title: `${t.paciente_nombre} ${t.paciente_apellido} (${t.estado})`,
-        start: new Date(t.fecha_hora_inicio),
-        end: new Date(t.fecha_hora_fin),
-        resource: t
-    }));
+    const eventosCalendario = useMemo(() => {
+        return turnos.map(t => ({
+            id: t.id,
+            title: `${t.paciente_nombre} ${t.paciente_apellido} (${t.estado})`,
+            start: new Date(t.fecha_hora_inicio),
+            end: new Date(t.fecha_hora_fin),
+            resource: t
+        }));
+    }, [turnos]);
 
     // Personalizar el aspecto y color de los eventos en el calendario
     const eventPropGetter = (event) => {
