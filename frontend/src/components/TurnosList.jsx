@@ -51,6 +51,9 @@ const TurnosList = () => {
     const [turnos, setTurnos] = useState([]);
     const [search, setSearch] = useState('');
     const [viewMode, setViewMode] = useState('list'); // 'list' o 'calendar'
+    const [sortConfig, setSortConfig] = useState({ key: 'fecha_hora_inicio', direction: 'asc' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
     const tableRef = useResizableColumns();
     const navigate = useNavigate();
 
@@ -62,6 +65,35 @@ const TurnosList = () => {
             setTurnos(res.data);
         } catch (error) {
             console.error('Error cargando turnos:', error);
+        }
+    };
+
+    const handleEnviarMail = async (id) => {
+        try {
+            Swal.fire({
+                title: 'Enviando...',
+                text: 'Por favor espera mientras enviamos el correo de confirmación.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            await axios.post(`http://localhost:3000/turnos/${id}/enviar-email`);
+            Swal.fire({
+                icon: 'success',
+                title: '¡Enviado!',
+                text: 'El correo de confirmación se envió al paciente.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            loadTurnos();
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data?.message || 'No se pudo enviar el correo de confirmación.'
+            });
         }
     };
 
@@ -152,11 +184,73 @@ const TurnosList = () => {
 
     useEffect(() => { loadTurnos(); }, []);
 
+    // Reset to page 1 on search change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
+
     const filtered = useMemo(() => {
         return turnos.filter(t =>
             `${t.paciente_nombre} ${t.paciente_apellido} ${t.profesional_nombre} ${t.profesional_apellido} ${t.estado}`.toLowerCase().includes(search.toLowerCase())
         );
     }, [turnos, search]);
+
+    const sortedData = useMemo(() => {
+        let sortableItems = [...filtered];
+        if (sortConfig.key) {
+            sortableItems.sort((a, b) => {
+                let aVal, bVal;
+
+                if (sortConfig.key === 'paciente') {
+                    aVal = `${a.paciente_nombre} ${a.paciente_apellido}`.toLowerCase();
+                    bVal = `${b.paciente_nombre} ${b.paciente_apellido}`.toLowerCase();
+                } else if (sortConfig.key === 'profesional') {
+                    aVal = `${a.profesional_nombre} ${a.profesional_apellido}`.toLowerCase();
+                    bVal = `${b.profesional_nombre} ${b.profesional_apellido}`.toLowerCase();
+                } else if (sortConfig.key === 'fecha_hora_inicio') {
+                    aVal = new Date(a.fecha_hora_inicio || 0).getTime();
+                    bVal = new Date(b.fecha_hora_inicio || 0).getTime();
+                } else {
+                    aVal = (a[sortConfig.key] || '').toString().toLowerCase();
+                    bVal = (b[sortConfig.key] || '').toString().toLowerCase();
+                }
+
+                if (aVal < bVal) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (aVal > bVal) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [filtered, sortConfig]);
+
+    const paginatedData = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return sortedData.slice(startIndex, endIndex);
+    }, [sortedData, currentPage]);
+
+    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+
+    const requestSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) {
+            return <span className="sort-icon">⇅</span>;
+        }
+        return sortConfig.direction === 'asc' ? 
+            <span className="sort-icon active">▲</span> : 
+            <span className="sort-icon active">▼</span>;
+    };
 
     // Mapeo de turnos para react-big-calendar
     const eventosCalendario = useMemo(() => {
@@ -260,20 +354,39 @@ const TurnosList = () => {
                         <table ref={tableRef}>
                             <thead>
                                 <tr>
-                                    <th>Paciente</th>
-                                    <th>Profesional</th>
-                                    <th>Fecha y Horario</th>
-                                    <th>Estado</th>
+                                    <th onClick={(e) => { if (e.target.classList.contains('col-resize-handle')) return; requestSort('paciente'); }} className="sortable-header">
+                                        <div className="sort-header-content">Paciente {getSortIcon('paciente')}</div>
+                                    </th>
+                                    <th onClick={(e) => { if (e.target.classList.contains('col-resize-handle')) return; requestSort('profesional'); }} className="sortable-header">
+                                        <div className="sort-header-content">Profesional {getSortIcon('profesional')}</div>
+                                    </th>
+                                    <th onClick={(e) => { if (e.target.classList.contains('col-resize-handle')) return; requestSort('fecha_hora_inicio'); }} className="sortable-header">
+                                        <div className="sort-header-content">Fecha y Horario {getSortIcon('fecha_hora_inicio')}</div>
+                                    </th>
+                                    <th onClick={(e) => { if (e.target.classList.contains('col-resize-handle')) return; requestSort('estado'); }} className="sortable-header">
+                                        <div className="sort-header-content">Estado {getSortIcon('estado')}</div>
+                                    </th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.length > 0 ? filtered.map((turno) => (
+                                {paginatedData.length > 0 ? paginatedData.map((turno) => (
                                     <tr key={turno.id}>
                                         <td>
                                             <div className="mod-name-chip">
                                                 <div className="mod-avatar blue">{getInitials(turno.paciente_nombre, turno.paciente_apellido)}</div>
-                                                <span>{turno.paciente_nombre} {turno.paciente_apellido}</span>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span>{turno.paciente_nombre} {turno.paciente_apellido}</span>
+                                                    {turno.recordatorio_enviado ? (
+                                                        <span style={{ fontSize: '0.73rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
+                                                            ✉️ Email Enviado
+                                                        </span>
+                                                    ) : (
+                                                        <span style={{ fontSize: '0.73rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
+                                                            ✉️ Sin Notificar
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </td>
                                         <td>
@@ -293,6 +406,17 @@ const TurnosList = () => {
                                         <td>
                                             {/* 👇 SECCIÓN DE ACCIONES ACTUALIZADA 👇 */}
                                             <div className="mod-actions" style={{ display: 'flex', gap: '5px' }}>
+                                                {/* Botón de Enviar Mail: Solo si está pendiente y el rol no es PROFESIONAL */}
+                                                {turno.estado?.toLowerCase() === 'pendiente' && userRole?.toUpperCase() !== 'MEDICO' && (
+                                                    <button
+                                                        onClick={() => handleEnviarMail(turno.id)}
+                                                        className="mod-btn"
+                                                        style={{ backgroundColor: '#3b82f6', color: 'white', borderColor: '#3b82f6' }}
+                                                        title="Enviar Email de Confirmación"
+                                                    >
+                                                        ✉️ Mail
+                                                    </button>
+                                                )}
                                                 {/* Botón de Cobrar: Solo aparece si está pendiente y el rol no es PROFESIONAL */}
                                                 {turno.estado?.toLowerCase() === 'pendiente' && userRole?.toUpperCase() !== 'MEDICO' && (
                                                     <button
@@ -323,6 +447,32 @@ const TurnosList = () => {
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Pagination footer */}
+                        <div className="mod-pagination">
+                            <div className="mod-pagination-info">
+                                Mostrando <strong>{sortedData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> a <strong>{Math.min(currentPage * itemsPerPage, sortedData.length)}</strong> de <strong>{sortedData.length}</strong> turnos
+                            </div>
+                            <div className="mod-pagination-controls">
+                                <button 
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                                    disabled={currentPage === 1}
+                                    className="mod-btn edit"
+                                >
+                                    ◀ Anterior
+                                </button>
+                                <span className="mod-pagination-pages">
+                                    Página <strong>{currentPage}</strong> de <strong>{totalPages || 1}</strong>
+                                </span>
+                                <button 
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    className="mod-btn edit"
+                                >
+                                    Siguiente ▶
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </>
             ) : (

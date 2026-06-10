@@ -36,6 +36,8 @@ app.use(archivosRoutes);
 app.use(cajaRoutes);
 app.use(passwordResetRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const { iniciarScheduler } = require('./utils/scheduler');
+
 // Manejo de errores (opcional pero recomendado)
 app.use((err, req, res, next) => {
     return res.json({
@@ -45,4 +47,5 @@ app.use((err, req, res, next) => {
 
 app.listen(3000, () => {
     console.log('Server on port 3000');
+    iniciarScheduler(); // Iniciar programador de recordatorios por email
 });

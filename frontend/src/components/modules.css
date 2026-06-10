@@ -826,4 +826,74 @@
     background: rgba(56, 189, 248, 0.25) !important;
 }
 
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.mod-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-row);
+    border-radius: 0 0 12px 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mod-pagination-info {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.mod-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mod-pagination-pages {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.mod-pagination-controls button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ── Sorting Headers ──────────────────────────────────────────────────────── */
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.sortable-header:hover {
+    background-color: var(--row-hover) !important;
+}
+
+.sort-header-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.sort-icon {
+    font-size: 0.75rem;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
+
+.sortable-header:hover .sort-icon {
+    opacity: 0.8;
+}
+
+.sort-icon.active {
+    opacity: 1;
+    color: #1a73e8;
+}
+
+
 
