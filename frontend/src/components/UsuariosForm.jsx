@@ -41,7 +41,8 @@ const UsuariosForm = () => {
                         email: res.data.email,
                         rol_id: res.data.rol_id, // Fix mapping
                         activo: res.data.activo,
-                        password_hash: ''
+                        password_hash: '',
+                        debe_cambiar_pass: res.data.debe_cambiar_pass
                     });
                 } catch (error) {
                     console.error(error);

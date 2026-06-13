@@ -53,6 +53,8 @@ const TurnosList = () => {
     const [viewMode, setViewMode] = useState('list'); // 'list' o 'calendar'
     const [sortConfig, setSortConfig] = useState({ key: 'fecha_hora_inicio', direction: 'asc' });
     const [currentPage, setCurrentPage] = useState(1);
+    const [calendarDate, setCalendarDate] = useState(new Date());
+    const [calendarView, setCalendarView] = useState('month');
     const itemsPerPage = 10;
     const tableRef = useResizableColumns();
     const navigate = useNavigate();
@@ -484,6 +486,10 @@ const TurnosList = () => {
                         startAccessor="start"
                         endAccessor="end"
                         culture="es"
+                        date={calendarDate}
+                        view={calendarView}
+                        onNavigate={(date) => setCalendarDate(date)}
+                        onView={(view) => setCalendarView(view)}
                         messages={{
                             next: "Siguiente",
                             previous: "Anterior",

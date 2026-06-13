@@ -80,7 +80,51 @@ async function getConnection() {
                                 ORDER BY t.fecha_hora_inicio DESC;
                             END;
                         `);
-                        console.log('✔️ Base de Datos: Migraciones de recordatorios y SPs aplicadas.');
+                        
+                        await pool.request().query(`
+                            ALTER PROCEDURE [dbo].[sp_GetUsuarios]
+                            AS
+                            BEGIN
+                                SET NOCOUNT ON;
+                                SELECT 
+                                    u.id, 
+                                    u.email, 
+                                    u.password_hash, 
+                                    u.rol_id, 
+                                    u.activo, 
+                                    u.fecha_creacion, 
+                                    u.username, 
+                                    u.debe_cambiar_pass,
+                                    pr.nombre AS profesional_nombre,
+                                    pr.apellido AS profesional_apellido
+                                FROM Usuarios u
+                                LEFT JOIN Profesionales pr ON pr.usuario_id = u.id;
+                            END;
+                        `);
+
+                        await pool.request().query(`
+                            ALTER PROCEDURE [dbo].[sp_SetUsuario]
+                                @id INT,
+                                @email NVARCHAR(100),
+                                @passwordHash NVARCHAR(255) = NULL,
+                                @rolId INT,
+                                @activo BIT,
+                                @username VARCHAR(100),
+                                @debeCambiarPass BIT
+                            AS
+                            BEGIN
+                                SET NOCOUNT ON;
+                                UPDATE Usuarios
+                                SET email = @email,
+                                    password_hash = CASE WHEN @passwordHash IS NULL OR @passwordHash = '' THEN password_hash ELSE @passwordHash END,
+                                    rol_id = @rolId,
+                                    activo = @activo,
+                                    username = @username,
+                                    debe_cambiar_pass = @debeCambiarPass
+                                WHERE id = @id;
+                            END;
+                        `);
+                        console.log('✔️ Base de Datos: Migraciones de recordatorios, sp_GetTurnos, sp_GetUsuarios y sp_SetUsuario aplicadas.');
                     } catch (migErr) {
                         migracionesRealizadas = false;
                         console.error('⚠️ Error al aplicar migraciones de recordatorios:', migErr.message);

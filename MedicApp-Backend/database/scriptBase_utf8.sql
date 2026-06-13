@@ -1,4 +1,4 @@
-﻿USE [MedicApp]
+USE [MedicApp]
 GO
 /****** Object:  User [medicapp_user]    Script Date: 28/5/2026 01:11:32 ******/
 CREATE USER [medicapp_user] FOR LOGIN [medicapp_user] WITH DEFAULT_SCHEMA=[dbo]
@@ -1579,6 +1579,7 @@ GO
             -- 4. Devuelve la lista con el filtro dinámico aplicado, incluyendo paciente_id y profesional_id
             SELECT 
                 t.id, t.paciente_id, t.profesional_id, t.fecha_hora_inicio, t.fecha_hora_fin, t.estado, t.motivo_consulta, t.observaciones_admin,
+                t.recordatorio_dia_anterior_enviado AS recordatorio_enviado,
                 pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido,
                 p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
             FROM Turnos t
@@ -1624,7 +1625,20 @@ GO
 CREATE PROCEDURE [dbo].[sp_GetUsuarios]
 AS
 BEGIN
-    SELECT * FROM Usuarios;
+    SET NOCOUNT ON;
+    SELECT 
+        u.id, 
+        u.email, 
+        u.password_hash, 
+        u.rol_id, 
+        u.activo, 
+        u.fecha_creacion, 
+        u.username, 
+        u.debe_cambiar_pass,
+        pr.nombre AS profesional_nombre,
+        pr.apellido AS profesional_apellido
+    FROM Usuarios u
+    LEFT JOIN Profesionales pr ON pr.usuario_id = u.id;
 END;
 GO
 /****** Object:  StoredProcedure [dbo].[sp_LoginUsuario]    Script Date: 28/5/2026 01:11:33 ******/
@@ -1947,16 +1961,17 @@ GO
 CREATE PROCEDURE [dbo].[sp_SetUsuario]
     @id INT,
     @email NVARCHAR(100),
-    @passwordHash NVARCHAR(255),
+    @passwordHash NVARCHAR(255) = NULL,
     @rolId INT,
     @activo BIT,
     @username VARCHAR(100),
     @debeCambiarPass BIT
 AS
 BEGIN
+    SET NOCOUNT ON;
     UPDATE Usuarios
     SET email = @email,
-        password_hash = @passwordHash,
+        password_hash = CASE WHEN @passwordHash IS NULL OR @passwordHash = '' THEN password_hash ELSE @passwordHash END,
         rol_id = @rolId,
         activo = @activo,
         username = @username,

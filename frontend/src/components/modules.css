@@ -227,6 +227,7 @@
     font-size: 0.88rem;
     color: var(--input-color);
     background: var(--input-bg);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     transition: all 0.2s ease;
     outline: none;
@@ -864,6 +865,7 @@
 /* ── Sorting Headers ──────────────────────────────────────────────────────── */
 .sortable-header {
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
     position: relative;
     transition: background-color 0.2s ease;

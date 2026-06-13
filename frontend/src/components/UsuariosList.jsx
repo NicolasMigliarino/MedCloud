@@ -57,7 +57,7 @@ const UsuariosList = () => {
 
     const filtered = useMemo(() => {
         return usuarios.filter(u =>
-            `${u.username} ${u.email}`.toLowerCase().includes(search.toLowerCase())
+            `${u.username} ${u.email} ${u.profesional_nombre || ''} ${u.profesional_apellido || ''}`.toLowerCase().includes(search.toLowerCase())
         );
     }, [usuarios, search]);
 
@@ -69,6 +69,9 @@ const UsuariosList = () => {
                 if (sortConfig.key === 'activo') {
                     aVal = a.activo ? 1 : 0;
                     bVal = b.activo ? 1 : 0;
+                } else if (sortConfig.key === 'profesional_apellido') {
+                    aVal = `${a.profesional_apellido || ''} ${a.profesional_nombre || ''}`.trim().toLowerCase();
+                    bVal = `${b.profesional_apellido || ''} ${b.profesional_nombre || ''}`.trim().toLowerCase();
                 } else {
                     aVal = (a[sortConfig.key] || '').toString().toLowerCase();
                     bVal = (b[sortConfig.key] || '').toString().toLowerCase();
@@ -130,7 +133,7 @@ const UsuariosList = () => {
                 <span className="mod-search-icon">🔍</span>
                 <input
                     type="text"
-                    placeholder="Buscar por username o email..."
+                    placeholder="Buscar por username, email o profesional..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
@@ -150,6 +153,9 @@ const UsuariosList = () => {
                             <th onClick={(e) => { if (e.target.classList.contains('col-resize-handle')) return; requestSort('rol_id'); }} className="sortable-header">
                                 <div className="sort-header-content">Rol ID {getSortIcon('rol_id')}</div>
                             </th>
+                            <th onClick={(e) => { if (e.target.classList.contains('col-resize-handle')) return; requestSort('profesional_apellido'); }} className="sortable-header">
+                                <div className="sort-header-content">Profesional {getSortIcon('profesional_apellido')}</div>
+                            </th>
                             <th onClick={(e) => { if (e.target.classList.contains('col-resize-handle')) return; requestSort('activo'); }} className="sortable-header">
                                 <div className="sort-header-content">Estado {getSortIcon('activo')}</div>
                             </th>
@@ -168,6 +174,16 @@ const UsuariosList = () => {
                                 <td>{user.email}</td>
                                 <td><span className="mod-code">{user.rol_id}</span></td>
                                 <td>
+                                    {user.profesional_nombre ? (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{ fontSize: '15px' }}>🩺</span>
+                                            <span>Dr. {user.profesional_nombre} {user.profesional_apellido}</span>
+                                        </div>
+                                    ) : (
+                                        <span style={{ color: '#94a3b8' }}>—</span>
+                                    )}
+                                </td>
+                                <td>
                                     <span className={`mod-badge ${user.activo ? 'activo' : 'inactivo'}`}>
                                         {user.activo ? 'Activo' : 'Inactivo'}
                                     </span>
@@ -185,7 +201,7 @@ const UsuariosList = () => {
                             </tr>
                         )) : (
                             <tr className="mod-empty">
-                                <td colSpan="5">
+                                <td colSpan="6">
                                     <span className="mod-empty-icon">👥</span>
                                     <p>No se encontraron usuarios.</p>
                                 </td>

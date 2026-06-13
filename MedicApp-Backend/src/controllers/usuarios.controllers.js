@@ -56,11 +56,11 @@ const setUsuario = async (req, res) => {
         const result = await pool.request()
             .input('id', sql.Int, id)
             .input('email', sql.VarChar, email)
-            .input('password_hash', sql.NVarChar, password_hash)   // Corregido el nombre
-            .input('rol_id', sql.Int, rol_id)                      // Corregido el nombre
+            .input('passwordHash', sql.NVarChar, password_hash || null)
+            .input('rolId', sql.Int, rol_id)
             .input('activo', sql.Bit, activo)
             .input('username', sql.VarChar, username)
-            .input('debe_cambiar_pass', sql.Bit, debe_cambiar_pass) // Corregido el nombre
+            .input('debeCambiarPass', sql.Bit, debe_cambiar_pass !== undefined ? debe_cambiar_pass : false)
             .execute('sp_SetUsuario');
 
         if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Usuario no encontrado' });
