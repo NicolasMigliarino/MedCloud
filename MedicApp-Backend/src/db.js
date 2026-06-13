@@ -6,13 +6,13 @@
 const sql = require('mssql');
 
 const dbSettings = {
-    server: 'localhost',
-    database: 'MedicApp',
-    user: 'medicapp_user',      // El usuario que acabamos de crear
-    password: 'MedicApp123',    // La contraseña que pusimos en el script
+    server: process.env.DB_HOST || 'medicapp-sql',
+    database: process.env.DB_NAME || 'MedicApp',
+    user: process.env.DB_USER || 'medicapp_user',
+    password: process.env.DB_PASSWORD || 'MedicApp123',
     options: {
-        encrypt: false, // Importante para SQL local
-        trustServerCertificate: true // Confía en el certificado local
+        encrypt: process.env.DB_ENCRYPT === 'true',
+        trustServerCertificate: true
     }
 };
 
@@ -44,7 +44,7 @@ async function getConnection() {
                                 );
                             END
                         `);
-                        
+
                         await pool.request().query(`
                             ALTER PROCEDURE [dbo].[sp_GetTurnos]
                                 @UsuarioID INT,
@@ -80,7 +80,7 @@ async function getConnection() {
                                 ORDER BY t.fecha_hora_inicio DESC;
                             END;
                         `);
-                        
+
                         await pool.request().query(`
                             ALTER PROCEDURE [dbo].[sp_GetUsuarios]
                             AS
