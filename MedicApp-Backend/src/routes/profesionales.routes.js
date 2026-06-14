@@ -1,6 +1,9 @@
-const{ Router} = require('express');
-const { getProfesional,getProfesionales, createProfesional, deleteProfesional, setProfesional } = require('../controllers/profesionales.controllers');
+const { Router } = require('express');
+const { getProfesional, getProfesionales, createProfesional, deleteProfesional, setProfesional, getEspecialidades } = require('../controllers/profesionales.controllers');
 const router = Router();
+
+// Ruta para obtener listado de especialidades precargadas
+router.get('/especialidades', getEspecialidades);
 
 // Cuando alguien visite "/profesionales", se ejecuta la función getProfesionales
 router.get('/profesionales', getProfesionales);

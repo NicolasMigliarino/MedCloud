@@ -16,7 +16,8 @@ const ProfesionalesForm = () => {
         apellido: '',
         dni: '',
         matricula: '',
-        especialidad: '',
+        especialidad_id: '',
+        email: '',
         telefono: '',
         duracion_turno_promedio: 30,
         porcentaje_honorario: 80,
@@ -25,6 +26,7 @@ const ProfesionalesForm = () => {
         fecha_nacimiento: '',
         sexo: ''
     });
+    const [especialidades, setEspecialidades] = useState([]);
     const navigate = useNavigate();
     const { id } = useParams();
     const isEditing = !!id;
@@ -99,7 +101,8 @@ const ProfesionalesForm = () => {
             apellido: profesional.apellido,
             dni: profesional.dni,
             matricula: profesional.matricula,
-            especialidad: profesional.especialidad,
+            especialidad_id: profesional.especialidad_id || null,
+            email: profesional.email || null,
             telefono: profesional.telefono,
             duracion_turno_promedio: parseInt(profesional.duracion_turno_promedio),
             porcentaje_retencion: retencion,
@@ -146,7 +149,8 @@ const ProfesionalesForm = () => {
                         apellido: data.apellido || '',
                         dni: data.dni || data.DNI || '',
                         matricula: data.matricula || '',
-                        especialidad: data.especialidad || '',
+                        especialidad_id: data.especialidad_id || '',
+                        email: data.email || '',
                         telefono: data.telefono || '',
                         duracion_turno_promedio: data.duracion_turno_promedio !== undefined ? data.duracion_turno_promedio : 30,
                         porcentaje_honorario: 100 - retencion,
@@ -162,6 +166,19 @@ const ProfesionalesForm = () => {
             loadProfesional();
         }
     }, [id]);
+
+    // Cargar especialidades al montar
+    useEffect(() => {
+        const loadEspecialidades = async () => {
+            try {
+                const res = await axios.get('http://localhost:3000/especialidades');
+                setEspecialidades(res.data);
+            } catch (error) {
+                console.error("Error al cargar especialidades:", error);
+            }
+        };
+        loadEspecialidades();
+    }, []);
 
     return (
         <div className="form-page">
@@ -253,6 +270,25 @@ const ProfesionalesForm = () => {
                                     </div>
                                 </div>
 
+                                {/* Fila 4: Correo electrónico */}
+                                <div className="form-row cols-2">
+                                    <div className="form-group">
+                                        <label className="form-label-custom">Email <span className="required">*</span></label>
+                                        <input 
+                                            className="form-input" 
+                                            type="email" 
+                                            name="email" 
+                                            value={profesional.email} 
+                                            onChange={handleChange} 
+                                            placeholder="Ej: medico@correo.com" 
+                                            required 
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        {/* Espacio reservado para balancear las columnas */}
+                                    </div>
+                                </div>
+
                                 {/* Datos profesionales */}
                                 <div className="form-section-label">Datos Profesionales</div>
                                 <div className="form-row cols-2">
@@ -262,7 +298,22 @@ const ProfesionalesForm = () => {
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label-custom">Especialidad <span className="required">*</span></label>
-                                        <input className="form-input" type="text" name="especialidad" value={profesional.especialidad} onChange={handleChange} placeholder="Ej: Cardiología" required />
+                                        <div className="form-select-wrap">
+                                            <select 
+                                                className="form-select-custom" 
+                                                name="especialidad_id" 
+                                                value={profesional.especialidad_id} 
+                                                onChange={handleChange} 
+                                                required
+                                            >
+                                                <option value="">Seleccione una especialidad...</option>
+                                                {especialidades.map((esp) => (
+                                                    <option key={esp.id} value={esp.id}>
+                                                        {esp.nombre}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="form-row cols-2">

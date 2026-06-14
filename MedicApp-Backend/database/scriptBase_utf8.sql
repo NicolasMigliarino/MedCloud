@@ -182,6 +182,25 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+/****** Object:  Table [dbo].[especialidades]    Script Date: 28/5/2026 01:11:33 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[especialidades](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [nvarchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
 /****** Object:  Table [dbo].[profesionales]    Script Date: 28/5/2026 01:11:33 ******/
 SET ANSI_NULLS ON
 GO
@@ -194,16 +213,25 @@ CREATE TABLE [dbo].[profesionales](
 	[apellido] [nvarchar](100) NOT NULL,
 	[matricula] [nvarchar](50) NULL,
 	[especialidad] [nvarchar](100) NULL,
+	[especialidad_id] [int] NULL,
+	[email] [nvarchar](100) NULL,
 	[telefono] [nvarchar](50) NULL,
 	[duracion_turno_promedio] [int] NULL,
 	[porcentaje_retencion] [decimal](5, 2) NOT NULL,
 	[tipo_matricula] [nvarchar](20) NULL,
 	[cuit_cuil] [nvarchar](20) NULL,
+	[fecha_nacimiento] [date] NULL,
+	[sexo] [nvarchar](50) NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[profesionales]  WITH CHECK ADD  CONSTRAINT [FK_Profesionales_Especialidades] FOREIGN KEY([especialidad_id])
+REFERENCES [dbo].[especialidades] ([id])
+GO
+ALTER TABLE [dbo].[profesionales] CHECK CONSTRAINT [FK_Profesionales_Especialidades]
 GO
 /****** Object:  Table [dbo].[roles]    Script Date: 28/5/2026 01:11:33 ******/
 SET ANSI_NULLS ON
@@ -295,6 +323,22 @@ INSERT [dbo].[historial_clinico] ([id], [paciente_id], [profesional_id], [turno_
 INSERT [dbo].[historial_clinico] ([id], [paciente_id], [profesional_id], [turno_id], [fecha_registro], [motivo], [evolucion], [diagnostico], [tratamiento], [archivos_adjuntos_url]) VALUES (1004, 3, 18, NULL, CAST(N'2026-02-26T01:24:01.130' AS DateTime), N'asdasd', N'asdsadsa', N'asdsad', N'asdasdsa', N'')
 INSERT [dbo].[historial_clinico] ([id], [paciente_id], [profesional_id], [turno_id], [fecha_registro], [motivo], [evolucion], [diagnostico], [tratamiento], [archivos_adjuntos_url]) VALUES (1005, 4, 18, NULL, CAST(N'2026-03-06T01:55:43.213' AS DateTime), N'depresion', N'sadsadsadsadzxcvsedhshczv', N'tdh', N'asfsa>SCasfgvdsv', N'')
 SET IDENTITY_INSERT [dbo].[historial_clinico] OFF
+GO
+SET IDENTITY_INSERT [dbo].[especialidades] ON 
+
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (1, N'Clínica Médica')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (2, N'Pediatría')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (3, N'Ginecología y Obstetricia')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (4, N'Cardiología')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (5, N'Psicología')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (6, N'Kinesiología')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (7, N'Psiquiatría')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (8, N'Dermatología')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (9, N'Oftalmología')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (10, N'Traumatología')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (11, N'Nutrición')
+INSERT [dbo].[especialidades] ([id], [nombre]) VALUES (12, N'Odontología')
+SET IDENTITY_INSERT [dbo].[especialidades] OFF
 GO
 SET IDENTITY_INSERT [dbo].[horarios_profesional] ON 
 
@@ -989,14 +1033,17 @@ GO
             @Apellido NVARCHAR(100),
             @DNI NVARCHAR(20),       
             @Matricula NVARCHAR(50),
-            @Especialidad NVARCHAR(100),
+            @EspecialidadID INT,
             @Telefono NVARCHAR(50),
             @duracionTurnoPromedio INT,
-            @RolID INT = 2,
+            @RolID INT = 5,
             @HorariosJSON NVARCHAR(MAX) = NULL,
             @PorcentajeRetencion DECIMAL(5,2) = 20.00,
             @TipoMatricula NVARCHAR(20) = NULL,
-            @CuitCuil NVARCHAR(20) = NULL
+            @CuitCuil NVARCHAR(20) = NULL,
+            @fecha_nacimiento DATE = NULL,
+            @sexo NVARCHAR(50) = NULL,
+            @Email NVARCHAR(100) = NULL
         AS
         BEGIN
             SET NOCOUNT ON;
@@ -1024,7 +1071,7 @@ GO
                 END
 
                 -- Generamos un email ficticio y password temporal
-                SET @EmailGenerado = @UsuarioFinal + '@medicapp.local';
+                SET @EmailGenerado = COALESCE(@Email, @UsuarioFinal + '@medicapp.local');
                 SET @PasswordProvisoria = @DNI; 
 
                 -- 1. Insertamos en la tabla PADRE (Usuarios)
@@ -1034,9 +1081,12 @@ GO
                 -- Recuperamos el ID del usuario
                 SET @NuevoUsuarioID = SCOPE_IDENTITY();
 
-                -- 2. Insertamos en la tabla HIJA (Profesionales) con porcentaje_retencion, tipo_matricula, cuit_cuil
-                INSERT INTO dbo.profesionales(usuario_id, nombre, apellido, matricula, especialidad, telefono, duracion_turno_promedio, porcentaje_retencion, tipo_matricula, cuit_cuil)
-                VALUES (@NuevoUsuarioID, @Nombre, @Apellido, @Matricula, @Especialidad, @Telefono, @duracionTurnoPromedio, @PorcentajeRetencion, @TipoMatricula, @CuitCuil);
+                -- Obtener el nombre de la especialidad para sincronización
+                DECLARE @EspecialidadText NVARCHAR(100) = (SELECT nombre FROM dbo.especialidades WHERE id = @EspecialidadID);
+
+                -- 2. Insertamos en la tabla HIJA (Profesionales)
+                INSERT INTO dbo.profesionales(usuario_id, nombre, apellido, matricula, especialidad, especialidad_id, email, telefono, duracion_turno_promedio, porcentaje_retencion, tipo_matricula, cuit_cuil, fecha_nacimiento, sexo)
+                VALUES (@NuevoUsuarioID, @Nombre, @Apellido, @Matricula, @EspecialidadText, @EspecialidadID, @Email, @Telefono, @duracionTurnoPromedio, @PorcentajeRetencion, @TipoMatricula, @CuitCuil, @fecha_nacimiento, @sexo);
 
                 -- Recuperamos el ID del PROFESIONAL recién creado
                 SET @NuevoProfesionalID = SCOPE_IDENTITY();
@@ -1061,22 +1111,17 @@ GO
                 -- Confirmamos la transacción
                 COMMIT TRANSACTION;
 
-                -- Devolvemos los datos al backend
-                SELECT 
-                    @NuevoUsuarioID as ID,
-                    @UsuarioFinal as UsuarioGenerado,
-                    @PasswordProvisoria as PasswordTemporal,
-                    @EmailGenerado as EmailDestino,
-                    'Medico creado exitosamente' as Mensaje;
-
             END TRY
             BEGIN CATCH
                 -- Si algo falla, deshacemos todo
                 IF @@TRANCOUNT > 0
                     ROLLBACK TRANSACTION;
                     
-                -- Lanzamos el error hacia Node.js
-                THROW; 
+                DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+                DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+                DECLARE @ErrorState INT = ERROR_STATE();
+
+                RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
             END CATCH
         END
     
@@ -1519,7 +1564,26 @@ CREATE PROCEDURE [dbo].[sp_GetProfesional]
     @id INT
 AS
 BEGIN
-    SELECT * FROM profesionales WHERE id = @id;
+    SET NOCOUNT ON;
+    SELECT 
+        pr.id,
+        pr.usuario_id,
+        pr.nombre,
+        pr.apellido,
+        pr.matricula,
+        pr.especialidad_id,
+        pr.email,
+        pr.telefono,
+        pr.duracion_turno_promedio,
+        pr.porcentaje_retencion,
+        pr.tipo_matricula,
+        pr.cuit_cuil,
+        pr.fecha_nacimiento,
+        pr.sexo,
+        COALESCE(esp.nombre, pr.especialidad) AS especialidad
+    FROM profesionales pr
+    LEFT JOIN especialidades esp ON pr.especialidad_id = esp.id
+    WHERE pr.id = @id;
 END;
 GO
 /****** Object:  StoredProcedure [dbo].[sp_GetProfesionales]    Script Date: 28/5/2026 01:11:33 ******/
@@ -1531,7 +1595,25 @@ GO
 CREATE PROCEDURE [dbo].[sp_GetProfesionales]
 AS
 BEGIN
-    SELECT * FROM profesionales;
+    SET NOCOUNT ON;
+    SELECT 
+        pr.id,
+        pr.usuario_id,
+        pr.nombre,
+        pr.apellido,
+        pr.matricula,
+        pr.especialidad_id,
+        pr.email,
+        pr.telefono,
+        pr.duracion_turno_promedio,
+        pr.porcentaje_retencion,
+        pr.tipo_matricula,
+        pr.cuit_cuil,
+        pr.fecha_nacimiento,
+        pr.sexo,
+        COALESCE(esp.nombre, pr.especialidad) AS especialidad
+    FROM profesionales pr
+    LEFT JOIN especialidades esp ON pr.especialidad_id = esp.id;
 END;
 GO
 /****** Object:  StoredProcedure [dbo].[sp_GetRoles]    Script Date: 28/5/2026 01:11:33 ******/
@@ -1867,27 +1949,42 @@ GO
             @nombre NVARCHAR(100),
             @apellido NVARCHAR(100),
             @matricula NVARCHAR(50),
-            @especialidad NVARCHAR(100),
+            @EspecialidadID INT,
             @telefono NVARCHAR(50),
             @duracionTurnoPromedio INT,
             @porcentajeRetencion DECIMAL(5,2) = 20.00,
             @tipoMatricula NVARCHAR(20) = NULL,
-            @cuitCuil NVARCHAR(20) = NULL
+            @cuitCuil NVARCHAR(20) = NULL,
+            @fecha_nacimiento DATE = NULL,
+            @sexo NVARCHAR(50) = NULL,
+            @Email NVARCHAR(100) = NULL
         AS
         BEGIN
             SET NOCOUNT ON;
+
+            DECLARE @EspecialidadText NVARCHAR(100) = (SELECT nombre FROM dbo.especialidades WHERE id = @EspecialidadID);
 
             UPDATE profesionales
             SET nombre = @nombre,
                 apellido = @apellido,
                 matricula = @matricula,
-                especialidad = @especialidad,
+                especialidad = @EspecialidadText,
+                especialidad_id = @EspecialidadID,
+                email = @Email,
                 telefono = @telefono,
                 duracion_turno_promedio = @duracionTurnoPromedio,
                 porcentaje_retencion = @porcentajeRetencion,
                 tipo_matricula = @tipoMatricula,
-                cuit_cuil = @cuitCuil
+                cuit_cuil = @cuitCuil,
+                fecha_nacimiento = @fecha_nacimiento,
+                sexo = @sexo
             WHERE id = @id;
+
+            -- Sincronizar email del usuario asociado para inicio de sesión
+            UPDATE dbo.usuarios
+            SET email = @Email
+            WHERE id = (SELECT usuario_id FROM dbo.profesionales WHERE id = @id)
+              AND @Email IS NOT NULL AND RTRIM(LTRIM(@Email)) <> '';
         END;
     
 GO
@@ -1996,4 +2093,19 @@ BEGIN
     INSERT INTO dbo.archivos_medicos (paciente_id, turno_id, nombre_original, nombre_archivo, tipo_archivo)
     VALUES (@paciente_id, @turno_id, @nombre_original, @nombre_archivo, @tipo_archivo);
 END
+GO
+
+/****** Object:  StoredProcedure [dbo].[sp_GetEspecialidades]    Script Date: 28/5/2026 01:11:33 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_GetEspecialidades]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT id, nombre 
+    FROM dbo.especialidades 
+    ORDER BY nombre ASC;
+END;
 GO
