@@ -89,7 +89,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     className="text-white text-decoration-none fs-4 fw-bold p-0 m-0 w-100 text-start"
                     style={{ background: 'none' }}
                 >
-                    🏥 MedicApp
+                    🏥 MedCloud
                 </button>
             </header>
             <ul>

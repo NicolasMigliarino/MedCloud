@@ -7,9 +7,9 @@ const sql = require('mssql');
 
 const dbSettings = {
     server: process.env.DB_HOST || process.env.DB_SERVER || 'localhost',
-    database: process.env.DB_NAME || 'MedicApp',
-    user: process.env.DB_USER || 'medicapp_user',
-    password: process.env.DB_PASSWORD || 'MedicApp123',
+    database: process.env.DB_NAME || 'MedCloud',
+    user: process.env.DB_USER || 'medcloud_user',
+    password: process.env.DB_PASSWORD || 'MedCloud123',
     options: {
         encrypt: process.env.DB_ENCRYPT === 'true',
         trustServerCertificate: true
@@ -107,7 +107,7 @@ async function getConnection() {
                                     SET pr.email = u.email
                                     FROM dbo.profesionales pr
                                     INNER JOIN dbo.usuarios u ON pr.usuario_id = u.id
-                                    WHERE pr.email IS NULL AND u.email IS NOT NULL AND u.email NOT LIKE ''%@medicapp.local'';
+                                    WHERE pr.email IS NULL AND u.email IS NOT NULL AND u.email NOT LIKE ''%@medcloud.local'';
                                 ');
                             END
                         `);
@@ -335,7 +335,7 @@ async function getConnection() {
                                     END
 
                                     -- Generamos un email ficticio y password temporal
-                                    SET @EmailGenerado = COALESCE(@Email, @UsuarioFinal + '@medicapp.local');
+                                    SET @EmailGenerado = COALESCE(@Email, @UsuarioFinal + '@medcloud.local');
                                     SET @PasswordProvisoria = @DNI; 
 
                                     -- 1. Insertamos en la tabla PADRE (Usuarios)

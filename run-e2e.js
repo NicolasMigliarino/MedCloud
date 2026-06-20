@@ -5,7 +5,7 @@ const net = require('net');
 
 const rootDir = __dirname;
 const frontendDir = path.join(rootDir, 'frontend');
-const backendDir = path.join(rootDir, 'MedicApp-Backend');
+const backendDir = path.join(rootDir, 'MedCloud-Backend');
 const reportPath = path.join('C:', 'Users', 'nmigl', '.gemini', 'antigravity', 'brain', '9795efa9-9acd-4677-9024-cfe30a30e831', 'reporte_pruebas.md');
 
 let backendProcess = null;
@@ -57,7 +57,7 @@ function killProcess(proc, name) {
 
 async function run() {
   console.log('====================================================');
-  console.log('🤖 MEDICAPP - EJECUTOR DE PRUEBAS INTEGRALES AUTOMATIZADO');
+  console.log('🤖 MEDCLOUD - EJECUTOR DE PRUEBAS INTEGRALES AUTOMATIZADO');
   console.log('====================================================');
 
   // 1. Instalar Playwright en el frontend si no existe
@@ -262,7 +262,7 @@ function generateReport(stdout, exitCode, stderr) {
   const totalPassed = tests.filter(t => t.status === '✅ Exitoso').length;
   const totalFailed = tests.filter(t => t.status === '❌ Fallido').length;
 
-  let reportContent = `# Reporte de Pruebas Integrales E2E - MedicApp
+  let reportContent = `# Reporte de Pruebas Integrales E2E - MedCloud
 
 Este documento registra los resultados de las pruebas integrales de interfaz automatizadas, simulando el comportamiento de usuarios administrativos y médicos en el sistema.
 

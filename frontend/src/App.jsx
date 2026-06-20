@@ -175,7 +175,7 @@ const MainLayout = ({ children }) => {
               Para evitar la interrupción del servicio, por favor contáctanos para activar tu licencia.
             </span>
             <a 
-              href={`https://wa.me/5491122334455?text=Hola!%20Mi%20periodo%20de%20prueba%20de%20MedicApp%20expira%20en%20${diasRestantes}%20d%C3%ADas%20y%20quiero%20activar%20mi%20licencia.`}
+              href={`https://wa.me/5491122334455?text=Hola!%20Mi%20periodo%20de%20prueba%20de%20MedCloud%20expira%20en%20${diasRestantes}%20d%C3%ADas%20y%20quiero%20activar%20mi%20licencia.`}
               target="_blank"
               rel="noreferrer"
               style={{
@@ -281,7 +281,7 @@ const MainLayout = ({ children }) => {
               lineHeight: '1.6',
               marginBottom: '32px'
             }}>
-              Esperamos que hayas disfrutado la interacción y facilidad de uso de <strong>MedicApp</strong>. Tu acceso de prueba de 15 días ha concluido. Para poder seguir gestionando pacientes y agendas médicas, por favor contáctanos para activar tu licencia.
+              Esperamos que hayas disfrutado la interacción y facilidad de uso de <strong>MedCloud</strong>. Tu acceso de prueba de 15 días ha concluido. Para poder seguir gestionando pacientes y agendas médicas, por favor contáctanos para activar tu licencia.
             </p>
             
             <div style={{
@@ -290,7 +290,7 @@ const MainLayout = ({ children }) => {
               gap: '12px'
             }}>
               <a 
-                href="https://wa.me/5491122334455?text=Hola!%20Termin%C3%B3%20mi%20periodo%20de%20prueba%20de%20MedicApp%20y%20quiero%20activar%20mi%20licencia."
+                href="https://wa.me/5491122334455?text=Hola!%20Termin%C3%B3%20mi%20periodo%20de%20prueba%20de%20MedCloud%20y%20quiero%20activar%20mi%20licencia."
                 target="_blank"
                 rel="noreferrer"
                 style={{

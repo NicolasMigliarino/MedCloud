@@ -1,6 +1,6 @@
-# Especificación del Modelo Entidad-Relación (DER) - MedicApp
+﻿# Especificación del Modelo Entidad-Relación (DER) - MedCloud
 
-Este documento describe detalladamente la estructura de la base de datos de **MedicApp** implementada en Microsoft SQL Server. Toda la lógica de mutación de datos se encuentra encapsulada en **Stored Procedures (Procedimientos Almacenados)** para garantizar la integridad referencial, consistencia de negocio, rendimiento y seguridad de las operaciones.
+Este documento describe detalladamente la estructura de la base de datos de **MedCloud** implementada en Microsoft SQL Server. Toda la lógica de mutación de datos se encuentra encapsulada en **Stored Procedures (Procedimientos Almacenados)** para garantizar la integridad referencial, consistencia de negocio, rendimiento y seguridad de las operaciones.
 
 ---
 
@@ -395,3 +395,4 @@ Para evitar modificaciones maliciosas o el uso del sistema con una demostración
 *   El backend intercepta las peticiones de escritura (`POST`, `PUT`, `DELETE`) en el middleware `verificarToken`.
 *   Si `trial_dias_restantes` es menor a `0`, bloquea la petición antes de enviarla a la base de datos retornando un error HTTP `403` con código `TRIAL_EXPIRED`.
 *   Adicionalmente, los procedimientos almacenados de base de datos pueden incorporar la llamada a `EXEC dbo.sp_VerificarTrial;` para brindar una capa redundante de protección contra escrituras directas.
+

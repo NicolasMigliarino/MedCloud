@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('MedicApp - Restricciones del Rol Médico (doctor_nico)', () => {
+test.describe('MedCloud - Restricciones del Rol Médico (doctor_nico)', () => {
 
   test.afterEach(async ({ page }) => {
     await page.evaluate(() => localStorage.clear());
@@ -31,8 +31,8 @@ test.describe('MedicApp - Restricciones del Rol Médico (doctor_nico)', () => {
     await expect(newPacienteBtn).not.toBeVisible();
 
     // 4. Comprobar que los botones de "Editar" y "Eliminar" estén ocultos en las acciones de la tabla
-    const editBtn = page.locator('.mod-btn.edit');
-    const deleteBtn = page.locator('.mod-btn.delete');
+    const editBtn = page.locator('tbody .mod-btn.edit');
+    const deleteBtn = page.locator('tbody .mod-btn.delete');
     
     await expect(editBtn).not.toBeVisible();
     await expect(deleteBtn).not.toBeVisible();

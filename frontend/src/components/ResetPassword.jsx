@@ -150,7 +150,7 @@ const ResetPassword = () => {
 
                 {/* Texto sobre el panel azul */}
                 <div className="hero register active">
-                    <h2>MedicApp</h2>
+                    <h2>MedCloud</h2>
                     <p>Establecé una nueva contraseña segura para acceder a tu cuenta.</p>
                 </div>
 

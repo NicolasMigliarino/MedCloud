@@ -1,11 +1,11 @@
--- ============================================================================
+﻿-- ============================================================================
 -- MIGRACIÓN 012: Agregar Fecha de Nacimiento y Sexo a Profesionales
 -- Fecha: 2026-06-02
 -- Descripción: Agrega los campos fecha_nacimiento y sexo a la tabla profesionales,
 --              y actualiza sp_CreateProfesional y sp_SetProfesional.
 -- ============================================================================
 
-USE MedicApp;
+USE MedCloud;
 GO
 
 -- ── 1. Agregar Columnas a Profesionales ──────────────────────────────────────
@@ -82,7 +82,7 @@ BEGIN
         END
 
         -- Generamos un email ficticio y password temporal
-        SET @EmailGenerado = @UsuarioFinal + '@medicapp.local';
+        SET @EmailGenerado = @UsuarioFinal + '@MedCloud.local';
         SET @PasswordProvisoria = @DNI; 
 
         -- 1. Insertamos en la tabla PADRE (Usuarios)
@@ -175,3 +175,4 @@ GO
 PRINT '✅ SP sp_SetProfesional actualizado.';
 PRINT '🎉 Migración 012 completada exitosamente.';
 GO
+

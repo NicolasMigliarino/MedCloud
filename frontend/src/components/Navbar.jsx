@@ -48,7 +48,7 @@ const Navbar = ({ theme, toggleTheme, setSidebarOpen }) => {
             WebkitTextFillColor: 'transparent',
             letterSpacing: '-0.5px'
           }}>
-            MedicApp Dashboard
+            MedCloud Dashboard
           </Link>
         </div>
 

@@ -17,7 +17,7 @@ async function main() {
         
         if (!mode || mode === '--list') {
             console.log(`\n======================================================`);
-            console.log(`🔍 MedicApp - ESTADO DE TURNOS PARA MAÑANA (${mañanaFechaStr})`);
+            console.log(`🔍 MedCloud - ESTADO DE TURNOS PARA MAÑANA (${mañanaFechaStr})`);
             console.log(`======================================================`);
             
             const resultTurnos = await pool.request()

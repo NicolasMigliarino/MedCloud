@@ -16,7 +16,7 @@ function getFutureDay(dayOfWeek) {
   return { day, month, year };
 }
 
-test.describe('MedicApp - Validaciones de Horario de Atención y Agenda (Rol Yanina)', () => {
+test.describe('MedCloud - Validaciones de Horario de Atención y Agenda (Rol Yanina)', () => {
 
   test.afterEach(async ({ page }) => {
     await page.evaluate(() => localStorage.clear());
@@ -49,7 +49,11 @@ test.describe('MedicApp - Validaciones de Horario de Atención y Agenda (Rol Yan
     await page.fill('input[name="apellido"]', docLastName);
     await page.fill('input[name="dni"]', docDni);
     await page.fill('input[name="matricula"]', 'MP-' + docDni.slice(0, 5));
-    await page.fill('input[name="especialidad"]', 'Odontología');
+    await page.fill('input[name="email"]', `doc_horario_${docDni}@medcloud.local`);
+    
+    // Esperar que las especialidades carguen
+    await page.waitForFunction(() => document.querySelectorAll('select[name="especialidad_id"] option').length > 1);
+    await page.selectOption('select[name="especialidad_id"]', { label: 'Odontología' });
 
     // Activar el checkbox de "Martes" haciendo clic en su slider estilizado
     const martesRow = page.locator('.schedule-day-row:has-text("Martes")');
@@ -64,6 +68,7 @@ test.describe('MedicApp - Validaciones de Horario de Atención y Agenda (Rol Yan
 
     // Esperar redirección al listado
     await page.waitForURL(url => url.pathname === '/profesionales');
+    await page.locator('.mod-search-wrap input').fill(docName);
     await expect(page.locator('table')).toContainText(docName);
 
     // 3. Crear un nuevo Paciente
@@ -85,10 +90,15 @@ test.describe('MedicApp - Validaciones de Horario de Atención y Agenda (Rol Yan
 
     // Esperar redirección al listado de pacientes
     await page.waitForURL(url => url.pathname === '/pacientes');
+    await page.locator('.mod-search-wrap input').fill(pacDni);
     await expect(page.locator('table')).toContainText(pacName);
 
     // 4. Intentar agendar Turno
     await page.goto('/turnos/nuevo');
+
+    // Esperar que los selectores carguen sus opciones desde la API
+    await page.waitForFunction(() => document.querySelectorAll('select[name="paciente_id"] option').length > 1);
+    await page.waitForFunction(() => document.querySelectorAll('select[name="profesional_id"] option').length > 1);
 
     // Seleccionar paciente
     const pacienteSelect = page.locator('select[name="paciente_id"]');
@@ -166,6 +176,9 @@ test.describe('MedicApp - Validaciones de Horario de Atención y Agenda (Rol Yan
 
     // Redirección exitosa al listado de turnos
     await page.waitForURL(url => url.pathname === '/turnos');
+
+    // Filtrar por nombre del paciente para asegurar que se muestre en la primera página
+    await page.locator('.mod-search-wrap input').fill(pacName);
 
     // Validar presencia en la lista usando el nombre del nuevo paciente
     const turnosTable = page.locator('table');

@@ -254,7 +254,7 @@ const Liquidaciones = () => {
                 <div>
                     {/* ENCABEZADO DE IMPRESIÓN (Sólo visible al imprimir) */}
                     <div className="d-none d-print-block mb-5 text-center">
-                        <h2>🏥 MedicApp - Centro Clínico</h2>
+                        <h2>🏥 MedCloud - Centro Clínico</h2>
                         <h4 className="text-muted">Liquidación Oficial de Honorarios Médicos</h4>
                         <hr />
                         <div className="row text-start mt-4">

@@ -58,7 +58,7 @@ const ForgotPassword = () => {
 
                 {/* Texto sobre el panel azul */}
                 <div className="hero register active">
-                    <h2>MedicApp</h2>
+                    <h2>MedCloud</h2>
                     <p>Te enviaremos un enlace seguro a tu correo electrónico para restablecer tu contraseña.</p>
                 </div>
 

@@ -26,7 +26,7 @@ const buildReminderEmailHTML = (pacienteNombre, profesionalNombre, especialidad,
                         <!-- Header con gradiente -->
                         <tr>
                             <td style="background:linear-gradient(135deg,#1e3c72,#2a5298); padding:32px 40px; text-align:center;">
-                                <h1 style="color:#ffffff; margin:0; font-size:28px; font-weight:700; letter-spacing:-0.5px;">MedicApp</h1>
+                                <h1 style="color:#ffffff; margin:0; font-size:28px; font-weight:700; letter-spacing:-0.5px;">MedCloud</h1>
                                 <p style="color:rgba(255,255,255,0.85); margin:8px 0 0; font-size:14px;">Recordatorio de Turno Médico</p>
                             </td>
                         </tr>
@@ -77,7 +77,7 @@ const buildReminderEmailHTML = (pacienteNombre, profesionalNombre, especialidad,
                         <tr>
                             <td style="background-color:#f8fafc; padding:20px 40px; border-top:1px solid #e2e8f0; text-align:center;">
                                 <p style="color:#94a3b8; font-size:11px; margin:0;">
-                                    © ${new Date().getFullYear()} MedicApp — Plataforma de Gestión Clínica Integral
+                                    © ${new Date().getFullYear()} MedCloud — Plataforma de Gestión Clínica Integral
                                 </p>
                             </td>
                         </tr>
@@ -91,9 +91,9 @@ const buildReminderEmailHTML = (pacienteNombre, profesionalNombre, especialidad,
 
 const sendPatientReminderEmail = async (pacienteNombre, pacienteEmail, profesionalNombre, especialidad, fechaHora) => {
     const mailOptions = {
-        from: `"MedicApp" <${process.env.SMTP_USER || 'noreply@medicapp.com'}>`,
+        from: `"MedCloud" <${process.env.SMTP_USER || 'noreply@medcloud.com'}>`,
         to: pacienteEmail,
-        subject: '📅 MedicApp — Recordatorio de Turno Médico',
+        subject: '📅 MedCloud — Recordatorio de Turno Médico',
         html: buildReminderEmailHTML(pacienteNombre, profesionalNombre, especialidad, fechaHora)
     };
 
@@ -142,7 +142,7 @@ const buildDoctorAgendaEmailHTML = (profesionalNombre, fechaLegible, turnosRowsH
                                     </tbody>
                                 </table>
                                 
-                                <p style="margin-top: 28px; font-size: 13px; color: #94a3b8; text-align: center;">Este es un envío automático generado por MedicApp.</p>
+                                <p style="margin-top: 28px; font-size: 13px; color: #94a3b8; text-align: center;">Este es un envío automático generado por MedCloud.</p>
                             </td>
                         </tr>
                     </table>
@@ -155,9 +155,9 @@ const buildDoctorAgendaEmailHTML = (profesionalNombre, fechaLegible, turnosRowsH
 
 const sendDoctorAgendaEmail = async (profesionalNombre, profesionalEmail, fechaLegible, turnosRowsHTML, totalTurnos) => {
     const mailOptions = {
-        from: `"MedicApp" <${process.env.SMTP_USER || 'noreply@medicapp.com'}>`,
+        from: `"MedCloud" <${process.env.SMTP_USER || 'noreply@medcloud.com'}>`,
         to: profesionalEmail,
-        subject: `📋 Agenda Médica para Mañana — MedicApp`,
+        subject: `📋 Agenda Médica para Mañana — MedCloud`,
         html: buildDoctorAgendaEmailHTML(profesionalNombre, fechaLegible, turnosRowsHTML, totalTurnos)
     };
 

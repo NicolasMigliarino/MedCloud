@@ -146,7 +146,7 @@ const LoginPage = () => {
 
                 {/* --- TEXTO SOBRE EL PANEL AZUL (DERECHA) --- */}
                 <div className="hero register active">
-                    <h2>MedicApp</h2>
+                    <h2>MedCloud</h2>
                     <p>Acceso restringido para personal autorizado.</p>
                 </div>
 

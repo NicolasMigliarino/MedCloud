@@ -1,8 +1,8 @@
 export const clinicConfig = {
-    nombre: "MedicApp",
+    nombre: "MedCloud",
     telefono: "+11 6182-0425",
     email: "nmigliarino@gmail.com",
-    sitioWeb: "www.medicapp.com",
+    sitioWeb: "www.medcloud.com",
     copyrightYear: new Date().getFullYear(),
     
     // Aquí el cliente pone los links de sus redes. 

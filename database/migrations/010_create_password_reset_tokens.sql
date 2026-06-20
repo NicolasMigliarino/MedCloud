@@ -1,11 +1,11 @@
--- ============================================================================
+﻿-- ============================================================================
 -- MIGRACIÓN 010: Recuperación de Contraseña por Email
 -- Fecha: 2026-05-30
 -- Descripción: Crea la tabla de tokens temporales y los SPs para el flujo
 --              completo de reset de contraseña vía correo electrónico.
 -- ============================================================================
 
-USE MedicApp;
+USE MedCloud;
 GO
 
 -- ── 1. Tabla de Tokens de Recuperación ──────────────────────────────────────
@@ -156,3 +156,4 @@ GO
 PRINT '✅ SP sp_ResetPasswordByToken creado.';
 PRINT '🎉 Migración 010 completada exitosamente.';
 GO
+

@@ -1,9 +1,9 @@
-USE [MedicApp]
+USE [MedCloud]
 GO
-/****** Object:  User [medicapp_user]    Script Date: 28/5/2026 01:11:32 ******/
-CREATE USER [medicapp_user] FOR LOGIN [medicapp_user] WITH DEFAULT_SCHEMA=[dbo]
+/****** Object:  User [MedCloud_user]    Script Date: 28/5/2026 01:11:32 ******/
+CREATE USER [MedCloud_user] FOR LOGIN [MedCloud_user] WITH DEFAULT_SCHEMA=[dbo]
 GO
-ALTER ROLE [db_owner] ADD MEMBER [medicapp_user]
+ALTER ROLE [db_owner] ADD MEMBER [MedCloud_user]
 GO
 /****** Object:  Table [dbo].[administrativos]    Script Date: 28/5/2026 01:11:33 ******/
 SET ANSI_NULLS ON
@@ -266,6 +266,7 @@ CREATE TABLE [dbo].[turnos](
 	[metodo_pago] [varchar](50) NULL,
 	[fecha_pago] [datetime] NULL,
 	[recordatorio_enviado] [bit] NULL,
+	[recordatorio_dia_anterior_enviado] [bit] NOT NULL DEFAULT 0,
 PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -556,37 +557,37 @@ GO
 SET IDENTITY_INSERT [dbo].[usuarios] ON 
 
 INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1, N'doctor@test.com', N'claveSecreta123', 5, 1, CAST(N'2025-12-17T19:47:54.367' AS DateTime), N'doctor_nico', NULL)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (4, N'admin@medicapp.com', N'clave_super_secreta_123', 2, 1, CAST(N'2026-01-21T20:08:24.167' AS DateTime), N'admin_general', 0)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (4, N'admin@MedCloud.com', N'clave_super_secreta_123', 2, 1, CAST(N'2026-01-21T20:08:24.167' AS DateTime), N'admin_general', 0)
 INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (6, N'yanina@gmail.com', N'123456', 4, 1, CAST(N'2026-02-21T20:30:53.907' AS DateTime), N'Yanina', 0)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (9, N'jboca@medicapp.local', N'22345555', 2, 1, CAST(N'2026-02-28T01:49:56.707' AS DateTime), N'jboca', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (9, N'jboca@MedCloud.local', N'22345555', 2, 1, CAST(N'2026-02-28T01:49:56.707' AS DateTime), N'jboca', 1)
 INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (10, N'melanie@gmail.com', N'12345', 4, 1, CAST(N'2026-02-28T15:12:23.983' AS DateTime), N'mmigliarino', 0)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (11, N'ctorres@medicapp.local', N'40555777', 2, 1, CAST(N'2026-02-28T17:32:37.803' AS DateTime), N'ctorres', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (12, N'cfalcioni@medicapp.local', N'23456432', 2, 1, CAST(N'2026-03-01T23:14:18.307' AS DateTime), N'cfalcioni', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (16, N'jmorales@medicapp.local', N'37546781', 2, 1, CAST(N'2026-03-01T23:18:52.207' AS DateTime), N'jmorales', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1012, N'msmith@medicapp.local', N'34567321', 2, 1, CAST(N'2026-03-14T19:01:24.750' AS DateTime), N'msmith', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1014, N'dflow@medicapp.local', N'77145807', 2, 1, CAST(N'2026-05-20T00:17:55.673' AS DateTime), N'dflow', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1015, N'dflow1@medicapp.local', N'60503625', 2, 1, CAST(N'2026-05-20T00:18:43.053' AS DateTime), N'dflow1', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1016, N'dflow2@medicapp.local', N'30764267', 2, 1, CAST(N'2026-05-20T00:19:45.897' AS DateTime), N'dflow2', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1017, N'dflow3@medicapp.local', N'44515348', 2, 1, CAST(N'2026-05-20T00:20:22.610' AS DateTime), N'dflow3', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1018, N'dflow4@medicapp.local', N'71374767', 2, 1, CAST(N'2026-05-20T13:07:40.237' AS DateTime), N'dflow4', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1019, N'dflow5@medicapp.local', N'93303952', 2, 1, CAST(N'2026-05-20T13:08:40.660' AS DateTime), N'dflow5', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1020, N'dflow6@medicapp.local', N'74873088', 2, 1, CAST(N'2026-05-20T13:13:15.187' AS DateTime), N'dflow6', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1021, N'dflow7@medicapp.local', N'52365662', 2, 1, CAST(N'2026-05-20T17:51:54.937' AS DateTime), N'dflow7', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1022, N'dflow8@medicapp.local', N'23652242', 2, 1, CAST(N'2026-05-20T18:06:44.780' AS DateTime), N'dflow8', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1023, N'dflow9@medicapp.local', N'45149489', 2, 1, CAST(N'2026-05-20T18:32:28.053' AS DateTime), N'dflow9', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1024, N'mlamas@medicapp.local', N'33754234', 2, 1, CAST(N'2026-05-21T00:05:33.160' AS DateTime), N'mlamas', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1025, N'dflow10@medicapp.local', N'53818162', 2, 1, CAST(N'2026-05-21T19:34:32.433' AS DateTime), N'dflow10', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1026, N'dflow11@medicapp.local', N'91676544', 2, 1, CAST(N'2026-05-21T19:43:56.033' AS DateTime), N'dflow11', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1027, N'dflow12@medicapp.local', N'60799863', 2, 1, CAST(N'2026-05-21T19:49:52.940' AS DateTime), N'dflow12', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1028, N'dflow13@medicapp.local', N'74975059', 2, 1, CAST(N'2026-05-21T20:06:54.370' AS DateTime), N'dflow13', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1029, N'dflow14@medicapp.local', N'82801432', 2, 1, CAST(N'2026-05-21T20:07:23.300' AS DateTime), N'dflow14', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1030, N'dflow15@medicapp.local', N'44509520', 2, 1, CAST(N'2026-05-21T20:12:54.290' AS DateTime), N'dflow15', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1031, N'dflow16@medicapp.local', N'73921120', 2, 1, CAST(N'2026-05-21T20:23:14.100' AS DateTime), N'dflow16', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1032, N'dflow17@medicapp.local', N'44415597', 2, 1, CAST(N'2026-05-22T11:50:52.240' AS DateTime), N'dflow17', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1033, N'dflow18@medicapp.local', N'38466580', 2, 1, CAST(N'2026-05-22T11:55:06.880' AS DateTime), N'dflow18', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1034, N'dflow19@medicapp.local', N'70944579', 2, 1, CAST(N'2026-05-23T02:59:45.567' AS DateTime), N'dflow19', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1035, N'dflow20@medicapp.local', N'17526302', 2, 1, CAST(N'2026-05-28T01:01:43.820' AS DateTime), N'dflow20', 1)
-INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1036, N'dflow21@medicapp.local', N'32458461', 2, 1, CAST(N'2026-05-28T01:08:39.917' AS DateTime), N'dflow21', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (11, N'ctorres@MedCloud.local', N'40555777', 2, 1, CAST(N'2026-02-28T17:32:37.803' AS DateTime), N'ctorres', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (12, N'cfalcioni@MedCloud.local', N'23456432', 2, 1, CAST(N'2026-03-01T23:14:18.307' AS DateTime), N'cfalcioni', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (16, N'jmorales@MedCloud.local', N'37546781', 2, 1, CAST(N'2026-03-01T23:18:52.207' AS DateTime), N'jmorales', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1012, N'msmith@MedCloud.local', N'34567321', 2, 1, CAST(N'2026-03-14T19:01:24.750' AS DateTime), N'msmith', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1014, N'dflow@MedCloud.local', N'77145807', 2, 1, CAST(N'2026-05-20T00:17:55.673' AS DateTime), N'dflow', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1015, N'dflow1@MedCloud.local', N'60503625', 2, 1, CAST(N'2026-05-20T00:18:43.053' AS DateTime), N'dflow1', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1016, N'dflow2@MedCloud.local', N'30764267', 2, 1, CAST(N'2026-05-20T00:19:45.897' AS DateTime), N'dflow2', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1017, N'dflow3@MedCloud.local', N'44515348', 2, 1, CAST(N'2026-05-20T00:20:22.610' AS DateTime), N'dflow3', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1018, N'dflow4@MedCloud.local', N'71374767', 2, 1, CAST(N'2026-05-20T13:07:40.237' AS DateTime), N'dflow4', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1019, N'dflow5@MedCloud.local', N'93303952', 2, 1, CAST(N'2026-05-20T13:08:40.660' AS DateTime), N'dflow5', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1020, N'dflow6@MedCloud.local', N'74873088', 2, 1, CAST(N'2026-05-20T13:13:15.187' AS DateTime), N'dflow6', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1021, N'dflow7@MedCloud.local', N'52365662', 2, 1, CAST(N'2026-05-20T17:51:54.937' AS DateTime), N'dflow7', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1022, N'dflow8@MedCloud.local', N'23652242', 2, 1, CAST(N'2026-05-20T18:06:44.780' AS DateTime), N'dflow8', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1023, N'dflow9@MedCloud.local', N'45149489', 2, 1, CAST(N'2026-05-20T18:32:28.053' AS DateTime), N'dflow9', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1024, N'mlamas@MedCloud.local', N'33754234', 2, 1, CAST(N'2026-05-21T00:05:33.160' AS DateTime), N'mlamas', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1025, N'dflow10@MedCloud.local', N'53818162', 2, 1, CAST(N'2026-05-21T19:34:32.433' AS DateTime), N'dflow10', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1026, N'dflow11@MedCloud.local', N'91676544', 2, 1, CAST(N'2026-05-21T19:43:56.033' AS DateTime), N'dflow11', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1027, N'dflow12@MedCloud.local', N'60799863', 2, 1, CAST(N'2026-05-21T19:49:52.940' AS DateTime), N'dflow12', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1028, N'dflow13@MedCloud.local', N'74975059', 2, 1, CAST(N'2026-05-21T20:06:54.370' AS DateTime), N'dflow13', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1029, N'dflow14@MedCloud.local', N'82801432', 2, 1, CAST(N'2026-05-21T20:07:23.300' AS DateTime), N'dflow14', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1030, N'dflow15@MedCloud.local', N'44509520', 2, 1, CAST(N'2026-05-21T20:12:54.290' AS DateTime), N'dflow15', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1031, N'dflow16@MedCloud.local', N'73921120', 2, 1, CAST(N'2026-05-21T20:23:14.100' AS DateTime), N'dflow16', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1032, N'dflow17@MedCloud.local', N'44415597', 2, 1, CAST(N'2026-05-22T11:50:52.240' AS DateTime), N'dflow17', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1033, N'dflow18@MedCloud.local', N'38466580', 2, 1, CAST(N'2026-05-22T11:55:06.880' AS DateTime), N'dflow18', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1034, N'dflow19@MedCloud.local', N'70944579', 2, 1, CAST(N'2026-05-23T02:59:45.567' AS DateTime), N'dflow19', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1035, N'dflow20@MedCloud.local', N'17526302', 2, 1, CAST(N'2026-05-28T01:01:43.820' AS DateTime), N'dflow20', 1)
+INSERT [dbo].[usuarios] ([id], [email], [password_hash], [rol_id], [activo], [fecha_creacion], [username], [debe_cambiar_pass]) VALUES (1036, N'dflow21@MedCloud.local', N'32458461', 2, 1, CAST(N'2026-05-28T01:08:39.917' AS DateTime), N'dflow21', 1)
 SET IDENTITY_INSERT [dbo].[usuarios] OFF
 GO
 SET ANSI_PADDING ON
@@ -1071,7 +1072,7 @@ GO
                 END
 
                 -- Generamos un email ficticio y password temporal
-                SET @EmailGenerado = COALESCE(@Email, @UsuarioFinal + '@medicapp.local');
+                SET @EmailGenerado = COALESCE(@Email, @UsuarioFinal + '@MedCloud.local');
                 SET @PasswordProvisoria = @DNI; 
 
                 -- 1. Insertamos en la tabla PADRE (Usuarios)
@@ -2109,3 +2110,4 @@ BEGIN
     ORDER BY nombre ASC;
 END;
 GO
+

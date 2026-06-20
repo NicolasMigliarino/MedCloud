@@ -1,11 +1,11 @@
--- ============================================================================
+﻿-- ============================================================================
 -- MIGRACIÓN 011: Configuración de Periodo de Prueba (Trial)
 -- Fecha: 2026-06-02
 -- Descripción: Crea la tabla de configuración de trial, inicializa el periodo,
 --              crea el SP sp_VerificarTrial y actualiza sp_LoginUsuario.
 -- ============================================================================
 
-USE MedicApp;
+USE MedCloud;
 GO
 
 -- ── 1. Tabla de Configuración del Trial ──────────────────────────────────────
@@ -16,12 +16,12 @@ BEGIN
         es_trial          BIT NOT NULL DEFAULT 1,
         fecha_inicio      DATETIME NOT NULL DEFAULT GETDATE(),
         duracion_dias     INT NOT NULL DEFAULT 15,
-        contacto_soporte  NVARCHAR(100) NOT NULL DEFAULT 'contacto@medicapp.com'
+        contacto_soporte  NVARCHAR(100) NOT NULL DEFAULT 'contacto@MedCloud.com'
     );
 
     -- Insertar configuración inicial (15 días de prueba a partir de hoy)
     INSERT INTO configuracion_trial (es_trial, fecha_inicio, duracion_dias, contacto_soporte)
-    VALUES (1, GETDATE(), 15, 'soporte@medicapp.com');
+    VALUES (1, GETDATE(), 15, 'soporte@MedCloud.com');
 
     PRINT '✅ Tabla configuracion_trial creada e inicializada.';
 END
@@ -51,7 +51,7 @@ BEGIN
 
     IF @es_trial = 1 AND DATEDIFF(day, GETDATE(), DATEADD(day, @duracion_dias, @fecha_inicio)) < 0
     BEGIN
-        ;THROW 50001, 'El periodo de prueba de MedicApp ha expirado. Por favor, contacte a soporte para activar su cuenta.', 1;
+        ;THROW 50001, 'El periodo de prueba de MedCloud ha expirado. Por favor, contacte a soporte para activar su cuenta.', 1;
     END;
 END
 GO
@@ -96,3 +96,4 @@ GO
 PRINT '✅ SP sp_LoginUsuario actualizado con retorno de días de prueba.';
 PRINT '🎉 Migración 011 completada exitosamente.';
 GO
+

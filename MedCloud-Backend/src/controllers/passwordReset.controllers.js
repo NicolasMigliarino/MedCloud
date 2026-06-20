@@ -39,7 +39,7 @@ const buildResetEmailHTML = (username, resetLink) => {
                         <!-- Header con gradiente -->
                         <tr>
                             <td style="background:linear-gradient(135deg,#3c23c9,#5b42f3); padding:32px 40px; text-align:center;">
-                                <h1 style="color:#ffffff; margin:0; font-size:28px; font-weight:700; letter-spacing:-0.5px;">MedicApp</h1>
+                                <h1 style="color:#ffffff; margin:0; font-size:28px; font-weight:700; letter-spacing:-0.5px;">MedCloud</h1>
                                 <p style="color:rgba(255,255,255,0.85); margin:8px 0 0; font-size:14px;">Plataforma de Gestión Clínica</p>
                             </td>
                         </tr>
@@ -86,7 +86,7 @@ const buildResetEmailHTML = (username, resetLink) => {
                         <tr>
                             <td style="background-color:#f8fafc; padding:20px 40px; border-top:1px solid #e2e8f0; text-align:center;">
                                 <p style="color:#94a3b8; font-size:11px; margin:0;">
-                                    © ${new Date().getFullYear()} MedicApp — Plataforma de Gestión Clínica Integral
+                                    © ${new Date().getFullYear()} MedCloud — Plataforma de Gestión Clínica Integral
                                 </p>
                             </td>
                         </tr>
@@ -148,9 +148,9 @@ const forgotPassword = async (req, res) => {
         // Enviar el email
         const transporter = createTransporter();
         await transporter.sendMail({
-            from: `"MedicApp" <${process.env.SMTP_USER || 'noreply@medicapp.com'}>`,
+            from: `"MedCloud" <${process.env.SMTP_USER || 'noreply@medcloud.com'}>`,
             to: usuario.email,
-            subject: '🔐 MedicApp — Recuperación de Contraseña',
+            subject: '🔐 MedCloud — Recuperación de Contraseña',
             html: buildResetEmailHTML(usuario.username, resetLink)
         });
 

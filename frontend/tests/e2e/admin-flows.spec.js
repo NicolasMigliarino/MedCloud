@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('MedicApp - Flujos Administrativos E2E', () => {
+test.describe('MedCloud - Flujos Administrativos E2E', () => {
 
   // Limpiar el almacenamiento después de cada test para aislar sesiones
   test.afterEach(async ({ page }) => {
@@ -97,6 +97,9 @@ test.describe('MedicApp - Flujos Administrativos E2E', () => {
     // Esperar redirección exacta al listado (utilizando función de callback para evitar falsos positivos con glob)
     await page.waitForURL(url => url.pathname === '/pacientes');
 
+    // Filtrar por DNI para asegurar que se muestre en la primera página
+    await page.locator('.mod-search-wrap input').fill(randDni);
+
     // Verificar presencia del nuevo paciente en la tabla con auto-wait
     const table = page.locator('table');
     await expect(table).toContainText('TEST_PLAYWRIGHT');
@@ -179,6 +182,9 @@ test.describe('MedicApp - Flujos Administrativos E2E', () => {
 
     // Esperar redirección exacta a agenda de turnos
     await page.waitForURL(url => url.pathname === '/turnos');
+
+    // Filtrar por nombre del paciente para asegurar que se muestre en la primera página
+    await page.locator('.mod-search-wrap input').fill(pacienteName);
 
     // Comprobar éxito con auto-wait en la tabla usando el nombre del paciente
     const table = page.locator('table');
