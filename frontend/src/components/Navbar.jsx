@@ -1,7 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const Navbar = ({ theme, toggleTheme, setSidebarOpen }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMainPage = location.pathname === '/';
 
   const handleLogout = () => {
     // 1. Borramos el token y el usuario del navegador
@@ -42,14 +44,16 @@ const Navbar = ({ theme, toggleTheme, setSidebarOpen }) => {
             <ion-icon name="menu-outline"></ion-icon>
           </button>
 
-          <Link className="navbar-brand fw-bold mb-0" to="/" style={{
-            background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px'
-          }}>
-            MedCloud Dashboard
-          </Link>
+          {isMainPage && (
+            <Link className="navbar-brand fw-bold mb-0" to="/" style={{
+              background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.5px'
+            }}>
+              MedCloud Dashboard
+            </Link>
+          )}
         </div>
 
         {/* LADO DERECHO: Toggle Tema & Botón de Salir */}
