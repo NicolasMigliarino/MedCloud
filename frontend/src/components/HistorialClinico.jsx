@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getLoggedInUser } from '../utils/auth';
+import { API_URL } from '../config';
 
 const HistorialClinico = () => {
     const { paciente_id } = useParams(); 
@@ -240,7 +241,7 @@ const HistorialClinico = () => {
                                                 </small>
                                             </div>
                                             <a 
-                                                href={`http://localhost:3000/uploads/${archivo.nombre_archivo}`} 
+                                                href={`${API_URL}/uploads/${archivo.nombre_archivo}`} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
                                                 className="btn btn-sm btn-outline-info rounded-pill px-3"

@@ -6,6 +6,7 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { es } from 'date-fns/locale/es';
 import './forms.css';
+import { API_URL } from '../config';
 
 registerLocale('es', es);
 
@@ -386,7 +387,7 @@ const PacientesForm = () => {
                                                         </span>
                                                     </div>
                                                     <a 
-                                                        href={`http://localhost:3000/uploads/${archivo.nombre_archivo}`} 
+                                                        href={`${API_URL}/uploads/${archivo.nombre_archivo}`} 
                                                         target="_blank" 
                                                         rel="noopener noreferrer"
                                                         style={{ background: '#007bff', color: 'white', padding: '5px 10px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.9rem' }}

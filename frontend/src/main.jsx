@@ -4,11 +4,17 @@ import axios from 'axios'
 import './index.css'
 import App from './App.jsx'
 
-// Interceptor global para enviar el token en todas las peticiones
+import { API_URL } from './config'
+
+// Interceptor global para enviar el token y ajustar la URL de la API
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  
+  if (config.url && config.url.startsWith('http://localhost:3000')) {
+    config.url = config.url.replace('http://localhost:3000', API_URL);
   }
   return config;
 }, (error) => {
