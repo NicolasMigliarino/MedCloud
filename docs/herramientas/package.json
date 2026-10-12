@@ -1,0 +1,15 @@
+{
+  "name": "medcloud-manuales",
+  "private": true,
+  "description": "Genera los manuales en PDF a partir de docs/manual-usuario y docs/manual-tecnico",
+  "type": "module",
+  "scripts": {
+    "pdf": "node generar-pdf.mjs"
+  },
+  "dependencies": {
+    "marked": "^15.0.12",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.10.38",
+    "puppeteer-core": "^23.11.1"
+  }
+}
