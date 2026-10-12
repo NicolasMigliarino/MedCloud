@@ -20,3 +20,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.tmp
+
+# Archivos propios del servidor de producción (nunca subir: tienen contraseñas y certificados)
+/docker-compose.yml
+MedCloud-Backend/docker-compose.yml
+/npm/
+*.deb

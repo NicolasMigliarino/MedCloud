@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './modules.css';
+import { abrirArchivo } from '../utils/archivos';
 
 const Liquidaciones = () => {
     const [profesionales, setProfesionales] = useState([]);
@@ -542,15 +543,14 @@ const Liquidaciones = () => {
                                             </td>
                                             <td className="text-center">
                                                 {p.comprobante_url ? (
-                                                    <a 
-                                                        href={`http://localhost:3000${p.comprobante_url}`} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer" 
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => abrirArchivo(p.comprobante_url)}
                                                         className="btn btn-sm btn-outline-primary"
                                                         style={{ padding: '2px 8px', fontSize: '0.8rem', borderRadius: '4px' }}
                                                     >
                                                         📄 Ver Recibo
-                                                    </a>
+                                                    </button>
                                                 ) : (
                                                     <span className="text-muted">-</span>
                                                 )}

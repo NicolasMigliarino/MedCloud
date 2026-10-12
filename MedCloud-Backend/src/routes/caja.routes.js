@@ -1,22 +1,25 @@
 const { Router } = require('express');
-const { 
-    getCajaActiva, 
-    abrirCaja, 
-    cerrarCaja, 
-    getHistorialCajas, 
-    getLiquidacion 
+const {
+    getCajaActiva,
+    abrirCaja,
+    cerrarCaja,
+    getHistorialCajas,
+    getLiquidacion
 } = require('../controllers/caja.controllers');
-const { verificarToken } = require('../middlewares/auth.middleware');
+const { verificarToken, permitirRoles } = require('../middlewares/auth.middleware');
 
 const router = Router();
 
-// Rutas de Control de Caja Diaria (Acceso para RECEPCION y ADMIN)
-router.get('/caja/activa', verificarToken, getCajaActiva);
-router.post('/caja/abrir', verificarToken, abrirCaja);
-router.post('/caja/cerrar', verificarToken, cerrarCaja);
-router.get('/caja/historial', verificarToken, getHistorialCajas);
+// Caja y liquidaciones: mismas restricciones que la pantalla (ADMIN y RECEPCION)
+const gestionCaja = [verificarToken, permitirRoles('ADMIN', 'RECEPCION')];
 
-// Ruta de Liquidaciones de Honorarios (Acceso para RECEPCION y ADMIN)
-router.get('/liquidaciones', verificarToken, getLiquidacion);
+// Rutas de Control de Caja Diaria
+router.get('/caja/activa', gestionCaja, getCajaActiva);
+router.post('/caja/abrir', gestionCaja, abrirCaja);
+router.post('/caja/cerrar', gestionCaja, cerrarCaja);
+router.get('/caja/historial', gestionCaja, getHistorialCajas);
+
+// Ruta de Liquidaciones de Honorarios
+router.get('/liquidaciones', gestionCaja, getLiquidacion);
 
 module.exports = router;

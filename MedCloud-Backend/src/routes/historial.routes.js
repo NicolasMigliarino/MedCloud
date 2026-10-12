@@ -1,18 +1,20 @@
 const { Router } = require('express');
-const { getHistoriales, createHistorial, setHistorial, deleteHistorial, compartirHistorial } = require('../controllers/historial.controllers');
+const { getHistoriales, createHistorial, compartirHistorial } = require('../controllers/historial.controllers');
+const { verificarToken, permitirRoles } = require('../middlewares/auth.middleware');
 const router = Router();
 
-// GET: Traer historial filtrado por privacidad (¡Esta es la que necesita React para mostrar la lista!)
-router.get('/historial/paciente/:paciente_id/profesional/:profesional_id', getHistoriales);
+// La historia clínica es exclusiva del rol MEDICO (igual que la pantalla).
+// El médico se toma siempre del token, nunca de la URL ni del cuerpo.
+const soloMedico = [verificarToken, permitirRoles('MEDICO')];
 
-// POST: Crear nueva evolución
-router.post('/historial', createHistorial);
+router.get('/historial/paciente/:paciente_id', soloMedico, getHistoriales);
+// Ruta anterior: se mantiene por compatibilidad; el id de profesional de la URL se ignora
+router.get('/historial/paciente/:paciente_id/profesional/:profesional_id', soloMedico, getHistoriales);
 
-// POST: Compartir evolución
-router.post('/historial/compartir', compartirHistorial); 
+router.post('/historial', soloMedico, createHistorial);
+router.post('/historial/compartir', soloMedico, compartirHistorial);
 
-// PUT y DELETE: Editar y Borrar
-router.put('/historial/:id', setHistorial);
-router.delete('/historial/:id', deleteHistorial);
+// No hay rutas para editar ni borrar evoluciones: la historia clínica es inviolable (Ley 26.529, art. 18)
+// y ninguna pantalla las usaba.
 
 module.exports = router;

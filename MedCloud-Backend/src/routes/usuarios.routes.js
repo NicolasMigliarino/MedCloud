@@ -1,23 +1,18 @@
 const { Router } = require('express');
 const { getUsuarios, getUsuarioById, createUsuario, deleteUsuario, setUsuario, changePassword } = require('../controllers/usuarios.controllers');
+const { verificarToken, permitirRoles } = require('../middlewares/auth.middleware');
 const router = Router();
 
-// Cuando alguien visite "/usuarios", se ejecuta la función getUsuario
-router.get('/usuarios', getUsuarios);
+// Gestión de usuarios: mismas restricciones que la pantalla (ADMIN y RECEPCION)
+const gestionUsuarios = [verificarToken, permitirRoles('ADMIN', 'RECEPCION')];
 
-// Ruta para obtener un usuario especifico
-router.get('/usuarios/:id', getUsuarioById);
+router.get('/usuarios', gestionUsuarios, getUsuarios);
+router.get('/usuarios/:id', gestionUsuarios, getUsuarioById);
+router.post('/usuarios', gestionUsuarios, createUsuario);
+router.put('/usuarios/:id', gestionUsuarios, setUsuario);
+router.delete('/usuarios/:id', gestionUsuarios, deleteUsuario);
 
-// Ruta para crear un nuevo usuario
-router.post('/usuarios', createUsuario);
-
-// PUT: Para editar. Se usa así: localhost:3000/medicos/1
-router.put('/usuarios/:id', setUsuario);
-
-// DELETE: Para borrar. Se usa así: localhost:3000/medicos/1
-router.delete('/usuarios/:id', deleteUsuario);
-
-// PUT: Para cambiar la contraseña del usuario (ej: 1er login)
-router.put('/usuarios/:id/password', changePassword);
+// Cambio de la propia contraseña (ej: 1er login). El controlador valida que sea el mismo usuario o un ADMIN.
+router.put('/usuarios/:id/password', verificarToken, changePassword);
 
 module.exports = router;

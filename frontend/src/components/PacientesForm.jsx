@@ -7,6 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { es } from 'date-fns/locale/es';
 import './forms.css';
 import { API_URL } from '../config';
+import { abrirArchivo } from '../utils/archivos';
 
 registerLocale('es', es);
 
@@ -400,14 +401,13 @@ const PacientesForm = () => {
                                                             ({new Date(archivo.fecha_subida).toLocaleDateString()})
                                                         </span>
                                                     </div>
-                                                    <a 
-                                                        href={`${API_URL}/uploads/${archivo.nombre_archivo}`} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        style={{ background: '#007bff', color: 'white', padding: '5px 10px', borderRadius: '4px', textDecoration: 'none', fontSize: '0.9rem' }}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => abrirArchivo(archivo.nombre_archivo)}
+                                                        style={{ background: '#007bff', color: 'white', padding: '5px 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
                                                     >
                                                         👁️ Ver Archivo
-                                                    </a>
+                                                    </button>
                                                 </li>
                                             ))}
                                         </ul>

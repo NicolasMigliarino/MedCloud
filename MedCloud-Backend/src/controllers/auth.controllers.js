@@ -1,6 +1,7 @@
 const { getConnection, sql } = require('../db');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { JWT_SECRET } = require('../config');
 
 /**
  * Endpoint de Login de Usuario.
@@ -64,7 +65,7 @@ const login = async (req, res) => {
                 trial_dias_restantes: usuario.trial_dias_restantes,
                 session_id
             },
-            'PALABRA_SECRETA_SUPER_SEGURA',
+            JWT_SECRET,
             { expiresIn: '8h' }
         );
 

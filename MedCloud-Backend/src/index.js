@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./config'); // Valida la configuración sensible antes de levantar el servidor
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -18,6 +19,7 @@ const cajaRoutes = require('./routes/caja.routes');
 const passwordResetRoutes = require('./routes/passwordReset.routes');
 const soporteRoutes = require('./routes/soporte.routes');
 const pagosRoutes = require('./routes/pagos.routes');
+const { verificarToken } = require('./middlewares/auth.middleware');
 
 const app = express();
 
@@ -39,15 +41,16 @@ app.use(cajaRoutes);
 app.use(passwordResetRoutes);
 app.use(soporteRoutes);
 app.use(pagosRoutes);
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Fallback dinámico para regenerar recibos de pago si el archivo físico no existe en disco
-app.get('/uploads/:filename', async (req, res) => {
-    const filename = req.params.filename;
+// Archivos subidos (estudios, comprobantes y recibos): solo con sesión iniciada.
+// Si un recibo en efectivo no existe en disco, se regenera a partir del pago.
+app.get('/uploads/:filename', verificarToken, async (req, res) => {
+    // basename evita salir de la carpeta uploads (ej: "..%2F..%2F.env")
+    const filename = path.basename(req.params.filename);
     const fs = require('fs');
     const filepath = path.join(__dirname, '../uploads', filename);
 
-    if (fs.existsSync(filepath)) {
+    if (fs.existsSync(filepath) && fs.statSync(filepath).isFile()) {
         return res.sendFile(filepath);
     }
 

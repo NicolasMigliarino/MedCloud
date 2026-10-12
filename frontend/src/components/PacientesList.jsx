@@ -6,6 +6,7 @@ import './modules.css';
 import useResizableColumns from './useResizableColumns';
 import { hasRole } from '../utils/auth';
 import { API_URL } from '../config';
+import { conectarBotonesArchivo } from '../utils/archivos';
 
 const getInitials = (nombre = '', apellido = '') =>
     `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
@@ -175,7 +176,7 @@ const PacientesList = () => {
                         </td>
                         <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
                             ${p.comprobante_url ? `
-                                <a href="${API_URL}${p.comprobante_url}" target="_blank" style="text-decoration: none; background-color: #0f766e; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;">📄 Ver Recibo</a>
+                                <button type="button" data-archivo="${p.comprobante_url}" style="border: none; cursor: pointer; background-color: #0f766e; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;">📄 Ver Recibo</button>
                             ` : '<span style="color:#9ca3af;">-</span>'}
                         </td>
                     </tr>
@@ -205,6 +206,7 @@ const PacientesList = () => {
                         </div>
                     </div>
                 `,
+                didOpen: conectarBotonesArchivo,
                 confirmButtonText: 'Cerrar',
                 confirmButtonColor: '#10b981'
             });

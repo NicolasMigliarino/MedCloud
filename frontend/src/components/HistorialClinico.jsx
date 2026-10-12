@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getLoggedInUser } from '../utils/auth';
-import { API_URL } from '../config';
+import { abrirArchivo } from '../utils/archivos';
 
 const HistorialClinico = () => {
     const { paciente_id } = useParams(); 
@@ -33,7 +33,8 @@ const HistorialClinico = () => {
         if (!profesional_id) return;
         try {
             // Traemos el historial
-            const resHistorial = await axios.get(`http://localhost:3000/historial/paciente/${paciente_id}/profesional/${profesional_id}`);
+            // El backend identifica al médico por la sesión (token)
+            const resHistorial = await axios.get(`http://localhost:3000/historial/paciente/${paciente_id}`);
             setHistoriales(resHistorial.data);
 
             // Traemos la lista de TODOS los profesionales para llenar el <select>
@@ -64,8 +65,7 @@ const HistorialClinico = () => {
             await axios.post('http://localhost:3000/historial', {
                 ...nuevaEvolucion,
                 paciente_id: parseInt(paciente_id),
-                profesional_id: parseInt(profesional_id), 
-                turno_id: null 
+                turno_id: null
             });
             Swal.fire({
                 icon: 'success',
@@ -240,14 +240,13 @@ const HistorialClinico = () => {
                                                     Subido: {new Date(archivo.fecha_subida).toLocaleDateString()}
                                                 </small>
                                             </div>
-                                            <a 
-                                                href={`${API_URL}/uploads/${archivo.nombre_archivo}`} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
+                                            <button
+                                                type="button"
+                                                onClick={() => abrirArchivo(archivo.nombre_archivo)}
                                                 className="btn btn-sm btn-outline-info rounded-pill px-3"
                                             >
                                                 👁️ Ver
-                                            </a>
+                                            </button>
                                         </li>
                                     ))}
                                 </ul>

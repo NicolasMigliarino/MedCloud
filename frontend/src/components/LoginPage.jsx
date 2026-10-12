@@ -65,8 +65,11 @@ const LoginPage = () => {
             return;
         }
         try {
+            // El token todavía no está guardado en localStorage: se envía explícitamente
             await axios.put(`${API_URL}/usuarios/${loggedInUser.user.id}/password`, {
                 newPassword: newPassword
+            }, {
+                headers: { Authorization: `Bearer ${loggedInUser.token}` }
             });
 
             // On success, save to localStorage and navigate

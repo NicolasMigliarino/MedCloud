@@ -1,27 +1,25 @@
 const { Router } = require('express');
 const { getPacientes,getPaciente,createPaciente,deletePaciente, setPaciente,getObrasSociales, getHistorialAsistenciaPaciente } = require('../controllers/pacientes.controllers');
-const { verificarToken } = require('../middlewares/auth.middleware');
+const { verificarToken, permitirRoles, negarRoles } = require('../middlewares/auth.middleware');
 const router = Router();
 
-// Cuando alguien visite "/pacientes", se ejecuta la función getPacientes
+// Altas, bajas y modificaciones: mismas restricciones que la pantalla (ADMIN y RECEPCION)
+const gestionPacientes = [verificarToken, permitirRoles('ADMIN', 'RECEPCION')];
+
+// Listado (el SP filtra por usuario: el médico ve solo sus pacientes)
 router.get('/pacientes', verificarToken, getPacientes);
 
-// Ruta para obtener el historial de asistencia del paciente
-router.get('/pacientes/:id/asistencia', verificarToken, getHistorialAsistenciaPaciente);
+// Historial de asistencia del paciente (el listado lo oculta al MEDICO)
+router.get('/pacientes/:id/asistencia', verificarToken, negarRoles('MEDICO'), getHistorialAsistenciaPaciente);
 
 // La Singular para editar o ver un solo paciente
 router.get('/pacientes/:id', verificarToken, getPaciente);
 
-// Ruta para crear un nuevo paciente
-router.post('/pacientes', verificarToken, createPaciente);
+router.post('/pacientes', gestionPacientes, createPaciente);
+router.put('/pacientes/:id', gestionPacientes, setPaciente);
+router.delete('/pacientes/:id', gestionPacientes, deletePaciente);
 
-// PUT: Para editar. Se usa así: localhost:3000/pacientes/1
-router.put('/pacientes/:id', verificarToken, setPaciente);
-
-// DELETE: Para borrar. Se usa así: localhost:3000/pacientes/1
-router.delete('/pacientes/:id', verificarToken, deletePaciente);
-
-// NUEVA RUTA: Para obtener la lista de obras sociales
-router.get('/obras-sociales', getObrasSociales);
+// Lista de obras sociales (formulario de pacientes)
+router.get('/obras-sociales', verificarToken, getObrasSociales);
 
 module.exports = router;

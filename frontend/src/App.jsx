@@ -44,23 +44,35 @@ const MainLayout = ({ children }) => {
   // ⏱️ Activar el control de inactividad automático (15 minutos)
   useInactivityTimer();
 
-  // 🛡️ Interceptor de Axios para capturar sesiones desplazadas por doble inicio de sesión
+  // 🛡️ Interceptor de Axios: sesión desplazada por doble inicio o sesión vencida/inválida
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       response => response,
       error => {
-        if (error.response && error.response.status === 401) {
+        // Solo si había una sesión guardada (evita actuar en login o recuperación de contraseña)
+        if (error.response && error.response.status === 401 && localStorage.getItem('token')) {
           const code = error.response.data?.code;
           const message = error.response.data?.message;
 
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+
           if (code === 'CONCURRENT_LOGIN_DISPLACED') {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
             Swal.fire({
               icon: 'warning',
               title: 'Sesión Finalizada',
               text: message || 'Se ha iniciado sesión en otro navegador o dispositivo con este usuario.',
               confirmButtonText: 'Entendido',
+              confirmButtonColor: '#2563eb'
+            }).then(() => {
+              navigate('/login');
+            });
+          } else {
+            Swal.fire({
+              icon: 'info',
+              title: 'Sesión Vencida',
+              text: 'Tu sesión venció. Volvé a ingresar con tu usuario y contraseña.',
+              confirmButtonText: 'Ingresar',
               confirmButtonColor: '#2563eb'
             }).then(() => {
               navigate('/login');
