@@ -12,6 +12,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './modules.css';
 import useResizableColumns from './useResizableColumns';
 import { getUserRole } from '../utils/auth';
+import { abrirArchivo, conectarBotonesArchivo } from '../utils/archivos';
 
 const locales = {
     'es': esES,
@@ -208,7 +209,8 @@ const TurnosList = () => {
                 Swal.fire({
                     icon: 'success',
                     title: '¡Pago Registrado!',
-                    html: `El turno pasó a estado Confirmado automáticamente.<br>${comprobante_url ? `<a href="http://localhost:3000${comprobante_url}" target="_blank" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; text-decoration: none; border-radius: 4px; border: none; font-weight: bold;">🖨️ Imprimir Recibo</a>` : ''}`,
+                    html: `El turno pasó a estado Confirmado automáticamente.<br>${comprobante_url ? `<button type="button" data-archivo="${comprobante_url}" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer; font-weight: bold;">🖨️ Imprimir Recibo</button>` : ''}`,
+                    didOpen: conectarBotonesArchivo,
                     showConfirmButton: true
                 });
 
@@ -302,7 +304,8 @@ const TurnosList = () => {
                 Swal.fire({
                     icon: 'success',
                     title: '¡Pagos Registrados!',
-                    html: `Se registraron los cobros y los turnos fueron Confirmados.<br>${comprobante_url ? `<a href="http://localhost:3000${comprobante_url}" target="_blank" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; text-decoration: none; border-radius: 4px; border: none; font-weight: bold;">🖨️ Imprimir Recibo Lote</a>` : ''}`,
+                    html: `Se registraron los cobros y los turnos fueron Confirmados.<br>${comprobante_url ? `<button type="button" data-archivo="${comprobante_url}" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer; font-weight: bold;">🖨️ Imprimir Recibo Lote</button>` : ''}`,
+                    didOpen: conectarBotonesArchivo,
                     showConfirmButton: true
                 });
 
@@ -594,16 +597,15 @@ const TurnosList = () => {
                                                 )}
                                                 {/* Enlace al Comprobante si ya fue cobrado */}
                                                 {turno.comprobante_url && (
-                                                    <a
-                                                        href={`http://localhost:3000${turno.comprobante_url}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => abrirArchivo(turno.comprobante_url)}
                                                         className="mod-btn"
-                                                        style={{ backgroundColor: '#0f766e', color: 'white', borderColor: '#0f766e', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                                                        style={{ backgroundColor: '#0f766e', color: 'white', borderColor: '#0f766e', display: 'inline-flex', alignItems: 'center' }}
                                                         title="Ver Comprobante de Pago"
                                                     >
                                                         📄 Recibo
-                                                    </a>
+                                                    </button>
                                                 )}
                                                 <Link to={`/turnos/editar/${turno.id}`} className="mod-btn edit">
                                                     ✏️ Editar
