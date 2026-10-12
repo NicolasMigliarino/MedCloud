@@ -1,23 +1,18 @@
 const { Router } = require('express');
 const { getProfesional, getProfesionales, createProfesional, deleteProfesional, setProfesional, getEspecialidades } = require('../controllers/profesionales.controllers');
+const { verificarToken, permitirRoles } = require('../middlewares/auth.middleware');
 const router = Router();
 
-// Ruta para obtener listado de especialidades precargadas
-router.get('/especialidades', getEspecialidades);
+// Altas, bajas y modificaciones: mismas restricciones que la pantalla (ADMIN y RECEPCION)
+const gestionProfesionales = [verificarToken, permitirRoles('ADMIN', 'RECEPCION')];
 
-// Cuando alguien visite "/profesionales", se ejecuta la función getProfesionales
-router.get('/profesionales', getProfesionales);
+// Lecturas: cualquier usuario logueado (los médicos usan el listado en turnos y para compartir historias)
+router.get('/especialidades', verificarToken, getEspecialidades);
+router.get('/profesionales', verificarToken, getProfesionales);
+router.get('/profesionales/:id', verificarToken, getProfesional);
 
-// La Singular para editar o ver un solo profesional
-router.get('/profesionales/:id', getProfesional);
-
-// PUT: Para editar. Se usa así: localhost:3000/profesionales/1
-router.put('/profesionales/:id', setProfesional);   
-
-// DELETE: Para borrar. Se usa así: localhost:3000/profesionales/1
-router.delete('/profesionales/:id', deleteProfesional);
-
-// Ruta para crear un nuevo médico
-router.post('/profesionales', createProfesional); 
+router.post('/profesionales', gestionProfesionales, createProfesional);
+router.put('/profesionales/:id', gestionProfesionales, setProfesional);
+router.delete('/profesionales/:id', gestionProfesionales, deleteProfesional);
 
 module.exports = router;

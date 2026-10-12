@@ -1,4 +1,6 @@
 const { getConnection, sql } = require('../db');
+const { ROL_ADMIN, esAdmin, codigoDeRol, SIN_PERMISO_ADMIN } = require('../utils/roles');
+
 const getRoles = async (req, res) => {
     try {
         const pool = await getConnection();
@@ -11,13 +13,19 @@ const getRoles = async (req, res) => {
 
 const createRol = async (req, res) => {
     const { nombre, codigo } = req.body;
+
+    // Solo un ADMIN puede crear un rol con código ADMIN
+    if (!esAdmin(req) && (codigo || '').toUpperCase() === ROL_ADMIN) {
+        return res.status(403).json(SIN_PERMISO_ADMIN);
+    }
+
     try {
         const pool = await getConnection();
         await pool.request()
             .input('nombre', sql.VarChar, nombre)
             .input('codigo', sql.VarChar, codigo)
             .execute('sp_CreateRol');
-        
+
         res.json({ msg: 'Rol creado' });
     } catch (error) {
         res.status(500).send(error.message);
@@ -30,6 +38,12 @@ const setRol = async (req, res) => {
     const { nombre, codigo } = req.body;
     try {
         const pool = await getConnection();
+
+        // Solo un ADMIN puede modificar el rol ADMIN o darle a otro rol el código ADMIN
+        if (!esAdmin(req) && ((codigo || '').toUpperCase() === ROL_ADMIN || await codigoDeRol(pool, id) === ROL_ADMIN)) {
+            return res.status(403).json(SIN_PERMISO_ADMIN);
+        }
+
         const result = await pool.request()
             .input('id', sql.Int, id)
             .input('nombre', sql.VarChar, nombre)
@@ -47,6 +61,12 @@ const setRol = async (req, res) => {
 const deleteRol = async (req, res) => {
     try {
         const pool = await getConnection();
+
+        // Solo un ADMIN puede borrar el rol ADMIN
+        if (!esAdmin(req) && await codigoDeRol(pool, req.params.id) === ROL_ADMIN) {
+            return res.status(403).json(SIN_PERMISO_ADMIN);
+        }
+
         const result = await pool.request()
             .input('id', sql.Int, req.params.id)
             .execute('sp_DeleteRol');
