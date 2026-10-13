@@ -1,5 +1,8 @@
 const { getConnection, sql } = require('../db');
 const { generarReciboEfectivo } = require('../utils/reciboHelper');
+const { verificar: verificarEnlace } = require('../utils/enlacesTurno');
+const { paginaTurno } = require('../utils/paginaTurno');
+const { formatoFecha, formatoHora } = require('../utils/horaArgentina');
 const path = require('path');
 const fs = require('fs');
 const getTurnos = async (req, res) => {
@@ -346,17 +349,168 @@ const enviarRecordatorioManual = async (req, res) => {
         res.json({ message: 'Email de recordatorio enviado correctamente.' });
     } catch (error) {
         console.error("🚨 Error al enviar recordatorio manual:", error.message);
+        res.status(error.status === 400 || error.status === 409 ? error.status : 500).json({ message: error.message });
+    }
+};
+
+const ESTADOS_TURNO = ['Pendiente', 'Confirmado', 'Completado', 'Cancelado'];
+
+// Cambio de estado desde la agenda (ej: recepción confirma la asistencia)
+const cambiarEstadoTurno = async (req, res) => {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    if (!ESTADOS_TURNO.includes(estado)) {
+        return res.status(400).json({ message: `Estado inválido. Valores posibles: ${ESTADOS_TURNO.join(', ')}.` });
+    }
+
+    try {
+        const pool = await getConnection();
+        const result = await pool.request()
+            .input('id', sql.Int, parseInt(id, 10))
+            .input('estado', sql.NVarChar(20), estado)
+            .query('UPDATE Turnos SET estado = @estado WHERE id = @id');
+
+        if (result.rowsAffected[0] === 0) return res.status(404).json({ message: 'Turno no encontrado' });
+
+        res.json({ message: `Estado del turno actualizado a ${estado}.` });
+    } catch (error) {
+        console.error("🚨 Error al cambiar estado del turno:", error.message);
         res.status(500).json({ message: error.message });
     }
 };
 
-module.exports = { 
-    getTurnos, 
-    createTurno, 
-    setTurno, 
-    deleteTurno, 
-    getHorarios, 
+// ── Respuesta del paciente desde el mail (links firmados de utils/enlacesTurno.js) ──────────
+// GET muestra el turno y un botón; recién el POST cambia el estado. Así los antivirus del correo,
+// que abren los links solos, no confirman ni cancelan nada.
+
+const ESTADO_POR_ACCION = { confirmar: 'Confirmado', cancelar: 'Cancelado' };
+
+const detalleTurno = (turno) => [
+    ['Paciente', turno.paciente_nombre],
+    ['Profesional', `${turno.profesional_sexo === 'Femenino' ? 'Dra. ' : turno.profesional_sexo === 'Masculino' ? 'Dr. ' : ''}${turno.profesional_nombre} ${turno.profesional_apellido}`],
+    ['Fecha', formatoFecha(turno.fecha_hora_inicio, { weekday: 'long', day: 'numeric', month: 'long' })],
+    ['Hora', `${formatoHora(turno.fecha_hora_inicio)} hs`],
+    ['Estado', turno.estado]
+];
+
+// Valida el link y decide qué se puede hacer con el turno
+const leerTurnoDelEnlace = async (token) => {
+    const enlace = verificarEnlace(token);
+    if (!enlace) {
+        return { status: 400, pagina: { titulo: 'Enlace inválido', mensaje: 'Este enlace no es válido. Si lo copiaste del mail, revisá que esté completo.', tono: 'error' } };
+    }
+
+    const pool = await getConnection();
+    const result = await pool.request()
+        .input('id', sql.Int, enlace.turnoId)
+        .query(`
+            SELECT t.id, t.fecha_hora_inicio, t.estado,
+                   p.nombre AS paciente_nombre,
+                   pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido, pr.sexo AS profesional_sexo
+            FROM Turnos t
+            INNER JOIN Pacientes p ON t.paciente_id = p.id
+            INNER JOIN Profesionales pr ON t.profesional_id = pr.id
+            WHERE t.id = @id
+        `);
+    const turno = result.recordset[0];
+    if (!turno) {
+        return { status: 404, pagina: { titulo: 'Turno no encontrado', mensaje: 'Este turno ya no existe. Si tenés dudas, comunicate con la clínica.', tono: 'error' } };
+    }
+
+    const detalle = detalleTurno(turno);
+    const estado = (turno.estado || '').toLowerCase();
+    const destino = ESTADO_POR_ACCION[enlace.accion];
+
+    if (estado === destino.toLowerCase()) {
+        const titulo = enlace.accion === 'confirmar' ? 'Tu turno ya está confirmado' : 'Tu turno ya está cancelado';
+        return { status: 200, pagina: { titulo, mensaje: 'No hace falta hacer nada más.', tono: 'ok', detalle } };
+    }
+    if (enlace.vencido || new Date(turno.fecha_hora_inicio) <= new Date()) {
+        return { status: 410, pagina: { titulo: 'El turno ya pasó', mensaje: 'Este enlace ya no se puede usar porque el turno ya empezó o pasó.', tono: 'error', detalle } };
+    }
+    if (estado !== 'pendiente' && estado !== 'confirmado') {
+        return { status: 409, pagina: { titulo: 'No se puede modificar', mensaje: 'Este turno no se puede cambiar desde el mail. Comunicate con la clínica.', tono: 'error', detalle } };
+    }
+    return { status: 200, turno, enlace, detalle, pool };
+};
+
+const paginaError = () => paginaTurno({
+    titulo: 'Ocurrió un error',
+    mensaje: 'No pudimos procesar el enlace. Probá de nuevo más tarde o comunicate con la clínica.',
+    tono: 'error'
+});
+
+const sinCache = (res) => res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' });
+
+const verRespuestaTurno = async (req, res) => {
+    sinCache(res);
+    try {
+        const r = await leerTurnoDelEnlace(req.query.t);
+        if (r.pagina) return res.status(r.status).send(paginaTurno(r.pagina));
+
+        const confirmar = r.enlace.accion === 'confirmar';
+        return res.send(paginaTurno({
+            titulo: confirmar ? '¿Confirmás tu turno?' : '¿Querés cancelar tu turno?',
+            mensaje: confirmar
+                ? 'Tocá el botón para avisarle a la clínica que vas a asistir.'
+                : 'Si cancelás, el horario queda libre para otro paciente. Para un turno nuevo vas a tener que comunicarte con la clínica.',
+            tono: confirmar ? 'aviso' : 'peligro',
+            detalle: r.detalle,
+            formulario: {
+                accion: `/turnos/respuesta?t=${encodeURIComponent(req.query.t)}`,
+                boton: confirmar ? 'Confirmar mi asistencia' : 'Cancelar el turno',
+                peligro: !confirmar
+            }
+        }));
+    } catch (error) {
+        console.error("🚨 Error al mostrar la respuesta del turno:", error.message);
+        return res.status(500).send(paginaError());
+    }
+};
+
+const confirmarRespuestaTurno = async (req, res) => {
+    sinCache(res);
+    try {
+        const r = await leerTurnoDelEnlace(req.query.t);
+        if (r.pagina) return res.status(r.status).send(paginaTurno(r.pagina));
+
+        const nuevoEstado = ESTADO_POR_ACCION[r.enlace.accion];
+        // La condición se vuelve a controlar en el UPDATE por si el turno cambió entre medio
+        const result = await r.pool.request()
+            .input('id', sql.Int, r.turno.id)
+            .input('estado', sql.NVarChar(20), nuevoEstado)
+            .input('ahora', sql.DateTime, new Date())
+            .query(`
+                UPDATE Turnos SET estado = @estado
+                WHERE id = @id AND estado IN ('Pendiente', 'Confirmado') AND fecha_hora_inicio > @ahora
+            `);
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(409).send(paginaTurno({ titulo: 'No se pudo actualizar', mensaje: 'El turno cambió mientras tanto. Comunicate con la clínica.', tono: 'error', detalle: r.detalle }));
+        }
+
+        console.log(`📅 Turno ID ${r.turno.id}: el paciente respondió "${r.enlace.accion}" desde el mail`);
+        const detalle = r.detalle.map(([k, v]) => (k === 'Estado' ? [k, nuevoEstado] : [k, v]));
+        return res.send(paginaTurno(r.enlace.accion === 'confirmar'
+            ? { titulo: '¡Listo! Tu turno está confirmado', mensaje: 'Gracias por avisarnos. Te esperamos.', tono: 'ok', detalle }
+            : { titulo: 'Tu turno fue cancelado', mensaje: 'Gracias por avisarnos: el horario quedó libre para otro paciente.', tono: 'ok', detalle }));
+    } catch (error) {
+        console.error("🚨 Error al registrar la respuesta del turno:", error.message);
+        return res.status(500).send(paginaError());
+    }
+};
+
+module.exports = {
+    getTurnos,
+    createTurno,
+    setTurno,
+    deleteTurno,
+    getHorarios,
     registrarPagoTurno,
     registrarPagoMultiplesTurnos,
-    enviarRecordatorioManual
+    enviarRecordatorioManual,
+    cambiarEstadoTurno,
+    verRespuestaTurno,
+    confirmarRespuestaTurno
 };
