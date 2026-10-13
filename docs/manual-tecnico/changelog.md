@@ -1,5 +1,30 @@
 # Historial de cambios
 
+## 2026-10-13 — Mails por la mensajería y confirmar o cancelar turnos desde el mail
+
+- **Qué cambió:**
+  - MedCloud deja de usar SMTP (Gmail): todos los mails salen por muchocodigo-mensajeria con las plantillas `medcloud/*`.
+  - El recordatorio al paciente trae links firmados para confirmar o cancelar, con una página intermedia de confirmación y validación de estado y horario. Reemplaza la ruta pública por id (`/turnos/accion-publica`), que nunca llegó a producción.
+  - El recordatorio ya no muestra especialidad.
+  - La agenda del médico incluye el motivo de consulta.
+  - Fechas y horas en hora argentina, sin depender de la zona del servidor.
+  - El link de recuperación de contraseña sale solo de `FRONTEND_URL`, que ya no se arma con el `Origin` del pedido: cierra el riesgo de link apuntando a otro sitio.
+  - Los logs de recuperación ya no muestran emails.
+- **Módulos:** turnos, mails, sesión (recuperar contraseña), soporte.
+- **Backend/API:**
+  - Nuevas: `GET`/`POST /turnos/respuesta` (públicas, protegidas por el link firmado) y `PUT /turnos/:id/estado` (todos menos MEDICO, con validación del estado).
+  - Quitada: `/turnos/accion-publica`.
+  - Nuevos `utils/mensajeria.js`, `utils/enlacesTurno.js`, `utils/paginaTurno.js` y `utils/horaArgentina.js`.
+  - Se quitaron `nodemailer` y el script `test-notifs.js`.
+- **Base de datos:** sin objetos nuevos. Se lee `profesionales.sexo` (Dr./Dra.) y el estado se cambia con un `UPDATE` condicionado.
+- **Configuración:**
+  - Nuevas: `MENSAJERIA_URL`, `MENSAJERIA_CLAVE`, `SOPORTE_EMAIL` y `TZ=America/Argentina/Buenos_Aires`.
+  - Se quitan las `SMTP_*`.
+  - `FRONTEND_URL` pasa a ser obligatoria para recuperar la contraseña.
+  - El backend tiene que estar en la red Docker `muchocodigo`.
+- **Pruebas:** ver [modulos.md](modulos.md).
+- **Commits:** ver el PR de la rama `mails/mensajeria`.
+
 ## 2026-10-10 — Seguridad: sesión y permisos en todas las rutas
 
 - **Qué cambió:**

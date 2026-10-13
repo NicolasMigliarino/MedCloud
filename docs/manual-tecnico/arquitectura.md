@@ -50,4 +50,11 @@ Los archivos de `uploads/` (estudios, comprobantes de transferencia, recibos de 
 
 - **Sin edición ni borrado de evoluciones clínicas**: la historia clínica es inviolable (Ley 26.529, art. 18). Las rutas `PUT/DELETE /historial/:id` se quitaron; ninguna pantalla las usaba.
 - **Falla temprana de configuración**: sin `JWT_SECRET` (mínimo 32 caracteres) el servidor no arranca, para que nunca funcione con una firma conocida.
-- **Recordatorios**: `utils/scheduler.js` corre dentro del mismo proceso cada 10 minutos (pacientes del día siguiente y agenda de cada médico a las 20 h). Si se levantan dos instancias, se duplican los mails.
+- **Recordatorios**: `utils/scheduler.js` corre dentro del mismo proceso cada 10 minutos. Manda los recordatorios a los pacientes con turno el día siguiente y, a las 20 h, la agenda a cada médico. Usa una clave única por mensaje (`turno-recordatorio-<id>-<inicio>`, `agenda-<médico>-<fecha>`), así la mensajería no duplica aunque se reintente o haya dos instancias. Los errores definitivos (mail inválido, destinatario dado de baja, límite mensual) no se reintentan.
+
+## Mails
+
+- **Ningún mail sale directo de MedCloud.** `utils/mensajeria.js` le pide cada envío a muchocodigo-mensajeria, que manda por Resend con reintentos, avisos de entrega y bajas. `utils/emailSender.js` arma los datos de cada plantilla `medcloud/*`: recordatorio, agenda, recuperar contraseña y soporte.
+- **Datos de salud:** al paciente le llegan solo fecha, hora y profesional (sin especialidad ni motivo). La agenda que recibe el médico incluye el motivo de consulta, por decisión del responsable de MedCloud.
+- **Confirmar o cancelar desde el mail:** el recordatorio trae dos links firmados (`utils/enlacesTurno.js`). El link abre una página (`utils/paginaTurno.js`, sin scripts y con los datos escapados) y recién el botón de esa página (POST) cambia el estado. Así un antivirus que abre los links no confirma ni cancela nada.
+- **Hora argentina:** `utils/horaArgentina.js` muestra fechas y horas en `America/Argentina/Buenos_Aires` y calcula "mañana" como rango de instantes, sin depender de la zona del servidor. Las horas que carga el formulario se interpretan en la zona del proceso: en Docker hace falta `TZ=America/Argentina/Buenos_Aires`.

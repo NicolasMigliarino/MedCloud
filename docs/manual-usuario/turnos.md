@@ -37,7 +37,14 @@
 
 1. Tocá **✉️ Mail** en el turno. El paciente tiene que tener un email cargado.
 
-Además, el sistema manda solo un recordatorio a cada paciente el día anterior, y a las 20 h le manda a cada médico su agenda del día siguiente.
+## Mails automáticos
+
+- **Al paciente, el día anterior:** un recordatorio con la fecha, la hora y el profesional, y dos botones: **Sí, voy a asistir** y **No puedo asistir**. Al tocar uno se abre una página con el detalle del turno; recién cuando el paciente toca el botón de esa página, el turno pasa a **Confirmado** o **Cancelado** en la agenda.
+- **Al médico, a las 20 h:** la agenda del día siguiente, con la hora, el paciente, si está confirmado o no y el motivo de consulta de cada turno.
+
+> ℹ️ El mail al paciente no incluye la especialidad ni el motivo de la consulta. Los botones dejan de funcionar cuando empieza el turno, y no sirven para turnos ya cancelados o completados.
+
+> ⚠️ Si un paciente cancela desde el mail, el horario queda libre en la agenda; la clínica no recibe un aviso aparte. Revisá la agenda antes de empezar el día.
 
 ## Avisos que pueden aparecer
 
@@ -46,3 +53,5 @@ Además, el sistema manda solo un recordatorio a cada paciente el día anterior,
 | "Los pagos por transferencia o MercadoPago requieren adjuntar el comprobante." | Falta el archivo del comprobante | Adjuntalo y confirmá de nuevo |
 | "No se pudo registrar el pago." | Por ejemplo, no hay caja abierta | Abrí la caja y volvé a intentar |
 | "No tenés permisos para realizar esta acción" | Tu rol no puede agendar, cobrar o enviar mails | Pedíselo a recepción |
+| "El paciente no tiene un email válido registrado." | Falta el mail del paciente o está mal escrito | Corregilo en la ficha del paciente |
+| "La mensajería no está configurada…" | El servicio de mails todavía no está conectado | Avisá a soporte |

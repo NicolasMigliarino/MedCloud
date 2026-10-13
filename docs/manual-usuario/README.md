@@ -37,6 +37,10 @@ Si intentás entrar a algo que tu rol no permite, aparece "No tenés permisos pa
 
 ## Novedades
 
+- **13/10/2026**:
+  - El recordatorio que recibe el paciente el día anterior trae botones para confirmar o cancelar el turno; la agenda se actualiza sola.
+  - Los mails salen por el nuevo servicio de mensajería, desde una dirección de MedCloud.
+  - Los horarios de los mails se muestran siempre en hora argentina.
 - **10/10/2026**:
   - Más seguridad. Los estudios y recibos se abren solo con la sesión iniciada, en una pestaña nueva.
   - Cuando la sesión vence, el sistema te avisa y te lleva al ingreso.
