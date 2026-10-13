@@ -5,100 +5,10 @@
 
 const { getConnection, sql } = require('../db');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { enviarRecuperarClave } = require('../utils/emailSender');
 
-// ── Configuración del transporter de email ──────────────────────────────────
-// Usa variables de entorno para la configuración SMTP.
-const createTransporter = () => {
-    // Sanitizamos la contraseña de aplicación de Google eliminando espacios en blanco
-    const cleanPass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
-    return nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT) || 587,
-        secure: false, // true para 465, false para otros puertos
-        auth: {
-            user: process.env.SMTP_USER || '',
-            pass: cleanPass
-        }
-    });
-};
-
-// ── Plantilla HTML del email de recuperación ────────────────────────────────
-const buildResetEmailHTML = (username, resetLink) => {
-    return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body style="margin:0; padding:0; background-color:#f0f2f5; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f2f5; padding:40px 0;">
-            <tr>
-                <td align="center">
-                    <table width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.08); overflow:hidden;">
-                        <!-- Header con gradiente -->
-                        <tr>
-                            <td style="background:linear-gradient(135deg,#3c23c9,#5b42f3); padding:32px 40px; text-align:center;">
-                                <h1 style="color:#ffffff; margin:0; font-size:28px; font-weight:700; letter-spacing:-0.5px;">MedCloud</h1>
-                                <p style="color:rgba(255,255,255,0.85); margin:8px 0 0; font-size:14px;">Plataforma de Gestión Clínica</p>
-                            </td>
-                        </tr>
-                        <!-- Cuerpo del email -->
-                        <tr>
-                            <td style="padding:36px 40px;">
-                                <h2 style="color:#1a1a2e; margin:0 0 8px; font-size:20px;">Recuperación de Contraseña</h2>
-                                <p style="color:#64748b; margin:0 0 24px; font-size:14px; line-height:1.6;">
-                                    Hola <strong style="color:#334155;">${username}</strong>, recibimos una solicitud para restablecer tu contraseña de acceso al sistema.
-                                </p>
-                                
-                                <!-- Botón de acción -->
-                                <table width="100%" cellpadding="0" cellspacing="0">
-                                    <tr>
-                                        <td align="center" style="padding:8px 0 24px;">
-                                            <a href="${resetLink}" 
-                                               style="display:inline-block; background:linear-gradient(135deg,#3c23c9,#5b42f3); color:#ffffff; text-decoration:none; padding:14px 36px; border-radius:25px; font-size:14px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">
-                                                Restablecer Contraseña
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </table>
-
-                                <p style="color:#94a3b8; font-size:13px; line-height:1.6; margin:0 0 16px;">
-                                    Si el botón no funciona, copiá y pegá este enlace en tu navegador:
-                                </p>
-                                <p style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 16px; word-break:break-all; font-size:12px; color:#3c23c9; margin:0 0 24px;">
-                                    ${resetLink}
-                                </p>
-
-                                <!-- Advertencia de expiración -->
-                                <table width="100%" cellpadding="0" cellspacing="0">
-                                    <tr>
-                                        <td style="background-color:#fef3c7; border:1px solid #fcd34d; border-radius:8px; padding:12px 16px;">
-                                            <p style="color:#92400e; font-size:12px; margin:0; line-height:1.5;">
-                                                ⏱️ <strong>Este enlace expira en 1 hora.</strong> Si no solicitaste este cambio, podés ignorar este mensaje con total seguridad.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <!-- Footer -->
-                        <tr>
-                            <td style="background-color:#f8fafc; padding:20px 40px; border-top:1px solid #e2e8f0; text-align:center;">
-                                <p style="color:#94a3b8; font-size:11px; margin:0;">
-                                    © ${new Date().getFullYear()} MedCloud — Plataforma de Gestión Clínica Integral
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </body>
-    </html>
-    `;
-};
+// Vigencia del link de recuperación (debe coincidir con sp_CreatePasswordResetToken)
+const MINUTOS_LINK = 60;
 
 // ============================================================================
 // 1. SOLICITAR RECUPERACIÓN DE CONTRASEÑA
@@ -123,7 +33,7 @@ const forgotPassword = async (req, res) => {
         // SEGURIDAD: Siempre retornar el mismo mensaje, sin importar si el email existe
         // Esto previene la enumeración de cuentas.
         if (result.recordset.length === 0) {
-            console.log(`⚠️ Solicitud de recuperación para email NO REGISTRADO: ${email}`);
+            console.log('⚠️ Solicitud de recuperación para un email no registrado');
             return res.json({
                 message: 'Si el email está registrado en el sistema, recibirás las instrucciones en tu bandeja de entrada.'
             });
@@ -134,8 +44,8 @@ const forgotPassword = async (req, res) => {
         // Generar token criptográfico seguro (32 bytes = 64 caracteres hex)
         const token = crypto.randomBytes(32).toString('hex');
 
-        // Calcular fecha de expiración (1 hora desde ahora)
-        const fechaExpiracion = new Date(Date.now() + 60 * 60 * 1000);
+        // Calcular fecha de expiración
+        const fechaExpiracion = new Date(Date.now() + MINUTOS_LINK * 60 * 1000);
 
         // Guardar token en la base de datos (invalida tokens previos automáticamente)
         await pool.request()
@@ -144,27 +54,20 @@ const forgotPassword = async (req, res) => {
             .input('fecha_expiracion', sql.DateTime, fechaExpiracion)
             .execute('sp_CreatePasswordResetToken');
 
-        // Construir el link de recuperación de forma dinámica según la web de origen
-        let originUrl = null;
-        if (req.headers.origin) {
-            originUrl = req.headers.origin;
-        } else if (req.headers.referer) {
-            try { originUrl = new URL(req.headers.referer).origin; } catch (e) {}
-        }
-
-        const frontendUrl = process.env.FRONTEND_URL || originUrl || 'https://medcloud.ar';
+        // El link sale siempre de la configuración, nunca de los encabezados del pedido
+        // (si no, un tercero podría hacer que el mail apunte a su sitio y robar el código)
+        const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/+$/, '');
+        if (!frontendUrl) throw new Error('Falta FRONTEND_URL en la configuración.');
         const resetLink = `${frontendUrl}/reset-password/${token}`;
 
-        // Enviar el email
-        const transporter = createTransporter();
-        await transporter.sendMail({
-            from: `"MedCloud" <${process.env.SMTP_USER || 'noreply@medcloud.com'}>`,
-            to: usuario.email,
-            subject: '🔐 MedCloud — Recuperación de Contraseña',
-            html: buildResetEmailHTML(usuario.username, resetLink)
+        await enviarRecuperarClave({
+            email: usuario.email,
+            usuario: usuario.username,
+            enlace: resetLink,
+            minutos: MINUTOS_LINK
         });
 
-        console.log(`📧 Email de recuperación enviado a: ${usuario.email} para usuario: ${usuario.username}`);
+        console.log(`📧 Recuperación de contraseña encolada para el usuario ID ${usuario.id}`);
 
         res.json({
             message: 'Si el email está registrado en el sistema, recibirás las instrucciones en tu bandeja de entrada.'

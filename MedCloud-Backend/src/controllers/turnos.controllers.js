@@ -26,17 +26,18 @@ const getTurnos = async (req, res) => {
     }
 };
 
-const { sendPatientReminderEmail } = require('../utils/emailSender');
+const { enviarRecordatorioTurno } = require('../utils/emailSender');
 
+// Reenvío manual del recordatorio (botón "Mail" de la agenda)
 const enviarEmailRecordatorioHelper = async (turnoId, poolInstance) => {
     const pool = poolInstance || await getConnection();
     const result = await pool.request()
         .input('id', sql.Int, turnoId)
         .query(`
-            SELECT 
-                t.id, t.fecha_hora_inicio, t.fecha_hora_fin, t.estado, t.motivo_consulta,
+            SELECT
+                t.id, t.fecha_hora_inicio,
                 p.nombre AS paciente_nombre, p.apellido AS paciente_apellido, p.email AS paciente_email,
-                pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido, pr.especialidad AS profesional_especialidad
+                pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido, pr.sexo AS profesional_sexo
             FROM Turnos t
             INNER JOIN Pacientes p ON t.paciente_id = p.id
             INNER JOIN Profesionales pr ON t.profesional_id = pr.id
@@ -52,18 +53,15 @@ const enviarEmailRecordatorioHelper = async (turnoId, poolInstance) => {
         throw new Error('El paciente no tiene un email válido registrado.');
     }
 
-    // Formatear fecha
-    const dateObj = new Date(turnoInfo.fecha_hora_inicio);
-    const fechaStr = dateObj.toLocaleDateString('es-AR') + ' a las ' + dateObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-
-    // Enviar email
-    await sendPatientReminderEmail(
-        `${turnoInfo.paciente_nombre} ${turnoInfo.paciente_apellido}`,
-        turnoInfo.paciente_email,
-        `${turnoInfo.profesional_nombre} ${turnoInfo.profesional_apellido}`,
-        turnoInfo.profesional_especialidad,
-        fechaStr
-    );
+    // Sin claveUnica: es un reenvío pedido por recepción
+    await enviarRecordatorioTurno({
+        turnoId: turnoInfo.id,
+        inicio: turnoInfo.fecha_hora_inicio,
+        pacienteNombre: `${turnoInfo.paciente_nombre} ${turnoInfo.paciente_apellido}`,
+        pacienteEmail: turnoInfo.paciente_email,
+        profesionalNombre: `${turnoInfo.profesional_nombre} ${turnoInfo.profesional_apellido}`,
+        profesionalSexo: turnoInfo.profesional_sexo
+    });
 
     // Actualizar flag
     await pool.request()
