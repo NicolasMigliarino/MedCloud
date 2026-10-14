@@ -22,7 +22,10 @@ Errores comunes de sesión y permisos:
 | POST | `/auth/forgot-password` | Pide el mail de recuperación. Responde siempre el mismo mensaje |
 | POST | `/auth/validate-reset-token` | Valida el link de recuperación |
 | POST | `/auth/reset-password` | Cambia la contraseña con el link |
-| GET | `/turnos/accion-publica?id=&accion=` | Confirmar o cancelar desde el mail (en desarrollo, todavía sin firma; ver changelog) |
+| GET | `/turnos/respuesta?t=<link firmado>` | Página para el paciente que tocó "Sí, voy a asistir" o "No puedo asistir" en el mail: muestra el turno y un botón. **No cambia nada** (los antivirus del correo abren los links) |
+| POST | `/turnos/respuesta?t=<link firmado>` | Confirma o cancela el turno. Solo turnos Pendiente o Confirmado que todavía no empezaron. Responde una página: `400` link inválido, `404` turno inexistente, `409` no se puede modificar, `410` el turno ya pasó |
+
+El link firmado (`utils/enlacesTurno.js`) lleva el turno, la acción y el vencimiento (inicio del turno), firmado con una clave derivada de `JWT_SECRET`. No se puede adivinar ni reutilizar para otro turno.
 
 ## Sesión
 

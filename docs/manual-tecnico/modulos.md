@@ -66,10 +66,25 @@ Cada módulo tiene su pantalla en `frontend/src/components/` y su API en `MedClo
 
 **Archivos**
 - Frontend: `TurnosList.jsx`, `TurnosForm.jsx`
-- Backend: `routes/turnos.routes.js`, `controllers/turnos.controllers.js`, `utils/emailSender.js`, `utils/scheduler.js`, `utils/reciboHelper.js`
+- Backend: `routes/turnos.routes.js`, `controllers/turnos.controllers.js`, `utils/emailSender.js`, `utils/scheduler.js`, `utils/reciboHelper.js`, `utils/enlacesTurno.js`, `utils/paginaTurno.js`, `utils/horaArgentina.js`, `utils/mensajeria.js`
 
 **Reglas**
 - El cobro registra el pago en la caja abierta y confirma el turno. En efectivo se genera un recibo HTML en `uploads/`; con transferencia o MercadoPago se adjunta el comprobante.
+- El día anterior, cada paciente recibe un recordatorio con dos botones: confirmar o cancelar. El paciente solo puede cambiar turnos Pendiente o Confirmado que todavía no empezaron. Un turno Cancelado no se puede volver a confirmar desde el mail.
+- `PUT /turnos/:id/estado` valida que el estado sea uno de los cuatro permitidos.
+
+## Mails
+
+**Estado:** en uso (requiere la mensajería instalada)  ·  **Permisos:** automático y botón Mail de la agenda (todos menos MEDICO)
+
+**Archivos**
+- Backend: `utils/mensajeria.js` (cliente), `utils/emailSender.js` (datos de cada plantilla), `utils/scheduler.js`, `controllers/passwordReset.controllers.js`, `routes/soporte.routes.js`
+- Plantillas: repo muchocodigo-mensajeria, `plantillas/medcloud/` (`recordatorio-turno`, `agenda-medico`, `recuperar-clave`, `soporte`)
+
+**Reglas**
+- Sin `MENSAJERIA_URL` y `MENSAJERIA_CLAVE`, el scheduler no envía y lo avisa al arrancar. El botón Mail y el soporte responden un error.
+- El link de recuperación sale siempre de `FRONTEND_URL`, nunca de los encabezados del pedido.
+- La agenda del médico se recorta a ~3.800 caracteres, con el aviso "y N turnos más (ver MedCloud)". La mensajería admite hasta 4.000 por dato.
 
 ## Caja diaria y liquidaciones
 
@@ -78,6 +93,18 @@ Cada módulo tiene su pantalla en `frontend/src/components/` y su API en `MedClo
 **Archivos**
 - Frontend: `CajaControl.jsx`, `CajaHistorial.jsx`, `Liquidaciones.jsx`
 - Backend: `routes/caja.routes.js`, `controllers/caja.controllers.js`, `routes/pagos.routes.js`, `controllers/pagos.controllers.js`
+
+## Cómo se probó (avance del 2026-10-13: mails por la mensajería)
+
+- Prueba con base y mensajería simuladas, sin conexión real ni envíos: 34 casos OK.
+  - **Links firmados:** se verifican; se rechazan si se alteran, si se cambia el turno o si están mal formados; vencen.
+  - **Hora argentina:** "mañana" va de 03:00 a 03:00 UTC, y un turno de 13:30 UTC se muestra 10:30.
+  - **Plantillas:** cada pedido trae exactamente los datos que pide su plantilla (se leyeron los JSON reales de `plantillas/medcloud/`). El recordatorio va sin motivo ni especialidad. La agenda incluye el motivo y se recorta.
+  - **Recuperar contraseña:** usa `FRONTEND_URL` e ignora el `Origin`. Con un email inexistente da la misma respuesta y no se envía nada.
+  - **Página del paciente:** el GET no cambia el estado; el POST confirma o cancela. Turno ya pasado: 410. Completado o Cancelado: 409. Link inválido: 400. Un nombre con HTML se muestra escapado y la página no tiene scripts. La ruta vieja `/turnos/accion-publica` ya no existe.
+  - **Recordatorios:** se buscan por el rango del día argentino.
+- La prueba de permisos del paso 1 sigue OK, incluida `PUT /turnos/:id/estado` (MEDICO: 403).
+- **Falta probar** con la mensajería instalada en el servidor: envío real a una casilla propia y respuesta desde el celular.
 
 ## Cómo se probó (avance del 2026-10-10)
 

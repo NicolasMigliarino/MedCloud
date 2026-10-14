@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { sendSupportTicketEmail } = require('../utils/emailSender');
+const { enviarSoporte } = require('../utils/emailSender');
 const { verificarToken } = require('../middlewares/auth.middleware');
 
 const router = Router();
@@ -15,7 +15,7 @@ router.post('/api/soporte', verificarToken, async (req, res) => {
             return res.status(400).json({ message: 'Todos los campos son requeridos.' });
         }
 
-        await sendSupportTicketEmail(username, rol, category, subject, description, contactEmail);
+        await enviarSoporte({ usuario: username, rol, categoria: category, asunto: subject, descripcion: description, contacto: contactEmail });
 
         res.json({ message: 'El reporte de soporte fue enviado con éxito.' });
     } catch (error) {

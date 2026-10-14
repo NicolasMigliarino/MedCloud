@@ -18,7 +18,7 @@ SQL Server, base `MedCloud`. El modelo está documentado en [`database/DER.md`](
 | Turnos | `sp_GetTurnos`, `sp_CreateTurno`, `sp_SetTurno`, `sp_DeleteTurno`, `sp_GetHorarios`, `sp_RegistrarPagoTurno`, `sp_CambiarEstadoTurno` |
 | Caja y pagos | `sp_AbrirCaja`, `sp_CerrarCaja`, `sp_GetLiquidacionProfesional`, `sp_GetHistorialPagosPaciente`, `sp_GetHistorialPagosProfesional`, `sp_RegistrarPagoProfesional` |
 
-También hay consultas SQL armadas en el código (pendientes de pasar a procedimientos): caja activa e historial (`caja.controllers.js`), recordatorios y confirmación pública (`turnos.controllers.js`, `utils/scheduler.js`), regeneración de recibos (`index.js`), control de sesión única (`auth.middleware.js`) y guardado de `session_token` en el login.
+También hay consultas SQL armadas en el código (pendientes de pasar a procedimientos): caja activa e historial (`caja.controllers.js`), recordatorios, agenda de médicos y cambio de estado de turnos, tanto desde la agenda como desde el link del mail (`turnos.controllers.js`, `utils/scheduler.js`; usan `UPDATE Turnos SET estado` con la condición en el mismo `UPDATE`), regeneración de recibos (`index.js`), control de sesión única (`auth.middleware.js`) y guardado de `session_token` en el login.
 
 ## Supuestos del código sobre la base
 
@@ -27,6 +27,8 @@ También hay consultas SQL armadas en el código (pendientes de pasar a procedim
 - `sp_GetHistorialesClinicos` y `sp_CreateHistorialClinico` reciben `usuario_id` (el usuario del token) y resuelven el profesional y la privacidad dentro del procedimiento.
 - `usuarios.session_token` guarda la sesión activa (la columna se crea en el primer login si no existe).
 - Estados de turno (`CK_Turnos_Estado`): `Pendiente`, `Confirmado`, `Completado`, `Cancelado`.
+- `profesionales.sexo` (`Femenino` / `Masculino` / otros) define "Dra." o "Dr." en los mails; `turnos.recordatorio_dia_anterior_enviado` marca el recordatorio ya encolado; `envios_agenda_medico` registra la agenda enviada por médico y fecha.
+- Las fechas de los turnos son instantes. El driver `mssql` los lee como UTC y MedCloud los muestra en hora argentina. Las cargas desde el formulario se interpretan en la zona del proceso (por eso `TZ` en Docker).
 
 ## Pendiente de verificar con acceso de solo lectura
 

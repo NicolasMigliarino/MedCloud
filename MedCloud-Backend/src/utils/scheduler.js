@@ -1,184 +1,154 @@
 const { getConnection, sql } = require('../db');
-const { sendPatientReminderEmail, sendDoctorAgendaEmail } = require('./emailSender');
+const { enviarRecordatorioTurno, enviarAgendaMedico } = require('./emailSender');
+const { mensajeriaConfigurada, esErrorDefinitivo } = require('./mensajeria');
+const { diaArgentino, horaArgentina } = require('./horaArgentina');
+
+// Hora (argentina) en la que cada médico recibe la agenda del día siguiente
+const HORA_AGENDA = 20;
+
+const emailValido = (email) => Boolean(email && email.includes('@'));
 
 const procesarRecordatoriosPacientes = async () => {
+    if (!mensajeriaConfigurada()) return;
     try {
         const pool = await getConnection();
-        
-        // Calcular fecha de mañana
-        const mañana = new Date();
-        mañana.setDate(mañana.getDate() + 1);
-        const mañanaFechaStr = mañana.toISOString().slice(0, 10); // YYYY-MM-DD
+        const manana = diaArgentino(1);
 
-        // Buscar turnos para mañana que no se hayan notificado aún
-        const pendingResult = await pool.request()
-            .input('mañana', sql.Date, mañanaFechaStr)
+        // Turnos de mañana (día argentino) que no se notificaron aún
+        const pendientes = await pool.request()
+            .input('desde', sql.DateTime, manana.desde)
+            .input('hasta', sql.DateTime, manana.hasta)
             .query(`
-                SELECT 
-                    t.id, t.fecha_hora_inicio, t.estado,
+                SELECT
+                    t.id, t.fecha_hora_inicio,
                     p.nombre AS paciente_nombre, p.apellido AS paciente_apellido, p.email AS paciente_email,
-                    pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido, pr.especialidad AS profesional_especialidad
+                    pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido, pr.sexo AS profesional_sexo
                 FROM Turnos t
                 INNER JOIN Pacientes p ON t.paciente_id = p.id
                 INNER JOIN Profesionales pr ON t.profesional_id = pr.id
                 WHERE t.estado != 'Cancelado'
                   AND t.recordatorio_dia_anterior_enviado = 0
-                  AND CAST(t.fecha_hora_inicio AS DATE) = @mañana
+                  AND t.fecha_hora_inicio >= @desde AND t.fecha_hora_inicio < @hasta
             `);
 
-        const listado = pendingResult.recordset;
-        if (listado.length === 0) return;
-
-        // Despachar envíos en paralelo de forma eficiente
-        const promesas = listado.map(async (turno) => {
-            if (turno.paciente_email && turno.paciente_email.includes('@')) {
+        for (const turno of pendientes.recordset) {
+            let marcar = true;
+            if (emailValido(turno.paciente_email)) {
                 try {
-                    const dateObj = new Date(turno.fecha_hora_inicio);
-                    const fechaStr = dateObj.toLocaleDateString('es-AR') + ' a las ' + dateObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-
-                    await sendPatientReminderEmail(
-                        `${turno.paciente_nombre} ${turno.paciente_apellido}`,
-                        turno.paciente_email,
-                        `${turno.profesional_nombre} ${turno.profesional_apellido}`,
-                        turno.profesional_especialidad,
-                        fechaStr
-                    );
-
-                    // Marcar como enviado
-                    await pool.request()
-                        .input('id', sql.Int, turno.id)
-                        .query('UPDATE Turnos SET recordatorio_dia_anterior_enviado = 1, recordatorio_enviado = 1 WHERE id = @id');
-                    
-                    console.log(`📧 Recordatorio enviado al paciente ${turno.paciente_email} para turno ID ${turno.id}`);
-                } catch (sendErr) {
-                    console.error(`❌ Error al enviar recordatorio por email para turno ID ${turno.id}:`, sendErr.message);
+                    await enviarRecordatorioTurno({
+                        turnoId: turno.id,
+                        inicio: turno.fecha_hora_inicio,
+                        pacienteNombre: `${turno.paciente_nombre} ${turno.paciente_apellido}`,
+                        pacienteEmail: turno.paciente_email,
+                        profesionalNombre: `${turno.profesional_nombre} ${turno.profesional_apellido}`,
+                        profesionalSexo: turno.profesional_sexo,
+                        claveUnica: `turno-recordatorio-${turno.id}-${new Date(turno.fecha_hora_inicio).toISOString()}`
+                    });
+                    console.log(`📧 Recordatorio encolado para el turno ID ${turno.id}`);
+                } catch (err) {
+                    // Error definitivo (mail inválido, baja, límite): no reintentar. Si no, se reintenta en la próxima vuelta.
+                    marcar = esErrorDefinitivo(err);
+                    console.error(`❌ Recordatorio del turno ID ${turno.id} no enviado: ${err.message}`);
                 }
-            } else {
-                // Marcar como procesado si el paciente no tiene email para evitar bucles
+            }
+            // Sin mail válido también se marca, para no revisarlo en cada vuelta
+            if (marcar) {
                 await pool.request()
                     .input('id', sql.Int, turno.id)
-                    .query('UPDATE Turnos SET recordatorio_dia_anterior_enviado = 1 WHERE id = @id');
+                    .query('UPDATE Turnos SET recordatorio_dia_anterior_enviado = 1, recordatorio_enviado = 1 WHERE id = @id');
             }
-        });
-
-        await Promise.allSettled(promesas);
+        }
     } catch (err) {
         console.error('🚨 Error en procesarRecordatoriosPacientes:', err.message);
     }
 };
 
 const procesarAgendasMedicas = async () => {
-    const ahora = new Date();
-    // Solo enviar si la hora actual es las 20 hs (8:00 PM)
-    if (ahora.getHours() !== 20) {
-        return;
-    }
+    if (!mensajeriaConfigurada() || horaArgentina() !== HORA_AGENDA) return;
 
     try {
         const pool = await getConnection();
-        
-        // Calcular fecha de mañana
-        const mañana = new Date();
-        mañana.setDate(mañana.getDate() + 1);
-        const mañanaFechaStr = mañana.toISOString().slice(0, 10); // YYYY-MM-DD
+        const manana = diaArgentino(1);
 
-        // 1. Buscar profesionales que tienen turnos mañana, tienen usuario/email,
-        // y que NO tienen un envío registrado para la fecha de mañana
+        // Profesionales con turnos mañana, con usuario activo y sin agenda enviada para esa fecha
         const resultProfesionales = await pool.request()
-            .input('mañana', sql.Date, mañanaFechaStr)
+            .input('desde', sql.DateTime, manana.desde)
+            .input('hasta', sql.DateTime, manana.hasta)
+            .input('fecha', sql.Date, manana.fecha)
             .query(`
-                SELECT DISTINCT 
+                SELECT DISTINCT
                     pr.id AS profesional_id, pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido,
-                    u.email AS profesional_email
+                    pr.sexo AS profesional_sexo, u.email AS profesional_email
                 FROM Turnos t
                 INNER JOIN Profesionales pr ON t.profesional_id = pr.id
                 INNER JOIN Usuarios u ON pr.usuario_id = u.id
                 WHERE t.estado != 'Cancelado'
-                  AND CAST(t.fecha_hora_inicio AS DATE) = @mañana
+                  AND t.fecha_hora_inicio >= @desde AND t.fecha_hora_inicio < @hasta
                   AND u.activo = 1
-                  AND pr.id NOT IN (
-                      SELECT profesional_id 
-                      FROM envios_agenda_medica 
-                      WHERE fecha_agenda = @mañana
-                  )
+                  AND pr.id NOT IN (SELECT profesional_id FROM envios_agenda_medico WHERE fecha_agenda = @fecha)
             `);
 
-        const profesionales = resultProfesionales.recordset;
-        if (profesionales.length === 0) return;
+        for (const prof of resultProfesionales.recordset) {
+            if (!emailValido(prof.profesional_email)) continue;
+            try {
+                const resultTurnos = await pool.request()
+                    .input('profesional_id', sql.Int, prof.profesional_id)
+                    .input('desde', sql.DateTime, manana.desde)
+                    .input('hasta', sql.DateTime, manana.hasta)
+                    .query(`
+                        SELECT
+                            t.fecha_hora_inicio, t.fecha_hora_fin, t.estado, t.motivo_consulta,
+                            p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
+                        FROM Turnos t
+                        INNER JOIN Pacientes p ON t.paciente_id = p.id
+                        WHERE t.profesional_id = @profesional_id
+                          AND t.estado != 'Cancelado'
+                          AND t.fecha_hora_inicio >= @desde AND t.fecha_hora_inicio < @hasta
+                        ORDER BY t.fecha_hora_inicio ASC
+                    `);
+                if (resultTurnos.recordset.length === 0) continue;
 
-        // Despachar envíos de agendas en paralelo
-        const promesas = profesionales.map(async (prof) => {
-            if (prof.profesional_email && prof.profesional_email.includes('@')) {
+                let registrar = true;
                 try {
-                    // 2. Buscar todos los turnos del profesional para mañana
-                    const resultTurnos = await pool.request()
-                        .input('profesional_id', sql.Int, prof.profesional_id)
-                        .input('mañana', sql.Date, mañanaFechaStr)
-                        .query(`
-                            SELECT 
-                                t.fecha_hora_inicio, t.fecha_hora_fin, t.estado, t.motivo_consulta,
-                                p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
-                            FROM Turnos t
-                            INNER JOIN Pacientes p ON t.paciente_id = p.id
-                            WHERE t.profesional_id = @profesional_id
-                              AND t.estado != 'Cancelado'
-                              AND CAST(t.fecha_hora_inicio AS DATE) = @mañana
-                            ORDER BY t.fecha_hora_inicio ASC
-                        `);
-
-                    const turnos = resultTurnos.recordset;
-                    if (turnos.length === 0) return;
-
-                    // 3. Formatear turnos en filas HTML
-                    let agendaRowsHTML = '';
-                    turnos.forEach((t) => {
-                        const inicio = new Date(t.fecha_hora_inicio).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-                        const fin = new Date(t.fecha_hora_fin).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-                        agendaRowsHTML += `
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 12px 8px; font-size: 14px; color: #1e293b;"><strong>${inicio} - ${fin} hs</strong></td>
-                                <td style="padding: 12px 8px; font-size: 14px; color: #1e293b;">${t.paciente_nombre} ${t.paciente_apellido}</td>
-                                <td style="padding: 12px 8px; font-size: 14px; color: #2563eb; font-weight: 600;">${t.estado}</td>
-                                <td style="padding: 12px 8px; font-size: 14px; color: #475569;">${t.motivo_consulta || 'Control general'}</td>
-                            </tr>
-                        `;
+                    await enviarAgendaMedico({
+                        profesionalId: prof.profesional_id,
+                        profesionalNombre: `${prof.profesional_nombre} ${prof.profesional_apellido}`,
+                        profesionalSexo: prof.profesional_sexo,
+                        profesionalEmail: prof.profesional_email,
+                        dia: manana,
+                        turnos: resultTurnos.recordset
                     });
+                    console.log(`📧 Agenda de mañana encolada para el profesional ID ${prof.profesional_id}`);
+                } catch (err) {
+                    registrar = esErrorDefinitivo(err);
+                    console.error(`❌ Agenda del profesional ID ${prof.profesional_id} no enviada: ${err.message}`);
+                }
 
-                    const fechaLegible = mañana.toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-                    await sendDoctorAgendaEmail(
-                        `${prof.profesional_nombre} ${prof.profesional_apellido}`,
-                        prof.profesional_email,
-                        fechaLegible,
-                        agendaRowsHTML,
-                        turnos.length
-                    );
-
-                    // 4. Registrar envío
+                if (registrar) {
                     await pool.request()
                         .input('profesional_id', sql.Int, prof.profesional_id)
-                        .input('fecha_agenda', sql.Date, mañanaFechaStr)
+                        .input('fecha_agenda', sql.Date, manana.fecha)
                         .query(`
-                            INSERT INTO envios_agenda_medica (profesional_id, fecha_agenda, fecha_envio)
+                            INSERT INTO envios_agenda_medico (profesional_id, fecha_agenda, fecha_envio)
                             VALUES (@profesional_id, @fecha_agenda, GETDATE())
                         `);
-
-                    console.log(`📧 Agenda de mañana enviada con éxito al Dr. ${prof.profesional_apellido} (${prof.profesional_email})`);
-                } catch (sendErr) {
-                    console.error(`❌ Error al enviar agenda al Dr. ID ${prof.profesional_id}:`, sendErr.message);
                 }
+            } catch (err) {
+                console.error(`❌ Error al armar la agenda del profesional ID ${prof.profesional_id}:`, err.message);
             }
-        });
-
-        await Promise.allSettled(promesas);
+        }
     } catch (err) {
         console.error('🚨 Error en procesarAgendasMedicas:', err.message);
     }
 };
 
 const iniciarScheduler = () => {
-    console.log('⏰ Scheduler de recordatorios automáticos iniciado (1 día antes a pacientes y 20:00 hs a médicos)...');
-    
+    if (!mensajeriaConfigurada()) {
+        console.warn('⏰ Mensajería no configurada (MENSAJERIA_URL / MENSAJERIA_CLAVE): no se envían recordatorios ni agendas.');
+    } else {
+        console.log(`⏰ Scheduler iniciado: recordatorios el día anterior y agenda a los médicos a las ${HORA_AGENDA} h (hora argentina).`);
+    }
+
     // Ejecutar comprobación inicial inmediatamente
     procesarRecordatoriosPacientes();
     procesarAgendasMedicas();
@@ -188,7 +158,7 @@ const iniciarScheduler = () => {
     setInterval(procesarAgendasMedicas, 10 * 60 * 1000);
 };
 
-module.exports = { 
+module.exports = {
     iniciarScheduler,
     procesarRecordatoriosPacientes,
     procesarAgendasMedicas
