@@ -1,6 +1,7 @@
 -- Agenda de turnos. El MEDICO ve solo los suyos; el resto, todos.
 -- Antes de listar, pasa a Completado los turnos Confirmados que ya terminaron.
--- Definición tal cual estaba en producción el 2026-11-02 (solo se cambió CREATE por CREATE OR ALTER y la sangría).
+-- pagado / metodo_pago salen de Pagos (un pago por turno, lo garantiza sp_RegistrarPagoTurno): la agenda los usa para
+-- mostrar "Pagado" y ocultar Cobrar aunque el pago no tenga comprobante (tarjeta, obra social).
 CREATE OR ALTER PROCEDURE [dbo].[sp_GetTurnos]
     @UsuarioID INT,
     @RolCodigo NVARCHAR(20)
@@ -27,7 +28,9 @@ BEGIN
         t.recordatorio_dia_anterior_enviado AS recordatorio_enviado,
         pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido,
         p.nombre AS paciente_nombre, p.apellido AS paciente_apellido,
-        pg.comprobante_url
+        pg.comprobante_url,
+        CAST(CASE WHEN pg.turno_id IS NULL THEN 0 ELSE 1 END AS bit) AS pagado,
+        pg.metodo_pago
     FROM Turnos t
     INNER JOIN Profesionales pr ON t.profesional_id = pr.id
     INNER JOIN Pacientes p ON t.paciente_id = p.id
