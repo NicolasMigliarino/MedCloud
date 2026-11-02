@@ -37,6 +37,9 @@ Si intentás entrar a algo que tu rol no permite, aparece "No tenés permisos pa
 
 ## Novedades
 
+- **02/11/2026**:
+  - Botón **✔️ Confirmar** en la agenda: confirma la asistencia sin cobrar.
+  - Se puede cobrar antes o después de la consulta. La etiqueta **💰 Pagado** aparece con cualquier método de pago, y el botón Cobrar ya no se ofrece en turnos pagados con tarjeta u obra social.
 - **13/10/2026**:
   - El recordatorio que recibe el paciente el día anterior trae botones para confirmar o cancelar el turno; la agenda se actualiza sola.
   - Los mails salen por el nuevo servicio de mensajería, desde una dirección de MedCloud.

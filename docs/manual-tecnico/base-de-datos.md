@@ -2,7 +2,7 @@
 
 SQL Server, base `MedCloud`. El modelo está documentado en [`database/DER.md`](../../database/DER.md).
 
-> ⚠️ Los procedimientos almacenados **no están versionados en el repositorio**: existen solo en la base. Exportarlos a `database/` (un archivo por objeto, `CREATE OR ALTER`, como en StockyApp) está pendiente.
+> ⚠️ La mayoría de los procedimientos **existen solo en la base**. Se versionan en `database/procedures/` a medida que se tocan (un archivo por objeto, `CREATE OR ALTER`, como en StockyApp); reglas y cómo aplicarlos en [`database/README.md`](../../database/README.md). Versionados: `sp_GetTurnos`.
 
 ## Procedimientos que usa el backend
 
@@ -26,7 +26,8 @@ También hay consultas SQL armadas en el código (pendientes de pasar a procedim
 - `sp_GetUsuarioById` devuelve `rol_id`.
 - `sp_GetHistorialesClinicos` y `sp_CreateHistorialClinico` reciben `usuario_id` (el usuario del token) y resuelven el profesional y la privacidad dentro del procedimiento.
 - `usuarios.session_token` guarda la sesión activa (la columna se crea en el primer login si no existe).
-- Estados de turno (`CK_Turnos_Estado`): `Pendiente`, `Confirmado`, `Completado`, `Cancelado`.
+- Estados de turno (`CK_Turnos_Estado`): `Pendiente`, `Confirmado`, `Completado`, `Cancelado`. `sp_GetTurnos` pasa a Completado los Confirmados que ya terminaron.
+- `Pagos` tiene a lo sumo un pago por turno (`sp_RegistrarPagoTurno` lo valida). El pago toma la caja con `estado = 'Abierta'` y `fecha = CAST(GETDATE() AS DATE)`; el contenedor de SQL está en UTC, así que después de las 21 h de Argentina esa fecha ya es la del día siguiente (pendiente de revisar).
 - `profesionales.sexo` (`Femenino` / `Masculino` / otros) define "Dra." o "Dr." en los mails; `turnos.recordatorio_dia_anterior_enviado` marca el recordatorio ya encolado; `envios_agenda_medico` registra la agenda enviada por médico y fecha.
 - Las fechas de los turnos son instantes. El driver `mssql` los lee como UTC y MedCloud los muestra en hora argentina. Las cargas desde el formulario se interpretan en la zona del proceso (por eso `TZ` en Docker).
 

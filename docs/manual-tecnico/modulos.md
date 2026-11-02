@@ -69,7 +69,8 @@ Cada módulo tiene su pantalla en `frontend/src/components/` y su API en `MedClo
 - Backend: `routes/turnos.routes.js`, `controllers/turnos.controllers.js`, `utils/emailSender.js`, `utils/scheduler.js`, `utils/reciboHelper.js`, `utils/enlacesTurno.js`, `utils/paginaTurno.js`, `utils/horaArgentina.js`, `utils/mensajeria.js`
 
 **Reglas**
-- El cobro registra el pago en la caja abierta y confirma el turno. En efectivo se genera un recibo HTML en `uploads/`; con transferencia o MercadoPago se adjunta el comprobante.
+- **Confirmado ya no significa pagado.** Confirmado = el paciente va a asistir (botón ✔️ Confirmar, link del mail o cobro). Pagado = existe una fila en `Pagos` para el turno (`sp_GetTurnos` devuelve `pagado` y `metodo_pago`). La agenda usa `estaPagado` / `sePuedeCobrar` (`TurnosList.jsx`): Cobrar y la casilla de cobro múltiple aparecen si no hay pago y el turno no está Cancelado, también en Completado (cobro después de la consulta).
+- El cobro registra el pago en la caja abierta y confirma el turno. En efectivo se genera un recibo HTML en `uploads/`; con transferencia o MercadoPago se adjunta el comprobante. Tarjeta y obra social no tienen comprobante. `sp_RegistrarPagoTurno` rechaza un segundo pago del mismo turno.
 - El día anterior, cada paciente recibe un recordatorio con dos botones: confirmar o cancelar. El paciente solo puede cambiar turnos Pendiente o Confirmado que todavía no empezaron. Un turno Cancelado no se puede volver a confirmar desde el mail.
 - `PUT /turnos/:id/estado` valida que el estado sea uno de los cuatro permitidos.
 
@@ -93,6 +94,12 @@ Cada módulo tiene su pantalla en `frontend/src/components/` y su API en `MedClo
 **Archivos**
 - Frontend: `CajaControl.jsx`, `CajaHistorial.jsx`, `Liquidaciones.jsx`
 - Backend: `routes/caja.routes.js`, `controllers/caja.controllers.js`, `routes/pagos.routes.js`, `controllers/pagos.controllers.js`
+
+## Cómo se probó (avance del 2026-11-02: confirmar asistencia y Pagado)
+
+- Se leyó en producción (solo la definición, sin datos) `sp_GetTurnos` y `sp_RegistrarPagoTurno`: la base ya impedía el doble cobro; el problema era solo de pantalla.
+- `npm run build` del frontend OK; lint sin problemas nuevos (los 3 avisos de `TurnosList.jsx` / `TurnosForm.jsx` ya existían).
+- **Falta probar** con el `sp_GetTurnos` nuevo aplicado: cobrar con tarjeta y ver Pagado sin botón Cobrar; cobrar un turno Confirmado sin pago; que el MEDICO no vea Pagado.
 
 ## Cómo se probó (avance del 2026-10-13: mails por la mensajería)
 

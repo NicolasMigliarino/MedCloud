@@ -1,5 +1,19 @@
 # Historial de cambios
 
+## 2026-11-02 — Agenda: confirmar asistencia y "Pagado" con cualquier método de pago
+
+- **Qué cambió:**
+  - Botón ✔️ Confirmar en la agenda (`PUT /turnos/:id/estado`); el formulario de turno vuelve a permitir elegir Confirmado. Confirmado ya no significa pagado.
+  - "Pagado" sale del pago registrado y no del comprobante: los turnos cobrados con tarjeta u obra social ya no ofrecen Cobrar (antes el botón quedaba y la base rechazaba el segundo cobro con "Esta consulta ya fue cobrada previamente por caja").
+  - Se puede cobrar un turno Confirmado o Completado sin pago (cobro después de la consulta), también en el cobro múltiple.
+  - La etiqueta Pagado no se muestra al MEDICO.
+- **Módulos:** turnos.
+- **Backend/API:** sin cambios de código; `GET /turnos` devuelve `pagado` y `metodo_pago`.
+- **Base de datos:** `sp_GetTurnos` versionado en `database/procedures/` (primero tal cual estaba en producción, después el cambio) y nuevo `database/README.md`. El cambio solo agrega columnas: se aplica antes de desplegar el frontend.
+- **Configuración:** ninguna.
+- **Pruebas:** ver [modulos.md](modulos.md).
+- **Commits:** ver el PR de la rama `turnos/confirmar-asistencia-y-pagado`.
+
 ## 2026-10-13 — Mails por la mensajería y confirmar o cancelar turnos desde el mail
 
 - **Qué cambió:**

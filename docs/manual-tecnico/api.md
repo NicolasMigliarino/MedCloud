@@ -99,7 +99,7 @@ No existen `PUT` ni `DELETE`: las evoluciones no se modifican ni se borran.
 
 | Método | Ruta | Roles |
 |---|---|---|
-| GET | `/turnos`, `/horarios` | Todos |
+| GET | `/turnos`, `/horarios` | Todos (`/turnos` incluye `pagado` y `metodo_pago` por turno) |
 | POST | `/turnos` | Todos menos M |
 | PUT | `/turnos/:id` | Todos |
 | DELETE | `/turnos/:id` | Todos |
