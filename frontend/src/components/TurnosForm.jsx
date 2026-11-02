@@ -384,8 +384,7 @@ const TurnosForm = () => {
                                     <div className="form-select-wrap">
                                         <select className="form-select-custom" name="estado" value={turno.estado} onChange={handleChange}>
                                             <option value="Pendiente">Pendiente</option>
-                                            {/* Lo deshabilitamos para que no lo puedan forzar a mano */}
-                                            <option value="Confirmado" disabled>Confirmado (Requiere Pago)</option>
+                                            <option value="Confirmado">Confirmado</option>
                                             <option value="Completado">Completado</option>
                                             <option value="Cancelado">Cancelado</option>
                                         </select>

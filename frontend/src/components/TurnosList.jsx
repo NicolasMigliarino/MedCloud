@@ -39,6 +39,13 @@ const getBadgeClass = (estado = '') => {
     return map[estado?.toLowerCase()] ?? 'default';
 };
 
+// Pagado sale del pago registrado, no del comprobante: tarjeta y obra social no tienen archivo.
+// (comprobante_url cubre el caso de un sp_GetTurnos que todavía no devuelva "pagado").
+const estaPagado = (turno) => Boolean(turno.pagado) || Boolean(turno.comprobante_url);
+
+// Se cobra antes o después de la consulta; nunca dos veces ni un turno cancelado.
+const sePuedeCobrar = (turno) => !estaPagado(turno) && turno.estado?.toLowerCase() !== 'cancelado';
+
 const formatearHorario = (fechaInicio, fechaFin) => {
     if (!fechaInicio || !fechaFin) return '';
     const inicio = new Date(fechaInicio);
@@ -98,6 +105,36 @@ const TurnosList = () => {
                 title: 'Error',
                 text: error.response?.data?.message || 'No se pudo enviar el correo de confirmación.'
             });
+        }
+    };
+
+    const handleConfirmarAsistencia = async (id) => {
+        const result = await Swal.fire({
+            title: '¿Confirmar asistencia?',
+            text: 'El turno pasará a estado Confirmado. El paciente podrá abonar la consulta cuando asista a la clínica.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, confirmar asistencia',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.put(`http://localhost:3000/turnos/${id}/estado`, { estado: 'Confirmado' });
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Turno Confirmado!',
+                    text: 'La asistencia ha sido confirmada con éxito.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                loadTurnos();
+            } catch (error) {
+                console.error('Error al confirmar asistencia:', error);
+                Swal.fire('Error', error.response?.data?.message || 'No se pudo confirmar el turno.', 'error');
+            }
         }
     };
 
@@ -209,7 +246,7 @@ const TurnosList = () => {
                 Swal.fire({
                     icon: 'success',
                     title: '¡Pago Registrado!',
-                    html: `El turno pasó a estado Confirmado automáticamente.<br>${comprobante_url ? `<button type="button" data-archivo="${comprobante_url}" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer; font-weight: bold;">🖨️ Imprimir Recibo</button>` : ''}`,
+                    html: `Pago registrado. Si el turno estaba Pendiente, pasó a Confirmado.<br>${comprobante_url ? `<button type="button" data-archivo="${comprobante_url}" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer; font-weight: bold;">🖨️ Imprimir Recibo</button>` : ''}`,
                     didOpen: conectarBotonesArchivo,
                     showConfirmButton: true
                 });
@@ -304,7 +341,7 @@ const TurnosList = () => {
                 Swal.fire({
                     icon: 'success',
                     title: '¡Pagos Registrados!',
-                    html: `Se registraron los cobros y los turnos fueron Confirmados.<br>${comprobante_url ? `<button type="button" data-archivo="${comprobante_url}" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer; font-weight: bold;">🖨️ Imprimir Recibo Lote</button>` : ''}`,
+                    html: `Se registraron los cobros. Los turnos Pendientes pasaron a Confirmado.<br>${comprobante_url ? `<button type="button" data-archivo="${comprobante_url}" class="mod-btn" style="display: inline-block; margin-top: 15px; padding: 8px 16px; background-color: #10b981; color: white; border-radius: 4px; border: none; cursor: pointer; font-weight: bold;">🖨️ Imprimir Recibo Lote</button>` : ''}`,
                     didOpen: conectarBotonesArchivo,
                     showConfirmButton: true
                 });
@@ -525,8 +562,8 @@ const TurnosList = () => {
                                     <tr key={turno.id}>
                                         {userRole?.toUpperCase() !== 'MEDICO' && (
                                             <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                                {turno.estado?.toLowerCase() === 'pendiente' && (
-                                                    <input 
+                                                {sePuedeCobrar(turno) && (
+                                                    <input
                                                         type="checkbox"
                                                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                                                         checked={selectedTurnos.includes(turno.id)}
@@ -567,30 +604,47 @@ const TurnosList = () => {
                                         </td>
                                         <td>
                                             <span className={`mod-badge ${getBadgeClass(turno.estado)}`}>
-                                                {turno.estado?.toLowerCase() === 'confirmado' ? '✅ Confirmado (Pagado)' : (turno.estado || 'Pendiente')}
+                                                {turno.estado?.toLowerCase() === 'confirmado' ? '✅ Confirmado' : (turno.estado || 'Pendiente')}
                                             </span>
+                                            {/* El MEDICO no ve cobros */}
+                                            {estaPagado(turno) && userRole?.toUpperCase() !== 'MEDICO' && (
+                                                <span className="mod-badge completado" style={{ marginLeft: '6px' }} title={turno.metodo_pago || 'Pago registrado'}>
+                                                    💰 Pagado
+                                                </span>
+                                            )}
                                         </td>
                                         <td>
                                             {/* 👇 SECCIÓN DE ACCIONES ACTUALIZADA 👇 */}
                                             <div className="mod-actions" style={{ display: 'flex', gap: '5px' }}>
-                                                {/* Botón de Enviar Mail: Solo si está pendiente y el rol no es PROFESIONAL */}
+                                                {/* Botón de Confirmar Asistencia: Solo si está pendiente y no es MEDICO */}
                                                 {turno.estado?.toLowerCase() === 'pendiente' && userRole?.toUpperCase() !== 'MEDICO' && (
+                                                    <button
+                                                        onClick={() => handleConfirmarAsistencia(turno.id)}
+                                                        className="mod-btn"
+                                                        style={{ backgroundColor: '#10b981', color: 'white', borderColor: '#10b981' }}
+                                                        title="Confirmar Asistencia del Paciente"
+                                                    >
+                                                        ✔️ Confirmar
+                                                    </button>
+                                                )}
+                                                {/* Botón de Enviar Mail: Si no está cancelado ni completado */}
+                                                {turno.estado?.toLowerCase() !== 'cancelado' && turno.estado?.toLowerCase() !== 'completado' && userRole?.toUpperCase() !== 'MEDICO' && (
                                                     <button
                                                         onClick={() => handleEnviarMail(turno.id)}
                                                         className="mod-btn"
                                                         style={{ backgroundColor: '#3b82f6', color: 'white', borderColor: '#3b82f6' }}
-                                                        title="Enviar Email de Confirmación"
+                                                        title="Enviar Email de Recordatorio / Confirmación"
                                                     >
                                                         ✉️ Mail
                                                     </button>
                                                 )}
-                                                {/* Botón de Cobrar: Solo aparece si está pendiente y el rol no es PROFESIONAL */}
-                                                {turno.estado?.toLowerCase() === 'pendiente' && userRole?.toUpperCase() !== 'MEDICO' && (
+                                                {/* Botón de Cobrar: si no tiene pago registrado y no es MEDICO */}
+                                                {sePuedeCobrar(turno) && userRole?.toUpperCase() !== 'MEDICO' && (
                                                     <button
                                                         onClick={() => handleCobrarTurno(turno.id)}
                                                         className="mod-btn"
-                                                        style={{ backgroundColor: '#10b981', color: 'white', borderColor: '#10b981' }}
-                                                        title="Registrar Pago y Confirmar"
+                                                        style={{ backgroundColor: '#f59e0b', color: 'white', borderColor: '#f59e0b' }}
+                                                        title="Registrar Cobro en Caja"
                                                     >
                                                         💰 Cobrar
                                                     </button>
